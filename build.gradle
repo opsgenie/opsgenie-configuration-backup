@@ -1,4 +1,7 @@
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
 group 'com.opsgenie.tools'
 version '0.1.0-SNAPSHOT'
 
@@ -27,3 +30,72 @@ dependencies {
 
 
 
+jar {
+    manifest {
+        attributes("Built-By": "http://www.opsgenie.com",
+                "Specification-Title": "OpsGenie Configuration Backup Tool",
+                "Specification-Product": "opsgenie-configuration-backup",
+                "Specification-Version": project.version,
+                "Specification-Vendor": "http://www.opsgenie.com",
+                "Implementation-Title": "OpsGenie Configuration Backup Tool",
+                "Implementation-Product": "opsgenie-configuration-backup",
+                "Implementation-Vendor": "http://www.opsgenie.com",
+                "Implementation-Version": project.version,
+        )
+    }
+}
+
+task sourcesJar(type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+
+artifacts {
+    archives sourcesJar
+}
+
+signing {
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: project.hasProperty('ossrhUsername') ? ossrhUsername : '', password: project.hasProperty('ossrhPassword') ? ossrhPassword : '')
+            }
+
+            pom.project {
+                name 'OpsGenie Configuration Backup Tool'
+                packaging 'jar'
+                description "OpsGenie Configuration Backup Tool"
+
+                url "https://www.opsgenie.com"
+
+                scm {
+                    connection 'scm:git:git@github.com:opsgenie/opsgenie-configuration-backup.git'
+                    url 'https://github.com/opsgenie/opsgenie-configuration-backup'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'mehmet'
+                        name 'Mehmet Mustafa Demir'
+                        email 'mehmetdemircs@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+}
