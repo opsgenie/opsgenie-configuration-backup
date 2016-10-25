@@ -14,6 +14,8 @@ import java.util.List;
 
 
 /**
+ * This is base importer class. It takes {@link BackupProperties} class and {@link ImportConfig} class inorder to set import settings.
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class Importer extends BaseBackup {
@@ -76,6 +78,11 @@ public class Importer extends BaseBackup {
         if (config.isAddNewEscalations() || config.isUpdateExistEscalations())
             importers.add(new EscalationImporter(opsGenieClient, rootPath, config.isAddNewEscalations(), config.isUpdateExistEscalations()));
     }
+
+    /**
+     * This is main restore(import) method. This method import opsgenie configuration from local folder or remote git.
+     * If git is enabled from BackupProperties parameters it will import those configurations from remote git.
+     */
 
     public void restore() {
         init();

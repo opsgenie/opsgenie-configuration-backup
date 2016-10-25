@@ -1,6 +1,8 @@
 package com.opsgenie.tools.backup;
 
 /**
+ * Config parameters for import procedure.
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class ImportConfig {

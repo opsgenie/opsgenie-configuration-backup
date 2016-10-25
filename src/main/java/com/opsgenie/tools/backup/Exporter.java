@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This is base exporter class. It takes {@link BackupProperties} class inorder to set export parameters.
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class Exporter extends BaseBackup {
@@ -50,6 +52,12 @@ public class Exporter extends BaseBackup {
         exporters.add(new EscalationExporter(opsGenieClient, rootPath));
     }
 
+    /**
+     * This is main export method. This method export opsgenie configuration to local folder.
+     * If git is enabled from BackupProperties parameters it will export those configurations to remote git.
+     *
+     * @throws GitAPIException
+     */
 
     public void export() throws GitAPIException {
         init();

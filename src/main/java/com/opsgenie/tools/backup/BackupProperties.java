@@ -1,6 +1,8 @@
 package com.opsgenie.tools.backup;
 
 /**
+ * Necessary parameters for export and import methods.
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class BackupProperties {
@@ -32,46 +34,99 @@ public class BackupProperties {
         }
     }
 
+    /**
+     * api key of the opsgenie account
+     *
+     * @return String apiKey
+     */
+
     public String getApiKey() {
         return apiKey;
     }
 
+    /**
+     * Set the apikey of the opsgenie account
+     *
+     * @param apiKey of the opsgenie account
+     */
     public BackupProperties setApiKey(String apiKey) {
         this.apiKey = apiKey;
         return this;
     }
 
+    /**
+     * SSH URI of the remote git
+     *
+     * @return String git SSH URI
+     */
     public String getGitSshUri() {
         return gitSshUri;
     }
 
+    /**
+     * Sets the remote git SSH URI
+     *
+     * @param gitSshUri SSH URI
+     */
     public BackupProperties setGitSshUri(String gitSshUri) {
         this.gitSshUri = gitSshUri;
         return this;
     }
 
+    /**
+     * Local part for export and import procedure.
+     *
+     * @return localPath
+     */
     public String getPath() {
         return path;
     }
 
+    /**
+     * Sets the local path
+     *
+     * @param path localPath
+     */
     public BackupProperties setPath(String path) {
         this.path = path;
         return this;
     }
 
+    /**
+     * SSH KEY file localation
+     *
+     * @return sshKeyPath
+     */
+
     public String getSshKeyPath() {
         return sshKeyPath;
     }
 
+    /**
+     * set SSH Key file location
+     *
+     * @param sshKeyPath location
+     */
     public BackupProperties setSshKeyPath(String sshKeyPath) {
         this.sshKeyPath = sshKeyPath;
         return this;
     }
 
+    /**
+     * git enabled settings
+     *
+     * @return gitEnabled boolean value
+     */
+
     public boolean isGitEnabled() {
         return gitEnabled;
     }
 
+    /**
+     * Sets the git enabled setting
+     *
+     * @param gitEnabled boolean value
+     */
     public BackupProperties setGitEnabled(boolean gitEnabled) {
         this.gitEnabled = gitEnabled;
         return this;
