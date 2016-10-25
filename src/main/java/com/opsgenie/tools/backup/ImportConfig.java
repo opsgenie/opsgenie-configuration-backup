@@ -3,7 +3,7 @@ package com.opsgenie.tools.backup;
 /**
  * Config parameters for import procedure.
  *
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class ImportConfig {
     private boolean addNewHeartbeats = true, updateExistHeartbeats = true;

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 abstract class BaseImporter<T extends Bean> implements ImporterInterface {
     private final Logger logger = LogManager.getLogger(BaseImporter.class);

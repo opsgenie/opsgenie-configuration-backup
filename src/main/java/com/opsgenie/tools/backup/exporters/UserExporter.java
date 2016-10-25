@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * This class exports Users from Opsgenie account to local directory called users
  *
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class UserExporter extends BaseExporter<User> {
     public UserExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {

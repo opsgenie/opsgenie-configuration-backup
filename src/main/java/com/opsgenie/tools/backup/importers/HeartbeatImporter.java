@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * This class imports Heartbeats from local directory called heartbeats to Opsgenie account.
  *
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class HeartbeatImporter extends BaseImporter<Heartbeat> {
     public HeartbeatImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {

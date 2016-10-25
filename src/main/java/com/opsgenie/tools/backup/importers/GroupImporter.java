@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * This class imports Groups from local directory called groups to Opsgenie account.
  *
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class GroupImporter extends BaseImporter<Group> {
     public GroupImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {

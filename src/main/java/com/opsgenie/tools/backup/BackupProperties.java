@@ -3,7 +3,7 @@ package com.opsgenie.tools.backup;
 /**
  * Necessary parameters for export and import methods.
  *
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class BackupProperties {
     private String apiKey;
@@ -45,7 +45,7 @@ public class BackupProperties {
     }
 
     /**
-     * Set the apikey of the opsgenie account
+     * Set the apiKey of the opsgenie account
      *
      * @param apiKey of the opsgenie account
      */

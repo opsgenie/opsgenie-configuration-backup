@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * This class imports Users from local directory called users to Opsgenie account.
  *
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class UserImporter extends BaseImporter<User> {
     public UserImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {

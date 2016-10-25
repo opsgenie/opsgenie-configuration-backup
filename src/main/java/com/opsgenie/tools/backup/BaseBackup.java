@@ -19,7 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 
 /**
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 abstract class BaseBackup {
     private final Logger logger = LogManager.getLogger(BaseBackup.class);

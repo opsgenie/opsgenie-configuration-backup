@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * This is base exporter class. It takes {@link BackupProperties} class inorder to set export parameters.
  *
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class Exporter extends BaseBackup {
     private static List<ExporterInterface> exporters;
