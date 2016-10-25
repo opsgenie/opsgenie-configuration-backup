@@ -81,35 +81,26 @@ Another word if user only import some entities he/she should think about the rel
 If the script encounter such an error it will write a logger error and simply skip this entity and continue to import other entities.
 
 
-The project includes:
-
-* Java SDK
-* Marid
-
-## Java SDK For Maven and Gradle
-
-
 ### Maven
-
-You can add OpsGenie Repository and SDK as dependency. Example:
+You can add OpsGenie Configuration Backup as dependency. Example:
 
 ```
 <dependencies>
   	<dependency>
-  		<groupId>com.opsgenie.integration</groupId>
-  		<artifactId>sdk</artifactId>
-  		<version>[2.0.0,)</version>
+  		<groupId>com.opsgenie.tools</groupId>
+  		<artifactId>configuration-backup</artifactId>
+  		<version>[0.1.0,)</version>
   	</dependency>
   </dependencies>
 ```
 
 ### Gradle
 
-You can add OpsGenie Repository and SDK as dependeny. Example:
+You can add OpsGenie Configuration Backup as dependency. Example:
 
 ```
 dependencies {
-	compile "com.opsgenie.integration:sdk:2+"
+	compile "com.opsgenie.tools:configuration-backup:0+"
 }
 ```
 
