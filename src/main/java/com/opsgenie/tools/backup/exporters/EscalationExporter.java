@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * This class exports Escalation from Opsgenie account to local directory called escalations
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class EscalationExporter extends BaseExporter<Escalation> {
     public EscalationExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {

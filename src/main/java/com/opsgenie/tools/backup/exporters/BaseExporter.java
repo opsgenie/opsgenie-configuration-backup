@@ -14,7 +14,7 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 abstract class BaseExporter<T extends Bean> implements ExporterInterface {
     private final Logger logger = LogManager.getLogger(BaseExporter.class);

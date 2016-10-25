@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * This class exports Heartbeats from Opsgenie account to local directory called heartbeats
  *
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class HeartbeatExporter extends BaseExporter<Heartbeat> {
 

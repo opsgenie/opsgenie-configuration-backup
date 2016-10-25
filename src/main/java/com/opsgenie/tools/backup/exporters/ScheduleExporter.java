@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * This class exports Schedules from Opsgenie account to local directory called schedules
  *
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class ScheduleExporter extends BaseExporter<Schedule> {
     public ScheduleExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {

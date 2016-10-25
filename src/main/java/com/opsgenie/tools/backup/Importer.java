@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * This is base importer class. It takes {@link BackupProperties} class and {@link ImportConfig} class inorder to set import settings.
  *
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class Importer extends BaseBackup {
     private static List<ImporterInterface> importers;

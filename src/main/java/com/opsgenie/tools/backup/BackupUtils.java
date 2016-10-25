@@ -9,7 +9,7 @@ import java.util.Scanner;
 /**
  * Common utils for export and import procedure.
  *
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class BackupUtils {
     public static String readFileAsJson(String fileName) throws FileNotFoundException {

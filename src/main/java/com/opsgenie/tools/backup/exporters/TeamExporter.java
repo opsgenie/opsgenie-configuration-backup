@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * This class exports Teams from Opsgenie account to local directory called teams
  *
- * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
+ * @author Mehmet Mustafa Demir
  */
 public class TeamExporter extends BaseExporter<Team> {
     public TeamExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
