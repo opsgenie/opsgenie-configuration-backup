@@ -16,6 +16,8 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
+ * This class imports Users from local directory called users to Opsgenie account.
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class UserImporter extends BaseImporter<User> {

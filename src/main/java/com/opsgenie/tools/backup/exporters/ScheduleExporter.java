@@ -10,6 +10,8 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
+ * This class exports Schedules from Opsgenie account to local directory called schedules
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class ScheduleExporter extends BaseExporter<Schedule> {

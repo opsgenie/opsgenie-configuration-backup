@@ -14,6 +14,8 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
+ * This class imports Schedules from local directory called schedules to Opsgenie account.
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class ScheduleImporter extends BaseImporter<Schedule> {

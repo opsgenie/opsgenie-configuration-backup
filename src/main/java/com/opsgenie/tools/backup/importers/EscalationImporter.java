@@ -13,6 +13,8 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
+ * This class imports Escalations from local directory called escalations to Opsgenie account.
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class EscalationImporter extends BaseImporter<Escalation> {

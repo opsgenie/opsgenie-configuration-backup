@@ -10,6 +10,8 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
+ * This class exports Groups from Opsgenie account to local directory called groups
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class GroupExporter extends BaseExporter<Group> {

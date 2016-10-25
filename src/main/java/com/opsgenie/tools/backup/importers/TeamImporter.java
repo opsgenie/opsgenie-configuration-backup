@@ -13,6 +13,8 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
+ * This class imports Teams from local directory called teams to Opsgenie account.
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class TeamImporter extends BaseImporter<Team> {

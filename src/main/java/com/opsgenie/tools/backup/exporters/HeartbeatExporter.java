@@ -10,6 +10,8 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
+ * This class exports Heartbeats from Opsgenie account to local directory called heartbeats
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class HeartbeatExporter extends BaseExporter<Heartbeat> {

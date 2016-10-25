@@ -12,6 +12,8 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
+ * This class imports Groups from local directory called groups to Opsgenie account.
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class GroupImporter extends BaseImporter<Group> {

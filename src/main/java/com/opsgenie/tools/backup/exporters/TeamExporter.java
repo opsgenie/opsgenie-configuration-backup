@@ -10,6 +10,8 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
+ * This class exports Teams from Opsgenie account to local directory called teams
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class TeamExporter extends BaseExporter<Team> {

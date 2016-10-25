@@ -13,6 +13,8 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
+ * This class imports Heartbeats from local directory called heartbeats to Opsgenie account.
+ *
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class HeartbeatImporter extends BaseImporter<Heartbeat> {

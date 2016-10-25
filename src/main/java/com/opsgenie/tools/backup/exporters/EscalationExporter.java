@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
+ * This class exports Escalation from Opsgenie account to local directory called escalations
  * @author Mehmet Mustafa Demir <mehmetdemircs@gmail.com>
  */
 public class EscalationExporter extends BaseExporter<Escalation> {
