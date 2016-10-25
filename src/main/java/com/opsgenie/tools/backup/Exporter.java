@@ -1,7 +1,14 @@
 package com.opsgenie.tools.backup;
 
 import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.opsgenie.tools.backup.exporters.*;
+import com.opsgenie.tools.backup.exporters.EscalationExporter;
+import com.opsgenie.tools.backup.exporters.ExporterInterface;
+import com.opsgenie.tools.backup.exporters.GroupExporter;
+import com.opsgenie.tools.backup.exporters.HeartbeatExporter;
+import com.opsgenie.tools.backup.exporters.ScheduleExporter;
+import com.opsgenie.tools.backup.exporters.TeamExporter;
+import com.opsgenie.tools.backup.exporters.UserExporter;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.PushCommand;
@@ -39,10 +46,10 @@ public class Exporter extends BaseBackup {
         }
         OpsGenieClient opsGenieClient = new OpsGenieClient();
         opsGenieClient.setApiKey(getBackupProperties().getApiKey());
-        initiliazeExporters(rootPath, opsGenieClient);
+        initializeExporters(rootPath, opsGenieClient);
     }
 
-    private void initiliazeExporters(String rootPath, OpsGenieClient opsGenieClient) {
+    private void initializeExporters(String rootPath, OpsGenieClient opsGenieClient) {
         exporters = new ArrayList<ExporterInterface>();
         exporters.add(new HeartbeatExporter(opsGenieClient, rootPath));
         exporters.add(new UserExporter(opsGenieClient, rootPath));

@@ -1,7 +1,14 @@
 package com.opsgenie.tools.backup;
 
 import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.opsgenie.tools.backup.importers.*;
+import com.opsgenie.tools.backup.importers.EscalationImporter;
+import com.opsgenie.tools.backup.importers.GroupImporter;
+import com.opsgenie.tools.backup.importers.HeartbeatImporter;
+import com.opsgenie.tools.backup.importers.ImporterInterface;
+import com.opsgenie.tools.backup.importers.ScheduleImporter;
+import com.opsgenie.tools.backup.importers.TeamImporter;
+import com.opsgenie.tools.backup.importers.UserImporter;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -55,10 +62,10 @@ public class Importer extends BaseBackup {
 
         OpsGenieClient opsGenieClient = new OpsGenieClient();
         opsGenieClient.setApiKey(getBackupProperties().getApiKey());
-        initiliazeImporters(rootPath, opsGenieClient);
+        initializeImporters(rootPath, opsGenieClient);
     }
 
-    private void initiliazeImporters(String rootPath, OpsGenieClient opsGenieClient) {
+    private void initializeImporters(String rootPath, OpsGenieClient opsGenieClient) {
         importers = new ArrayList<ImporterInterface>();
         if (config.isAddNewHeartbeats() || config.isUpdateExistHeartbeats())
             importers.add(new HeartbeatImporter(opsGenieClient, rootPath, config.isAddNewHeartbeats(), config.isUpdateExistEscalations()));
