@@ -3,10 +3,10 @@
 OpsGenie customers can backup their account configurations and restore it later using this script.
 
 # Export
-During export, those features are exported to local directory or remote git branch:
+During export, this features are exported to local directory or remote Git branch:
 
 ```
-User informations (username-fullname-skypeUsername-timezone-userRole-userContacts-notificationRules)
+User information (username-fullname-skypeUsername-timezone-userRole-userContacts-notificationRules)
 Group information (name -users-description)
 Team information (name-members-memberRoles-description)
 Escalation information (name-rules-team-description-repeatInterval)
