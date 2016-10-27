@@ -33,6 +33,8 @@ public class ImportConfig {
         updateExistSchedules = false;
         addNewEscalations = false;
         updateExistEscalations = false;
+        addNewNotifications = false;
+        updateExistNotifications = false;
     }
 
     public boolean isAddNewHeartbeats() {
