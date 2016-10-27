@@ -50,7 +50,7 @@ public class Importer extends BaseBackup {
     }
 
     protected void init() {
-        String rootPath = getBackupProperties().getPath() + "/OpsgenieBackups";
+        String rootPath = getBackupProperties().getPath() + "/OpsGenieBackups";
         File backupRootFile = new File(rootPath);
         if (!backupRootFile.exists()) {
             RuntimeException e = new RuntimeException(rootPath + " direcotry is not exist");
@@ -97,7 +97,10 @@ public class Importer extends BaseBackup {
      * configurations from remote git.
      */
 
-    public void restore() {
+    public void restore() throws GitAPIException {
+        if (getBackupProperties().isGitEnabled()) {
+            cloneGit(getBackupProperties());
+        }
         init();
         logger.info("Import operation started!");
         for (ImporterInterface importer : importers) {

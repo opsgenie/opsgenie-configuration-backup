@@ -3,6 +3,7 @@ package com.opsgenie.tools.backup;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,7 +12,11 @@ import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.*;
+import org.eclipse.jgit.transport.JschConfigSessionFactory;
+import org.eclipse.jgit.transport.OpenSshConfig;
+import org.eclipse.jgit.transport.SshSessionFactory;
+import org.eclipse.jgit.transport.SshTransport;
+import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.util.FS;
 
 import java.io.File;
@@ -30,13 +35,11 @@ abstract class BaseBackup {
     public BaseBackup(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
         backupProperties.validate();
         this.backupProperties = backupProperties;
-        if (backupProperties.isGitEnabled()) {
-            cloneGit(backupProperties);
-        }
+
     }
 
-    protected void cloneGit(final BackupProperties properties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
-        properties.setPath(properties.getPath() + "/OpsgenieBackupGitRepository");
+    protected void cloneGit(final BackupProperties properties) throws GitAPIException {
+        properties.setPath(properties.getPath() + "/OpsGenieBackupGitRepository");
         String rootPath = properties.getPath();
         File backupGitDirectory = new File(rootPath);
 
