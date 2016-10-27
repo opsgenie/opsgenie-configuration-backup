@@ -18,6 +18,21 @@ public class ImportConfig {
 
     private boolean addNewEscalations = true, updateExistEscalations = true;
 
+    public void setAllFalse() {
+        addNewHeartbeats = false;
+        updateExistHeartbeats = false;
+        addNewUsers = false;
+        updateExistUsers = false;
+        addNewGroups = false;
+        updateExistGroups = false;
+        addNewTeams = false;
+        updateExistTeams = false;
+        addNewSchedules = false;
+        updateExistSchedules = false;
+        addNewEscalations = false;
+        updateExistEscalations = false;
+    }
+
     public boolean isAddNewHeartbeats() {
         return addNewHeartbeats;
     }

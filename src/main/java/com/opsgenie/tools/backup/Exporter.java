@@ -34,7 +34,7 @@ public class Exporter extends BaseBackup {
     }
 
     protected void init() {
-        String rootPath = getBackupProperties().getPath() + "/OpsgenieBackups";
+        String rootPath = getBackupProperties().getPath() + "/OpsGenieBackups";
         File backupRootFile = new File(rootPath);
         if (backupRootFile.exists() && (backupRootFile.list() != null) && (backupRootFile.list().length > 0)) {
             logger.warn("Destination path " + rootPath + " already exists and is not an empty directory");
@@ -67,6 +67,9 @@ public class Exporter extends BaseBackup {
      */
 
     public void export() throws GitAPIException {
+        if (getBackupProperties().isGitEnabled()) {
+            cloneGit(getBackupProperties());
+        }
         init();
         logger.info("Export operation started!");
         for (ExporterInterface exporter : exporters) {
