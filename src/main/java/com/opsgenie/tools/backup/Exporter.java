@@ -77,7 +77,7 @@ public class Exporter extends BaseBackup {
         }
         if (getBackupProperties().isGitEnabled()) {
             logger.info("Export to remote git operation started!");
-            getGit().add().addFilepattern("OpsgenieBackups").call();
+            getGit().add().addFilepattern("OpsGenieBackups").call();
             getGit().commit().setAll(true).setAllowEmpty(true).setMessage("Opsgenie Backups").setCommitter("opsgenie", "info@opsgenie.com").call();
             PushCommand pc = getGit().push();
             pc.setTransportConfigCallback(getCallBack());
