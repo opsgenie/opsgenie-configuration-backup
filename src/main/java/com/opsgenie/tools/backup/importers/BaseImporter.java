@@ -5,6 +5,7 @@ import com.ifountain.opsgenie.client.OpsGenieClientException;
 import com.ifountain.opsgenie.client.model.beans.Bean;
 import com.ifountain.opsgenie.client.util.JsonUtils;
 import com.opsgenie.tools.backup.BackupUtils;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,7 +25,7 @@ abstract class BaseImporter<T extends Bean> implements ImporterInterface {
     private boolean addEntity;
     private boolean updateEntitiy;
 
-    public BaseImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
+    BaseImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         this.addEntity = addEntity;
         this.updateEntitiy = updateEntitiy;
         this.opsGenieClient = opsGenieClient;
@@ -35,27 +36,29 @@ abstract class BaseImporter<T extends Bean> implements ImporterInterface {
         logger.info("Restoring " + getImportDirectoryName() + " operation is started");
         List<T> backups = new ArrayList<T>();
         String[] files = BackupUtils.getFileListOf(importDirectory);
-        for (String fileName : files) {
-            try {
-                String beanJson = BackupUtils.readFileAsJson(importDirectory.getAbsolutePath() + "/" + fileName);
-                T bean = getBean();
-                JsonUtils.fromJson(bean, beanJson);
-                backups.add(bean);
-            } catch (Exception e) {
-                logger.error("Error at reading " + getImportDirectoryName() + " file " + fileName, e);
+        if (files != null && files.length > 0) {
+            for (String fileName : files) {
+                try {
+                    String beanJson = BackupUtils.readFileAsJson(importDirectory.getAbsolutePath() + "/" + fileName);
+                    T bean = getBean();
+                    JsonUtils.fromJson(bean, beanJson);
+                    backups.add(bean);
+                } catch (Exception e) {
+                    logger.error("Error at reading " + getImportDirectoryName() + " file " + fileName, e);
+                }
             }
-        }
-        try {
-            importEntities(backups, retrieveEntities());
-        } catch (Exception e) {
-            logger.error("Error at listing " + getImportDirectoryName(), e);
+            try {
+                importEntities(backups, retrieveEntities());
+            } catch (Exception e) {
+                logger.error("Error at listing " + getImportDirectoryName(), e);
+            }
         }
         logger.info("Restoring " + getImportDirectoryName() + " operation is finished");
     }
 
     protected abstract int checkEntities(T oldEntity, T currentEntity);
 
-    protected void importEntities(List<T> backupList, List<T> currentList) {
+    void importEntities(List<T> backupList, List<T> currentList) {
         for (T backupBean : backupList) {
             boolean notExist = true;
             for (T current : currentList) {
@@ -99,7 +102,7 @@ abstract class BaseImporter<T extends Bean> implements ImporterInterface {
         return opsGenieClient;
     }
 
-    protected File getImportDirectory() {
+    File getImportDirectory() {
         return importDirectory;
     }
 

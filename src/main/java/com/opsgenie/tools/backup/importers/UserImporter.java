@@ -62,7 +62,6 @@ public class UserImporter extends BaseImporter<User> {
         request.setTimeZone(bean.getTimeZone());
         getOpsGenieClient().user().addUser(request);
         addContacts(bean);
-        System.out.println("Add User " + bean.getUsername());
     }
 
     @Override

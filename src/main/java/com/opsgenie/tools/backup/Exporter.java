@@ -5,6 +5,7 @@ import com.opsgenie.tools.backup.exporters.EscalationExporter;
 import com.opsgenie.tools.backup.exporters.ExporterInterface;
 import com.opsgenie.tools.backup.exporters.GroupExporter;
 import com.opsgenie.tools.backup.exporters.HeartbeatExporter;
+import com.opsgenie.tools.backup.exporters.NotificationExporter;
 import com.opsgenie.tools.backup.exporters.ScheduleExporter;
 import com.opsgenie.tools.backup.exporters.TeamExporter;
 import com.opsgenie.tools.backup.exporters.UserExporter;
@@ -36,7 +37,7 @@ public class Exporter extends BaseBackup {
     protected void init() {
         String rootPath = getBackupProperties().getPath() + "/OpsgenieBackups";
         File backupRootFile = new File(rootPath);
-        if (backupRootFile.exists() && (backupRootFile.list() != null) && (backupRootFile.list().length > 0)) {
+        if (backupRootFile.exists() && (backupRootFile.list() != null && backupRootFile.list().length > 0)) {
             logger.warn("Destination path " + rootPath + " already exists and is not an empty directory");
             logger.warn("Destination path " + rootPath + " will be deleted inorder to export current system");
             BackupUtils.deleteDirectory(backupRootFile);
@@ -53,6 +54,7 @@ public class Exporter extends BaseBackup {
         exporters = new ArrayList<ExporterInterface>();
         exporters.add(new HeartbeatExporter(opsGenieClient, rootPath));
         exporters.add(new UserExporter(opsGenieClient, rootPath));
+        exporters.add(new NotificationExporter(opsGenieClient, rootPath));
         exporters.add(new GroupExporter(opsGenieClient, rootPath));
         exporters.add(new TeamExporter(opsGenieClient, rootPath));
         exporters.add(new ScheduleExporter(opsGenieClient, rootPath));

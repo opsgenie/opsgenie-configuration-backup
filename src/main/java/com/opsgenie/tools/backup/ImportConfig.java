@@ -18,6 +18,8 @@ public class ImportConfig {
 
     private boolean addNewEscalations = true, updateExistEscalations = true;
 
+    private boolean addNewNotifications = true, updateExistNotifications = true;
+
     public boolean isAddNewHeartbeats() {
         return addNewHeartbeats;
     }
@@ -123,6 +125,24 @@ public class ImportConfig {
 
     public ImportConfig setUpdateExistEscalations(boolean updateExistEscalations) {
         this.updateExistEscalations = updateExistEscalations;
+        return this;
+    }
+
+    public boolean isAddNewNotifications() {
+        return addNewNotifications;
+    }
+
+    public ImportConfig setAddNewNotifications(boolean addNewNotifications) {
+        this.addNewNotifications = addNewNotifications;
+        return this;
+    }
+
+    public boolean isUpdateExistNotifications() {
+        return updateExistNotifications;
+    }
+
+    public ImportConfig setUpdateExistNotifications(boolean updateExistNotifications) {
+        this.updateExistNotifications = updateExistNotifications;
         return this;
     }
 }
