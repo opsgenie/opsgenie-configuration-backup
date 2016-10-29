@@ -1,14 +1,7 @@
 package com.opsgenie.tools.backup;
 
 import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.opsgenie.tools.backup.exporters.EscalationExporter;
-import com.opsgenie.tools.backup.exporters.ExporterInterface;
-import com.opsgenie.tools.backup.exporters.GroupExporter;
-import com.opsgenie.tools.backup.exporters.HeartbeatExporter;
-import com.opsgenie.tools.backup.exporters.NotificationExporter;
-import com.opsgenie.tools.backup.exporters.ScheduleExporter;
-import com.opsgenie.tools.backup.exporters.TeamExporter;
-import com.opsgenie.tools.backup.exporters.UserExporter;
+import com.opsgenie.tools.backup.exporters.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,6 +50,7 @@ public class Exporter extends BaseBackup {
         exporters.add(new NotificationExporter(opsGenieClient, rootPath));
         exporters.add(new GroupExporter(opsGenieClient, rootPath));
         exporters.add(new TeamExporter(opsGenieClient, rootPath));
+        exporters.add(new TeamRoutingRuleExporter(opsGenieClient, rootPath));
         exporters.add(new ScheduleExporter(opsGenieClient, rootPath));
         exporters.add(new EscalationExporter(opsGenieClient, rootPath));
     }

@@ -1,14 +1,7 @@
 package com.opsgenie.tools.backup;
 
 import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.opsgenie.tools.backup.importers.EscalationImporter;
-import com.opsgenie.tools.backup.importers.GroupImporter;
-import com.opsgenie.tools.backup.importers.HeartbeatImporter;
-import com.opsgenie.tools.backup.importers.ImporterInterface;
-import com.opsgenie.tools.backup.importers.NotificationImporter;
-import com.opsgenie.tools.backup.importers.ScheduleImporter;
-import com.opsgenie.tools.backup.importers.TeamImporter;
-import com.opsgenie.tools.backup.importers.UserImporter;
+import com.opsgenie.tools.backup.importers.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -89,6 +82,9 @@ public class Importer extends BaseBackup {
 
         if (config.isAddNewNotifications() || config.isUpdateExistNotifications())
             importers.add(new NotificationImporter(opsGenieClient, rootPath, config.isAddNewNotifications(), config.isUpdateExistNotifications()));
+
+        if (config.isAddNewTeamRoutingRules() || config.isUpdateExistTeamRoutingRules())
+            importers.add(new TeamRoutingRuleImporter(opsGenieClient, rootPath, config.isAddNewTeamRoutingRules(), config.isUpdateExistTeamRoutingRules()));
     }
 
     /**

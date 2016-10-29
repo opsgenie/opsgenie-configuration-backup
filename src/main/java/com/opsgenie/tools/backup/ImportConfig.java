@@ -20,6 +20,9 @@ public class ImportConfig {
 
     private boolean addNewNotifications = true, updateExistNotifications = true;
 
+    private boolean addNewTeamRoutingRules = true, updateExistTeamRoutingRules = true;
+
+
     public void setAllFalse() {
         addNewHeartbeats = false;
         updateExistHeartbeats = false;
@@ -35,6 +38,9 @@ public class ImportConfig {
         updateExistEscalations = false;
         addNewNotifications = false;
         updateExistNotifications = false;
+        addNewTeamRoutingRules = false;
+        updateExistTeamRoutingRules = false;
+
     }
 
     public boolean isAddNewHeartbeats() {
@@ -160,6 +166,24 @@ public class ImportConfig {
 
     public ImportConfig setUpdateExistNotifications(boolean updateExistNotifications) {
         this.updateExistNotifications = updateExistNotifications;
+        return this;
+    }
+
+    public boolean isAddNewTeamRoutingRules() {
+        return addNewTeamRoutingRules;
+    }
+
+    public ImportConfig setAddNewTeamRoutingRules(boolean addNewTeamRoutingRules) {
+        this.addNewTeamRoutingRules = addNewTeamRoutingRules;
+        return this;
+    }
+
+    public boolean isUpdateExistTeamRoutingRules() {
+        return updateExistTeamRoutingRules;
+    }
+
+    public ImportConfig setUpdateExistTeamRoutingRules(boolean updateExistTeamRoutingRules) {
+        this.updateExistTeamRoutingRules = updateExistTeamRoutingRules;
         return this;
     }
 }

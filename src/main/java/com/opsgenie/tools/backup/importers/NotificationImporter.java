@@ -58,7 +58,7 @@ public class NotificationImporter extends BaseImporter<NotificationRule> {
     }
 
     public void restore() {
-        logger.info("Restoring notification operation is started");
+        logger.info("Restoring " + getImportDirectoryName() + " operation is started");
         try {
             ListUsersRequest listUsersRequest = new ListUsersRequest();
             List<User> userList = getOpsGenieClient().user().listUsers(listUsersRequest).getUsers();
@@ -77,13 +77,13 @@ public class NotificationImporter extends BaseImporter<NotificationRule> {
                                     JsonUtils.fromJson(bean, beanJson);
                                     backups.add(bean);
                                 } catch (Exception e) {
-                                    logger.error("Error at reading notification rule for user " + getImportDirectoryName() + " file name " + fileName, e);
+                                    logger.error("Error at reading notification rule for user " + username + " file name " + fileName, e);
                                 }
                             }
                             try {
                                 importEntities(backups, retrieveEntities());
                             } catch (Exception e) {
-                                logger.error("Error at listing " + getImportDirectoryName(), e);
+                                logger.error("Error at restoring " + getImportDirectoryName() + " for user " + username, e);
                             }
                             break;
                         }
@@ -91,7 +91,7 @@ public class NotificationImporter extends BaseImporter<NotificationRule> {
                 }
             }
         } catch (Exception e) {
-            logger.error("Error at restoring notificarionts.", e);
+            logger.error("Error at restoring " + getImportDirectoryName(), e);
 
         }
 
@@ -112,9 +112,6 @@ public class NotificationImporter extends BaseImporter<NotificationRule> {
         request.setNotifyBefore(bean.getNotifyBefore());
         request.setSchedules(bean.getSchedules());
         String id = getOpsGenieClient().notificationRule().addNotificationRule(request).getId();
-        bean.setId(id);
-        importNotificationRuleSteps(bean);
-
         for (NotificationRuleStep step : bean.getSteps()) {
             addNotificationRuleStep(id, step);
         }
@@ -132,11 +129,8 @@ public class NotificationImporter extends BaseImporter<NotificationRule> {
         request.setConditionMatchType(bean.getConditionMatchType());
         request.setConditions(bean.getConditions());
         request.setRestrictions(bean.getRestrictions());
-        String id = getOpsGenieClient().notificationRule().updateNotificationRule(request).getId();
-        GetNotificationRuleRequest getNotificationRuleRequest = new GetNotificationRuleRequest();
-        getNotificationRuleRequest.setUsername(username);
-        getNotificationRuleRequest.setId(id);
-        NotificationRule current = getOpsGenieClient().notificationRule().getNotificationRule(getNotificationRuleRequest).getNotificationRule();
+        getOpsGenieClient().notificationRule().updateNotificationRule(request).getId();
+        importNotificationRuleSteps(bean);
 
     }
 
@@ -194,7 +188,7 @@ public class NotificationImporter extends BaseImporter<NotificationRule> {
 
 
     @Override
-    protected String getEntityIdentifierName(NotificationRule entitiy) {
-        return "Notification " + entitiy.getName() + " for user " + username;
+    protected String getEntityIdentifierName(NotificationRule bean) {
+        return "Notification " + bean.getName() + " for user " + username;
     }
 }
