@@ -8,6 +8,7 @@ import com.opsgenie.tools.backup.exporters.GroupExporter;
 import com.opsgenie.tools.backup.exporters.HeartbeatExporter;
 import com.opsgenie.tools.backup.exporters.NotificationExporter;
 import com.opsgenie.tools.backup.exporters.ScheduleExporter;
+import com.opsgenie.tools.backup.exporters.ScheduleOverrideExporter;
 import com.opsgenie.tools.backup.exporters.TeamExporter;
 import com.opsgenie.tools.backup.exporters.TeamRoutingRuleExporter;
 import com.opsgenie.tools.backup.exporters.UserExporter;
@@ -24,7 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This is base exporter class. It takes {@link BackupProperties} class inorder to set export parameters.
+ * This is base exporter class. It takes {@link BackupProperties} class inorder to set export
+ * parameters.
  *
  * @author Mehmet Mustafa Demir
  */
@@ -63,13 +65,13 @@ public class Exporter extends BaseBackup {
         exporters.add(new ScheduleExporter(opsGenieClient, rootPath));
         exporters.add(new EscalationExporter(opsGenieClient, rootPath));
         exporters.add(new ForwardingExporter(opsGenieClient, rootPath));
+        exporters.add(new ScheduleOverrideExporter(opsGenieClient, rootPath));
     }
 
     /**
-     * This is main export method. This method export opsgenie configuration to local folder.
-     * If git is enabled from BackupProperties parameters it will export those configurations to remote git.
-     *
-     * @throws GitAPIException
+     * This is main export method. This method export opsgenie configuration to local folder. If git
+     * is enabled from BackupProperties parameters it will export those configurations to remote
+     * git.
      */
 
     public void export() throws GitAPIException {

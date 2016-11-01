@@ -6,6 +6,7 @@ import com.ifountain.opsgenie.client.model.beans.Team;
 import com.ifountain.opsgenie.client.model.beans.TeamRoutingRule;
 import com.ifountain.opsgenie.client.model.team.ListTeamsRequest;
 import com.ifountain.opsgenie.client.model.team.routing_rule.ListTeamRoutingRulesRequest;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,18 +41,23 @@ public class TeamRoutingRuleExporter extends BaseExporter<TeamRoutingRule> {
             List<Team> currentTeamList = getOpsGenieClient().team().listTeams(listTeamsRequest).getTeams();
             listTeamRoutingRulesRequest = new ListTeamRoutingRulesRequest();
             for (Team team : currentTeamList) {
-                listTeamRoutingRulesRequest.setTeamName(team.getName());
-                List<TeamRoutingRule> teamRoutingRules = retrieveEntities();
-                if (teamRoutingRules != null && teamRoutingRules.size() > 0) {
-                    File teamFile = new File(getExportDirectory().getAbsolutePath() + "/" + team.getName());
-                    teamFile.mkdirs();
-                    for (TeamRoutingRule bean : teamRoutingRules) {
-                        exportFile(getExportDirectory().getAbsolutePath() + "/" + team.getName() + "/" + getBeanFileName(bean) + ".json", bean);
+                try {
+                    listTeamRoutingRulesRequest.setTeamName(team.getName());
+                    List<TeamRoutingRule> teamRoutingRules = retrieveEntities();
+                    if (teamRoutingRules != null && teamRoutingRules.size() > 0) {
+                        File teamFile = new File(getExportDirectory().getAbsolutePath() + "/" + team.getName());
+                        teamFile.mkdirs();
+                        for (TeamRoutingRule bean : teamRoutingRules) {
+                            exportFile(getExportDirectory().getAbsolutePath() + "/" + team.getName() + "/" + getBeanFileName(bean) + ".json", bean);
+                        }
                     }
+                } catch (Exception e) {
+                    logger.error("Error at Listing team routing rules for team " + team.getName(), e);
                 }
+
             }
         } catch (Exception e) {
-            logger.error("Error at Listing notifications", e);
+            logger.error("Error at Listing teams for team routing rules", e);
         }
 
     }
