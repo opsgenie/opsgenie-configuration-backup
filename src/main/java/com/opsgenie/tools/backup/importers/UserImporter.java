@@ -76,7 +76,6 @@ public class UserImporter extends BaseImporter<User> {
         request.setTimeZone(bean.getTimeZone());
         getOpsGenieClient().user().updateUser(request);
         addContacts(bean);
-        System.out.println("Update User " + bean.getUsername());
     }
 
     private void addContacts(User user) throws ParseException, OpsGenieClientException, IOException {

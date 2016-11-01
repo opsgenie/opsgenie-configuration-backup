@@ -1,7 +1,16 @@
 package com.opsgenie.tools.backup;
 
 import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.opsgenie.tools.backup.importers.*;
+import com.opsgenie.tools.backup.importers.EscalationImporter;
+import com.opsgenie.tools.backup.importers.ForwardingImporter;
+import com.opsgenie.tools.backup.importers.GroupImporter;
+import com.opsgenie.tools.backup.importers.HeartbeatImporter;
+import com.opsgenie.tools.backup.importers.ImporterInterface;
+import com.opsgenie.tools.backup.importers.NotificationImporter;
+import com.opsgenie.tools.backup.importers.ScheduleImporter;
+import com.opsgenie.tools.backup.importers.TeamImporter;
+import com.opsgenie.tools.backup.importers.TeamRoutingRuleImporter;
+import com.opsgenie.tools.backup.importers.UserImporter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -85,6 +94,9 @@ public class Importer extends BaseBackup {
 
         if (config.isAddNewTeamRoutingRules() || config.isUpdateExistTeamRoutingRules())
             importers.add(new TeamRoutingRuleImporter(opsGenieClient, rootPath, config.isAddNewTeamRoutingRules(), config.isUpdateExistTeamRoutingRules()));
+
+        if (config.isAddNewUserForwarding() || config.isUpdateExistUserForwarding())
+            importers.add(new ForwardingImporter(opsGenieClient, rootPath, config.isAddNewUserForwarding(), config.isUpdateExistUserForwarding()));
     }
 
     /**

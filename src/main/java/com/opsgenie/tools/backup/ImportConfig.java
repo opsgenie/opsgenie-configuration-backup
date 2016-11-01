@@ -22,6 +22,8 @@ public class ImportConfig {
 
     private boolean addNewTeamRoutingRules = true, updateExistTeamRoutingRules = true;
 
+    private boolean addNewUserForwarding = true, updateExistUserForwarding = true;
+
 
     public void setAllFalse() {
         addNewHeartbeats = false;
@@ -40,6 +42,9 @@ public class ImportConfig {
         updateExistNotifications = false;
         addNewTeamRoutingRules = false;
         updateExistTeamRoutingRules = false;
+        addNewUserForwarding = false;
+        updateExistUserForwarding = false;
+
 
     }
 
@@ -184,6 +189,24 @@ public class ImportConfig {
 
     public ImportConfig setUpdateExistTeamRoutingRules(boolean updateExistTeamRoutingRules) {
         this.updateExistTeamRoutingRules = updateExistTeamRoutingRules;
+        return this;
+    }
+
+    public boolean isAddNewUserForwarding() {
+        return addNewUserForwarding;
+    }
+
+    public ImportConfig setAddNewUserForwarding(boolean addNewUserForwarding) {
+        this.addNewUserForwarding = addNewUserForwarding;
+        return this;
+    }
+
+    public boolean isUpdateExistUserForwarding() {
+        return updateExistUserForwarding;
+    }
+
+    public ImportConfig setUpdateExistUserForwarding(boolean updateExistUserForwarding) {
+        this.updateExistUserForwarding = updateExistUserForwarding;
         return this;
     }
 }

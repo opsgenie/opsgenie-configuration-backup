@@ -41,18 +41,23 @@ public class NotificationExporter extends BaseExporter<NotificationRule> {
             List<User> currentUserList = getOpsGenieClient().user().listUsers(request).getUsers();
             listNotificationRulesRequest = new ListNotificationRulesRequest();
             for (User user : currentUserList) {
-                listNotificationRulesRequest.setUsername(user.getUsername());
-                List<NotificationRule> notificationRuleList = retrieveEntities();
-                if (notificationRuleList != null) {
-                    File userNotificationFile = new File(getExportDirectory().getAbsolutePath() + "/" + user.getUsername());
-                    userNotificationFile.mkdirs();
-                    for (NotificationRule bean : notificationRuleList) {
-                        exportFile(getExportDirectory().getAbsolutePath() + "/" + user.getUsername() + "/" + getBeanFileName(bean) + ".json", bean);
+                try {
+                    listNotificationRulesRequest.setUsername(user.getUsername());
+                    List<NotificationRule> notificationRuleList = retrieveEntities();
+                    if (notificationRuleList != null) {
+                        File userNotificationFile = new File(getExportDirectory().getAbsolutePath() + "/" + user.getUsername());
+                        userNotificationFile.mkdirs();
+                        for (NotificationRule bean : notificationRuleList) {
+                            exportFile(getExportDirectory().getAbsolutePath() + "/" + user.getUsername() + "/" + getBeanFileName(bean) + ".json", bean);
+                        }
                     }
+                } catch (Exception e) {
+                    logger.error("Error at Listing notifications for user " + user.getUsername(), e);
                 }
+
             }
         } catch (Exception e) {
-            logger.error("Error at Listing notifications", e);
+            logger.error("Error at Listing users for notification rules", e);
         }
 
     }
