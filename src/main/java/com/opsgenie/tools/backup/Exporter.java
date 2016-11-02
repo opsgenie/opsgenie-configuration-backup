@@ -3,15 +3,15 @@ package com.opsgenie.tools.backup;
 import com.ifountain.opsgenie.client.OpsGenieClient;
 import com.opsgenie.tools.backup.exporters.EscalationExporter;
 import com.opsgenie.tools.backup.exporters.ExporterInterface;
-import com.opsgenie.tools.backup.exporters.ForwardingExporter;
 import com.opsgenie.tools.backup.exporters.GroupExporter;
 import com.opsgenie.tools.backup.exporters.HeartbeatExporter;
-import com.opsgenie.tools.backup.exporters.NotificationExporter;
 import com.opsgenie.tools.backup.exporters.ScheduleExporter;
 import com.opsgenie.tools.backup.exporters.ScheduleOverrideExporter;
 import com.opsgenie.tools.backup.exporters.TeamExporter;
 import com.opsgenie.tools.backup.exporters.TeamRoutingRuleExporter;
 import com.opsgenie.tools.backup.exporters.UserExporter;
+import com.opsgenie.tools.backup.exporters.UserForwardingExporter;
+import com.opsgenie.tools.backup.exporters.UserNotificationExporter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,13 +58,13 @@ public class Exporter extends BaseBackup {
         exporters = new ArrayList<ExporterInterface>();
         exporters.add(new HeartbeatExporter(opsGenieClient, rootPath));
         exporters.add(new UserExporter(opsGenieClient, rootPath));
-        exporters.add(new NotificationExporter(opsGenieClient, rootPath));
+        exporters.add(new UserNotificationExporter(opsGenieClient, rootPath));
         exporters.add(new GroupExporter(opsGenieClient, rootPath));
         exporters.add(new TeamExporter(opsGenieClient, rootPath));
         exporters.add(new TeamRoutingRuleExporter(opsGenieClient, rootPath));
         exporters.add(new ScheduleExporter(opsGenieClient, rootPath));
         exporters.add(new EscalationExporter(opsGenieClient, rootPath));
-        exporters.add(new ForwardingExporter(opsGenieClient, rootPath));
+        exporters.add(new UserForwardingExporter(opsGenieClient, rootPath));
         exporters.add(new ScheduleOverrideExporter(opsGenieClient, rootPath));
     }
 

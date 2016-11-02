@@ -8,8 +8,8 @@ import com.ifountain.opsgenie.client.model.team.ListTeamsRequest;
 import com.ifountain.opsgenie.client.model.team.routing_rule.AddTeamRoutingRuleRequest;
 import com.ifountain.opsgenie.client.model.team.routing_rule.ListTeamRoutingRulesRequest;
 import com.ifountain.opsgenie.client.model.team.routing_rule.UpdateTeamRoutingRuleRequest;
-import com.ifountain.opsgenie.client.util.JsonUtils;
 import com.opsgenie.tools.backup.BackupUtils;
+import com.opsgenie.tools.backup.RestoreException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,46 +53,72 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
         return "teamRoutingRules";
     }
 
-    public void restore() {
+    public void restore() throws RestoreException {
         logger.info("Restoring " + getImportDirectoryName() + " operation is started");
-        try {
-            ListTeamsRequest listTeamsRequest = new ListTeamsRequest();
-            List<Team> teamList = getOpsGenieClient().team().listTeams(listTeamsRequest).getTeams();
-            File[] fileList = getImportDirectory().listFiles();
-            for (File teamDirectory : fileList) {
-                if (teamDirectory.exists() && teamDirectory.isDirectory()) {
-                    for (Team team : teamList) {
-                        if (team.getName().equals(teamDirectory.getName())) {
-                            teamName = team.getName();
-                            List<TeamRoutingRule> backups = new ArrayList<TeamRoutingRule>();
-                            String[] files = BackupUtils.getFileListOf(teamDirectory);
-                            for (String fileName : files) {
-                                try {
-                                    String beanJson = BackupUtils.readFileAsJson(teamDirectory.getAbsolutePath() + "/" + fileName);
-                                    TeamRoutingRule bean = getBean();
-                                    JsonUtils.fromJson(bean, beanJson);
-                                    backups.add(bean);
-                                } catch (Exception e) {
-                                    logger.error("Error at reading team routing rule for team " + teamName + " file name " + fileName, e);
-                                }
-                            }
-                            try {
-                                importEntities(backups, retrieveEntities());
-                            } catch (Exception e) {
-                                logger.error("Error at restoring " + getImportDirectoryName() + " for team " + teamName, e);
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Error at restoring " + getImportDirectoryName(), e);
 
+        if (!getImportDirectory().exists()) {
+            logger.error("Error : " + getImportDirectoryName() + " does not exist. Restoring " + getImportDirectoryName() + " skipeed");
+            return;
+        }
+
+        File[] fileList = getImportDirectory().listFiles();
+        if (fileList == null || fileList.length == 0) {
+            logger.error("Error : " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipped");
+            return;
+        }
+
+        List<Team> teamList = retrieveTeamList();
+
+        for (File teamDirectory : fileList) {
+            Team team = findTeam(teamDirectory, teamList);
+            if (team != null) {
+                importRoutingRulesForTeam(team, teamDirectory);
+            }
         }
 
 
         logger.info("Restoring " + getImportDirectoryName() + " operation is finished");
+    }
+
+    private Team findTeam(File teamDirectory, List<Team> teamList) {
+        if (teamDirectory.exists() && teamDirectory.isDirectory()) {
+            return null;
+        }
+        for (Team team : teamList) {
+            if (team.getName().equals(teamDirectory.getName())) {
+                return team;
+            }
+        }
+        return null;
+    }
+
+    private void importRoutingRulesForTeam(Team team, File teamDirectory) {
+        teamName = team.getName();
+        List<TeamRoutingRule> backups = new ArrayList<TeamRoutingRule>();
+        String[] files = BackupUtils.getFileListOf(teamDirectory);
+
+        for (String fileName : files) {
+            TeamRoutingRule bean = readEntity(fileName);
+            if (bean != null) {
+                backups.add(bean);
+            }
+        }
+
+        try {
+            importEntities(backups, retrieveEntities());
+        } catch (Exception e) {
+            logger.error("Error at restoring " + getImportDirectoryName() + " for team " + teamName, e);
+        }
+    }
+
+    private List<Team> retrieveTeamList() throws RestoreException {
+        try {
+            ListTeamsRequest listTeamsRequest = new ListTeamsRequest();
+            return getOpsGenieClient().team().listTeams(listTeamsRequest).getTeams();
+        } catch (Exception e) {
+            throw new RestoreException("Error at listing teams for team routing rules", e);
+        }
+
     }
 
     @Override

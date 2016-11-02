@@ -5,6 +5,7 @@ import com.ifountain.opsgenie.client.OpsGenieClientException;
 import com.ifountain.opsgenie.client.model.beans.Bean;
 import com.ifountain.opsgenie.client.util.JsonUtils;
 import com.opsgenie.tools.backup.BackupUtils;
+import com.opsgenie.tools.backup.RestoreException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +33,7 @@ abstract class BaseImporter<T extends Bean> implements ImporterInterface {
         this.importDirectory = new File(backupRootDirectory + "/" + getImportDirectoryName() + "/");
     }
 
-    public void restore() {
+    public void restore() throws RestoreException {
         logger.info("Restoring " + getImportDirectoryName() + " operation is started");
 
         if (!importDirectory.exists()) {
@@ -42,7 +43,7 @@ abstract class BaseImporter<T extends Bean> implements ImporterInterface {
 
         String[] files = BackupUtils.getFileListOf(importDirectory);
         if (files == null || files.length == 0) {
-            logger.error("Error : " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipeed");
+            logger.error("Error : " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipped");
             return;
         }
 
@@ -65,7 +66,7 @@ abstract class BaseImporter<T extends Bean> implements ImporterInterface {
         logger.info("Restoring " + getImportDirectoryName() + " operation is finished");
     }
 
-    private T readEntity(String fileName) {
+    protected T readEntity(String fileName) {
         try {
             String beanJson = BackupUtils.readFileAsJson(importDirectory.getAbsolutePath() + "/" + fileName);
             T bean = getBean();

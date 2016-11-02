@@ -2,15 +2,15 @@ package com.opsgenie.tools.backup;
 
 import com.ifountain.opsgenie.client.OpsGenieClient;
 import com.opsgenie.tools.backup.importers.EscalationImporter;
-import com.opsgenie.tools.backup.importers.ForwardingImporter;
 import com.opsgenie.tools.backup.importers.GroupImporter;
 import com.opsgenie.tools.backup.importers.HeartbeatImporter;
 import com.opsgenie.tools.backup.importers.ImporterInterface;
-import com.opsgenie.tools.backup.importers.NotificationImporter;
 import com.opsgenie.tools.backup.importers.ScheduleImporter;
 import com.opsgenie.tools.backup.importers.TeamImporter;
 import com.opsgenie.tools.backup.importers.TeamRoutingRuleImporter;
+import com.opsgenie.tools.backup.importers.UserForwardingImporter;
 import com.opsgenie.tools.backup.importers.UserImporter;
+import com.opsgenie.tools.backup.importers.UserNotificationImporter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -90,13 +90,13 @@ public class Importer extends BaseBackup {
             importers.add(new EscalationImporter(opsGenieClient, rootPath, config.isAddNewEscalations(), config.isUpdateExistEscalations()));
 
         if (config.isAddNewNotifications() || config.isUpdateExistNotifications())
-            importers.add(new NotificationImporter(opsGenieClient, rootPath, config.isAddNewNotifications(), config.isUpdateExistNotifications()));
+            importers.add(new UserNotificationImporter(opsGenieClient, rootPath, config.isAddNewNotifications(), config.isUpdateExistNotifications()));
 
         if (config.isAddNewTeamRoutingRules() || config.isUpdateExistTeamRoutingRules())
             importers.add(new TeamRoutingRuleImporter(opsGenieClient, rootPath, config.isAddNewTeamRoutingRules(), config.isUpdateExistTeamRoutingRules()));
 
         if (config.isAddNewUserForwarding() || config.isUpdateExistUserForwarding())
-            importers.add(new ForwardingImporter(opsGenieClient, rootPath, config.isAddNewUserForwarding(), config.isUpdateExistUserForwarding()));
+            importers.add(new UserForwardingImporter(opsGenieClient, rootPath, config.isAddNewUserForwarding(), config.isUpdateExistUserForwarding()));
     }
 
     /**
@@ -109,10 +109,16 @@ public class Importer extends BaseBackup {
         if (getBackupProperties().isGitEnabled()) {
             cloneGit(getBackupProperties());
         }
+
         init();
+
         logger.info("Import operation started!");
         for (ImporterInterface importer : importers) {
-            importer.restore();
+            try {
+                importer.restore();
+            } catch (RestoreException e) {
+                logger.error("Error at restoring.", e);
+            }
         }
         logger.info("Import operation finished!");
     }

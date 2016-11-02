@@ -7,6 +7,9 @@ import com.ifountain.opsgenie.client.model.user.forward.AddForwardingRequest;
 import com.ifountain.opsgenie.client.model.user.forward.ListForwardingsRequest;
 import com.ifountain.opsgenie.client.model.user.forward.UpdateForwardingRequest;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
@@ -16,8 +19,10 @@ import java.util.List;
  *
  * @author Mehmet Mustafa Demir
  */
-public class ForwardingImporter extends BaseImporter<Forwarding> {
-    public ForwardingImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
+public class UserForwardingImporter extends BaseImporter<Forwarding> {
+    private final Logger logger = LogManager.getLogger(UserForwardingImporter.class);
+
+    public UserForwardingImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(opsGenieClient, backupRootDirectory, addEntity, updateEntitiy);
     }
 
@@ -43,30 +48,36 @@ public class ForwardingImporter extends BaseImporter<Forwarding> {
     @Override
     protected void addBean(Forwarding bean) throws ParseException, OpsGenieClientException, IOException {
         if (bean.getEndDate() != null && bean.getEndDate().getTime() > System.currentTimeMillis()) {
-            AddForwardingRequest request = new AddForwardingRequest();
-            request.setFromUser(bean.getFromUser());
-            request.setToUser(bean.getToUser());
-            request.setStartDate(bean.getStartDate());
-            request.setEndDate(bean.getEndDate());
-            request.setTimeZone(bean.getTimeZone());
-            request.setAlias(bean.getAlias());
-            getOpsGenieClient().user().addForwarding(request);
+            logger.warn(getEntityIdentifierName(bean) + " end date is in the past.");
+            return;
         }
+
+        AddForwardingRequest request = new AddForwardingRequest();
+        request.setFromUser(bean.getFromUser());
+        request.setToUser(bean.getToUser());
+        request.setStartDate(bean.getStartDate());
+        request.setEndDate(bean.getEndDate());
+        request.setTimeZone(bean.getTimeZone());
+        request.setAlias(bean.getAlias());
+        getOpsGenieClient().user().addForwarding(request);
     }
 
     @Override
     protected void updateBean(Forwarding bean) throws ParseException, OpsGenieClientException, IOException {
         if (bean.getEndDate() != null && bean.getEndDate().getTime() > System.currentTimeMillis()) {
-            UpdateForwardingRequest request = new UpdateForwardingRequest();
-            request.setFromUser(bean.getFromUser());
-            request.setToUser(bean.getToUser());
-            request.setStartDate(bean.getStartDate());
-            request.setEndDate(bean.getEndDate());
-            request.setTimeZone(bean.getTimeZone());
-            request.setAlias(bean.getAlias());
-            request.setId(bean.getId());
-            getOpsGenieClient().user().updateForwarding(request);
+            logger.warn(getEntityIdentifierName(bean) + " end date is in the past.");
+            return;
         }
+
+        UpdateForwardingRequest request = new UpdateForwardingRequest();
+        request.setFromUser(bean.getFromUser());
+        request.setToUser(bean.getToUser());
+        request.setStartDate(bean.getStartDate());
+        request.setEndDate(bean.getEndDate());
+        request.setTimeZone(bean.getTimeZone());
+        request.setAlias(bean.getAlias());
+        request.setId(bean.getId());
+        getOpsGenieClient().user().updateForwarding(request);
     }
 
     @Override

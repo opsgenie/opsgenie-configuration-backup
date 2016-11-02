@@ -21,11 +21,11 @@ import java.util.List;
  *
  * @author Mehmet Mustafa Demir
  */
-public class NotificationExporter extends BaseExporter<NotificationRule> {
-    private final Logger logger = LogManager.getLogger(NotificationExporter.class);
+public class UserNotificationExporter extends BaseExporter<NotificationRule> {
+    private final Logger logger = LogManager.getLogger(UserNotificationExporter.class);
     private ListNotificationRulesRequest listNotificationRulesRequest = null;
 
-    public NotificationExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
+    public UserNotificationExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
         super(opsGenieClient, backupRootDirectory, "notifications");
     }
 

@@ -5,9 +5,6 @@ import com.ifountain.opsgenie.client.OpsGenieClientException;
 import com.ifountain.opsgenie.client.model.beans.Forwarding;
 import com.ifountain.opsgenie.client.model.user.forward.ListForwardingsRequest;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
@@ -18,10 +15,9 @@ import java.util.List;
  *
  * @author Mehmet Mustafa Demir
  */
-public class ForwardingExporter extends BaseExporter<Forwarding> {
-    private final Logger logger = LogManager.getLogger(ForwardingExporter.class);
+public class UserForwardingExporter extends BaseExporter<Forwarding> {
 
-    public ForwardingExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
+    public UserForwardingExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
         super(opsGenieClient, backupRootDirectory, "forwardings");
     }
 

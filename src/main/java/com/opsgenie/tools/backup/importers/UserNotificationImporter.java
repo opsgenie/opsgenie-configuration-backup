@@ -12,8 +12,8 @@ import com.ifountain.opsgenie.client.model.notification_rule.ListNotificationRul
 import com.ifountain.opsgenie.client.model.notification_rule.UpdateNotificationRuleRequest;
 import com.ifountain.opsgenie.client.model.notification_rule.UpdateNotificationRuleStepRequest;
 import com.ifountain.opsgenie.client.model.user.ListUsersRequest;
-import com.ifountain.opsgenie.client.util.JsonUtils;
 import com.opsgenie.tools.backup.BackupUtils;
+import com.opsgenie.tools.backup.RestoreException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,11 +29,11 @@ import java.util.List;
  *
  * @author Mehmet Mustafa Demir
  */
-public class NotificationImporter extends BaseImporter<NotificationRule> {
-    private final Logger logger = LogManager.getLogger(NotificationImporter.class);
+public class UserNotificationImporter extends BaseImporter<NotificationRule> {
+    private final Logger logger = LogManager.getLogger(UserNotificationImporter.class);
     private String username;
 
-    public NotificationImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
+    public UserNotificationImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(opsGenieClient, backupRootDirectory, addEntity, updateEntitiy);
     }
 
@@ -56,46 +56,69 @@ public class NotificationImporter extends BaseImporter<NotificationRule> {
         return "notifications";
     }
 
-    public void restore() {
+    public void restore() throws RestoreException {
         logger.info("Restoring " + getImportDirectoryName() + " operation is started");
-        try {
-            ListUsersRequest listUsersRequest = new ListUsersRequest();
-            List<User> userList = getOpsGenieClient().user().listUsers(listUsersRequest).getUsers();
-            File[] fileList = getImportDirectory().listFiles();
-            for (File notificationDirectory : fileList) {
-                if (notificationDirectory.exists() && notificationDirectory.isDirectory()) {
-                    for (User user : userList) {
-                        if (user.getUsername().equals(notificationDirectory.getName())) {
-                            username = user.getUsername();
-                            List<NotificationRule> backups = new ArrayList<NotificationRule>();
-                            String[] files = BackupUtils.getFileListOf(notificationDirectory);
-                            for (String fileName : files) {
-                                try {
-                                    String beanJson = BackupUtils.readFileAsJson(notificationDirectory.getAbsolutePath() + "/" + fileName);
-                                    NotificationRule bean = getBean();
-                                    JsonUtils.fromJson(bean, beanJson);
-                                    backups.add(bean);
-                                } catch (Exception e) {
-                                    logger.error("Error at reading notification rule for user " + username + " file name " + fileName, e);
-                                }
-                            }
-                            try {
-                                importEntities(backups, retrieveEntities());
-                            } catch (Exception e) {
-                                logger.error("Error at restoring " + getImportDirectoryName() + " for user " + username, e);
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Error at restoring " + getImportDirectoryName(), e);
 
+        if (!getImportDirectory().exists()) {
+            logger.error("Error : " + getImportDirectoryName() + " does not exist. Restoring " + getImportDirectoryName() + " skipeed");
+            return;
         }
 
+        File[] fileList = getImportDirectory().listFiles();
+        if (fileList == null || fileList.length == 0) {
+            logger.error("Error : " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipped");
+            return;
+        }
+
+        List<User> userList = retrieveUserList();
+
+        for (File notificationDirectory : fileList) {
+            User user = findUser(notificationDirectory, userList);
+            if (user != null) {
+                importNotificationsForUser(user, notificationDirectory);
+            }
+        }
 
         logger.info("Restoring " + getImportDirectoryName() + " operation is finished");
+    }
+
+    private User findUser(File notificationDirectory, List<User> userList) {
+        if (notificationDirectory.exists() && notificationDirectory.isDirectory()) {
+            return null;
+        }
+        for (User user : userList) {
+            if (user.getUsername().equals(notificationDirectory.getName())) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    private void importNotificationsForUser(User user, File notificationDirectory) {
+        username = user.getUsername();
+        List<NotificationRule> backups = new ArrayList<NotificationRule>();
+        String[] files = BackupUtils.getFileListOf(notificationDirectory);
+        for (String fileName : files) {
+            NotificationRule bean = readEntity(fileName);
+            if (bean != null) {
+                backups.add(bean);
+            }
+        }
+        try {
+            importEntities(backups, retrieveEntities());
+        } catch (Exception e) {
+            logger.error("Error at restoring " + getImportDirectoryName() + " for user " + username, e);
+        }
+    }
+
+    private List<User> retrieveUserList() throws RestoreException {
+        try {
+            ListUsersRequest listUsersRequest = new ListUsersRequest();
+            return getOpsGenieClient().user().listUsers(listUsersRequest).getUsers();
+        } catch (Exception e) {
+            throw new RestoreException("Error at listing users for notification rules", e);
+        }
+
     }
 
     @Override
@@ -134,26 +157,29 @@ public class NotificationImporter extends BaseImporter<NotificationRule> {
     }
 
     private void importNotificationRuleSteps(NotificationRule notificationRule) throws ParseException, OpsGenieClientException, IOException {
+        List<NotificationRuleStep> stepList = notificationRule.getSteps();
+        if (stepList == null || stepList.size() == 0) {
+            return;
+        }
         GetNotificationRuleRequest getNotificationRuleRequest = new GetNotificationRuleRequest();
         getNotificationRuleRequest.setUsername(username);
         getNotificationRuleRequest.setId(notificationRule.getId());
         NotificationRule current = getOpsGenieClient().notificationRule().getNotificationRule(getNotificationRuleRequest).getNotificationRule();
-        List<NotificationRuleStep> stepList = notificationRule.getSteps();
-        if (stepList != null && stepList.size() > 0) {
-            for (NotificationRuleStep backupStep : stepList) {
-                boolean notExist = true;
-                for (NotificationRuleStep currentStep : current.getSteps()) {
-                    if (backupStep.getId().equals(currentStep.getId())) {
-                        notExist = false;
-                        if (!backupStep.toString().equals(currentStep.toString()))
-                            updateNotificationRuleStep(notificationRule.getId(), backupStep);
-                    }
-                    if (notExist)
-                        addNotificationRuleStep(notificationRule.getId(), backupStep);
-                }
-            }
+        for (NotificationRuleStep backupStep : stepList) {
+            importSingleNotificationRuleStep(notificationRule.getId(), current, backupStep);
         }
 
+    }
+
+    private void importSingleNotificationRuleStep(String notificationRuleId, NotificationRule current, NotificationRuleStep backupStep) throws ParseException, OpsGenieClientException, IOException {
+        for (NotificationRuleStep currentStep : current.getSteps()) {
+            if (backupStep.getId().equals(currentStep.getId())) {
+                if (!backupStep.toString().equals(currentStep.toString()))
+                    updateNotificationRuleStep(notificationRuleId, backupStep);
+                return;
+            }
+        }
+        addNotificationRuleStep(notificationRuleId, backupStep);
     }
 
     private void addNotificationRuleStep(String ruleId, NotificationRuleStep step) throws ParseException, OpsGenieClientException, IOException {
