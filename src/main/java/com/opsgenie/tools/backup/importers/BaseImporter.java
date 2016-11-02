@@ -22,69 +22,96 @@ abstract class BaseImporter<T extends Bean> implements ImporterInterface {
     private final Logger logger = LogManager.getLogger(BaseImporter.class);
     private OpsGenieClient opsGenieClient;
     private File importDirectory;
-    private boolean addEntity;
-    private boolean updateEntitiy;
+    private boolean addEntityEnabled;
+    private boolean updateEntityEnabled;
 
-    BaseImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
-        this.addEntity = addEntity;
-        this.updateEntitiy = updateEntitiy;
+    BaseImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntityEnabled, boolean updateEntityEnabled) {
+        this.addEntityEnabled = addEntityEnabled;
+        this.updateEntityEnabled = updateEntityEnabled;
         this.opsGenieClient = opsGenieClient;
         this.importDirectory = new File(backupRootDirectory + "/" + getImportDirectoryName() + "/");
     }
 
     public void restore() {
         logger.info("Restoring " + getImportDirectoryName() + " operation is started");
-        List<T> backups = new ArrayList<T>();
+
+        if (!importDirectory.exists()) {
+            logger.error("Error : " + getImportDirectoryName() + " does not exist. Restoring " + getImportDirectoryName() + " skipeed");
+            return;
+        }
+
         String[] files = BackupUtils.getFileListOf(importDirectory);
-        if (files != null && files.length > 0) {
-            for (String fileName : files) {
-                try {
-                    String beanJson = BackupUtils.readFileAsJson(importDirectory.getAbsolutePath() + "/" + fileName);
-                    T bean = getBean();
-                    JsonUtils.fromJson(bean, beanJson);
-                    backups.add(bean);
-                } catch (Exception e) {
-                    logger.error("Error at reading " + getImportDirectoryName() + " file " + fileName, e);
-                }
-            }
-            try {
-                importEntities(backups, retrieveEntities());
-            } catch (Exception e) {
-                logger.error("Error at listing " + getImportDirectoryName(), e);
+        if (files == null || files.length == 0) {
+            logger.error("Error : " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipeed");
+            return;
+        }
+
+
+        List<T> backups = new ArrayList<T>();
+        for (String fileName : files) {
+            T bean = readEntity(fileName);
+            if (bean != null) {
+                backups.add(bean);
             }
         }
+
+        try {
+            importEntities(backups, retrieveEntities());
+        } catch (Exception e) {
+            logger.error("Error at listing " + getImportDirectoryName(), e);
+        }
+
+
         logger.info("Restoring " + getImportDirectoryName() + " operation is finished");
     }
 
-    protected abstract int checkEntities(T oldEntity, T currentEntity);
+    private T readEntity(String fileName) {
+        try {
+            String beanJson = BackupUtils.readFileAsJson(importDirectory.getAbsolutePath() + "/" + fileName);
+            T bean = getBean();
+            JsonUtils.fromJson(bean, beanJson);
+            return bean;
+        } catch (Exception e) {
+            logger.error("Error at reading " + getImportDirectoryName() + " file " + fileName, e);
+            return null;
+        }
+    }
+
+    protected abstract BeanStatus checkEntities(T oldEntity, T currentEntity);
 
     void importEntities(List<T> backupList, List<T> currentList) {
         for (T backupBean : backupList) {
-            boolean notExist = true;
-            for (T current : currentList) {
-                int checkResult = checkEntities(backupBean, current);
-                if (checkResult == 0) {
-                    notExist = false;
-                    break;
-                } else if (checkResult == 1) {
-                    notExist = false;
-                    if (updateEntitiy)
-                        try {
-                            updateBean(backupBean);
-                            logger.info(getEntityIdentifierName(backupBean) + " updated");
-                        } catch (Exception e) {
-                            logger.error("Error at updating " + getEntityIdentifierName(backupBean), e);
-                        }
-                    break;
-                }
+            importEntity(currentList, backupBean);
+        }
+    }
+
+    private void importEntity(List<T> currentList, T backupBean) {
+        for (T current : currentList) {
+
+            BeanStatus result = checkEntities(backupBean, current);
+            if (result == BeanStatus.NOT_CHANGED) {
+                return;
             }
-            if (notExist && addEntity)
+
+            if (result == BeanStatus.MODIFIED && updateEntityEnabled) {
                 try {
-                    addBean(backupBean);
-                    logger.info(getEntityIdentifierName(backupBean) + " added");
+                    updateBean(backupBean);
+                    logger.info(getEntityIdentifierName(backupBean) + " updated");
                 } catch (Exception e) {
-                    logger.error("Error at adding " + getEntityIdentifierName(backupBean), e);
+                    logger.error("Error at updating " + getEntityIdentifierName(backupBean), e);
                 }
+
+                return;
+            }
+        }
+
+        if (addEntityEnabled) {
+            try {
+                addBean(backupBean);
+                logger.info(getEntityIdentifierName(backupBean) + " added");
+            } catch (Exception e) {
+                logger.error("Error at adding " + getEntityIdentifierName(backupBean), e);
+            }
         }
     }
 
@@ -111,4 +138,5 @@ abstract class BaseImporter<T extends Bean> implements ImporterInterface {
     }
 
     protected abstract String getEntityIdentifierName(T entitiy);
+
 }

@@ -6,5 +6,5 @@ package com.opsgenie.tools.backup.importers;
  * @author Mehmet Mustafa Demir
  */
 public interface ImporterInterface {
-    public void restore();
+    void restore();
 }

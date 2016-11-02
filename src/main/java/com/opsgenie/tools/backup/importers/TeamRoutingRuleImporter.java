@@ -2,13 +2,15 @@ package com.opsgenie.tools.backup.importers;
 
 import com.ifountain.opsgenie.client.OpsGenieClient;
 import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.*;
+import com.ifountain.opsgenie.client.model.beans.Team;
+import com.ifountain.opsgenie.client.model.beans.TeamRoutingRule;
 import com.ifountain.opsgenie.client.model.team.ListTeamsRequest;
 import com.ifountain.opsgenie.client.model.team.routing_rule.AddTeamRoutingRuleRequest;
 import com.ifountain.opsgenie.client.model.team.routing_rule.ListTeamRoutingRulesRequest;
 import com.ifountain.opsgenie.client.model.team.routing_rule.UpdateTeamRoutingRuleRequest;
 import com.ifountain.opsgenie.client.util.JsonUtils;
 import com.opsgenie.tools.backup.BackupUtils;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,7 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class imports Team Routing rules from local directory called teamRoutingRules to Opsgenie account.
+ * This class imports Team Routing rules from local directory called teamRoutingRules to Opsgenie
+ * account.
  *
  * @author Mehmet Mustafa Demir
  */
@@ -32,13 +35,12 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
     }
 
     @Override
-    protected int checkEntities(TeamRoutingRule oldEntity, TeamRoutingRule currentEntity) {
+    protected BeanStatus checkEntities(TeamRoutingRule oldEntity, TeamRoutingRule currentEntity) {
         if (oldEntity.getId().equals(currentEntity.getId())) {
-            if (!isSame(oldEntity, currentEntity))
-                return 1;
-            return 0;
+            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
         }
-        return -1;
+
+        return BeanStatus.NOT_EXIST;
     }
 
     @Override

@@ -22,13 +22,12 @@ public class ForwardingImporter extends BaseImporter<Forwarding> {
     }
 
     @Override
-    protected int checkEntities(Forwarding oldEntity, Forwarding currentEntity) {
+    protected BeanStatus checkEntities(Forwarding oldEntity, Forwarding currentEntity) {
         if (oldEntity.getId().equals(currentEntity.getId())) {
-            if (!isSame(oldEntity, currentEntity))
-                return 1;
-            return 0;
+            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
         }
-        return -1;
+
+        return BeanStatus.NOT_EXIST;
     }
 
     @Override

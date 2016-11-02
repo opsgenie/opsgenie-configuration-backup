@@ -23,13 +23,13 @@ public class HeartbeatImporter extends BaseImporter<Heartbeat> {
     }
 
     @Override
-    protected int checkEntities(Heartbeat oldEntity, Heartbeat currentEntity) {
+    protected BeanStatus checkEntities(Heartbeat oldEntity, Heartbeat currentEntity) {
+
         if (oldEntity.getName().equals(currentEntity.getName())) {
-            if (!isSame(oldEntity, currentEntity))
-                return 1;
-            return 0;
+            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
         }
-        return -1;
+
+        return BeanStatus.NOT_EXIST;
     }
 
     @Override

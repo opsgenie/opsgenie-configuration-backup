@@ -38,13 +38,12 @@ public class NotificationImporter extends BaseImporter<NotificationRule> {
     }
 
     @Override
-    protected int checkEntities(NotificationRule oldEntity, NotificationRule currentEntity) {
+    protected BeanStatus checkEntities(NotificationRule oldEntity, NotificationRule currentEntity) {
         if (oldEntity.getId().equals(currentEntity.getId())) {
-            if (!isSame(oldEntity, currentEntity))
-                return 1;
-            return 0;
+            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
         }
-        return -1;
+
+        return BeanStatus.NOT_EXIST;
     }
 
     @Override

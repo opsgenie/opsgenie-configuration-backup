@@ -24,18 +24,17 @@ public class ScheduleImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected int checkEntities(Schedule oldEntity, Schedule currentEntity) {
+    protected BeanStatus checkEntities(Schedule oldEntity, Schedule currentEntity) {
         if (oldEntity.getId().equals(currentEntity.getId())) {
-            if (!isSame(oldEntity, currentEntity))
-                return 1;
-            return 0;
-        } else if (oldEntity.getName().equals(currentEntity.getName())) {
-            oldEntity.setId(currentEntity.getId());
-            if (!isSame(oldEntity, currentEntity))
-                return 1;
-            return 0;
+            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
         }
-        return -1;
+
+        if (oldEntity.getName().equals(currentEntity.getName())) {
+            oldEntity.setId(currentEntity.getId());
+            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
+        }
+
+        return BeanStatus.NOT_EXIST;
     }
 
     @Override
