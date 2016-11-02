@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -40,10 +41,19 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
     @Override
     protected BeanStatus checkEntities(NotificationRule oldEntity, NotificationRule currentEntity) {
         if (oldEntity.getId().equals(currentEntity.getId())) {
+            oldEntity.setApplyOrder(0);
+            currentEntity.setApplyOrder(0);
+            sortNotifyBeforeList(oldEntity);
+            sortNotifyBeforeList(currentEntity);
             return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
         }
-
         return BeanStatus.NOT_EXIST;
+    }
+
+    private void sortNotifyBeforeList(NotificationRule entity) {
+        if (entity.getNotifyBefore() != null && entity.getNotifyBefore().size() > 0) {
+            Collections.sort(entity.getNotifyBefore());
+        }
     }
 
     @Override
@@ -83,7 +93,7 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
     }
 
     private User findUser(File notificationDirectory, List<User> userList) {
-        if (notificationDirectory.exists() && notificationDirectory.isDirectory()) {
+        if (!notificationDirectory.exists() || !notificationDirectory.isDirectory()) {
             return null;
         }
         for (User user : userList) {
@@ -99,7 +109,7 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
         List<NotificationRule> backups = new ArrayList<NotificationRule>();
         String[] files = BackupUtils.getFileListOf(notificationDirectory);
         for (String fileName : files) {
-            NotificationRule bean = readEntity(fileName);
+            NotificationRule bean = readEntity(notificationDirectory.getName() + "/" + fileName);
             if (bean != null) {
                 backups.add(bean);
             }

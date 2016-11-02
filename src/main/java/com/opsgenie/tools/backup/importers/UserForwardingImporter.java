@@ -47,7 +47,7 @@ public class UserForwardingImporter extends BaseImporter<Forwarding> {
 
     @Override
     protected void addBean(Forwarding bean) throws ParseException, OpsGenieClientException, IOException {
-        if (bean.getEndDate() != null && bean.getEndDate().getTime() > System.currentTimeMillis()) {
+        if (bean.getEndDate() != null && bean.getEndDate().getTime() < System.currentTimeMillis()) {
             logger.warn(getEntityIdentifierName(bean) + " end date is in the past.");
             return;
         }
@@ -64,7 +64,7 @@ public class UserForwardingImporter extends BaseImporter<Forwarding> {
 
     @Override
     protected void updateBean(Forwarding bean) throws ParseException, OpsGenieClientException, IOException {
-        if (bean.getEndDate() != null && bean.getEndDate().getTime() > System.currentTimeMillis()) {
+        if (bean.getEndDate() != null && bean.getEndDate().getTime() < System.currentTimeMillis()) {
             logger.warn(getEntityIdentifierName(bean) + " end date is in the past.");
             return;
         }

@@ -81,7 +81,7 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
     }
 
     private Team findTeam(File teamDirectory, List<Team> teamList) {
-        if (teamDirectory.exists() && teamDirectory.isDirectory()) {
+        if (!teamDirectory.exists() || !teamDirectory.isDirectory()) {
             return null;
         }
         for (Team team : teamList) {
@@ -98,7 +98,7 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
         String[] files = BackupUtils.getFileListOf(teamDirectory);
 
         for (String fileName : files) {
-            TeamRoutingRule bean = readEntity(fileName);
+            TeamRoutingRule bean = readEntity(teamDirectory.getName() + "/" + fileName);
             if (bean != null) {
                 backups.add(bean);
             }
@@ -125,7 +125,7 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
     protected void addBean(TeamRoutingRule bean) throws ParseException, OpsGenieClientException, IOException {
         AddTeamRoutingRuleRequest request = new AddTeamRoutingRuleRequest();
         request.setTeamName(teamName);
-        request.setApplyOrder(bean.getApplyOrder());
+        //request.setApplyOrder(bean.getApplyOrder());
         request.setConditionMatchType(bean.getConditionMatchType());
         request.setConditions(bean.getConditions());
         request.setName(bean.getName());
@@ -143,6 +143,7 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
         request.setName(bean.getName());
         request.setRestrictions(bean.getRestrictions());
         request.setNotify(bean.getNotify());
+        request.setId(bean.getId());
         getOpsGenieClient().team().updateTeamRoutingRule(request);
     }
 
