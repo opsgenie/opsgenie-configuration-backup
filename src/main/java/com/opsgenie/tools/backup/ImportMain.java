@@ -35,7 +35,8 @@ public class ImportMain {
                 "java -jar OpsGenieRestoreExecutable apiKey\n" +
                 "java -jar OpsGenieRestoreExecutable apiKey OpsGenieBackupsHomePath\n" +
                 "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath\n" +
-                "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath OpsGenieBackupsHomePath\n");
+                "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath OpsGenieBackupsHomePath\n" +
+                "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase OpsGenieBackupsHomePath\n");
 
         String backupFolderHomePath = null;
         String gitSSHURI = null;
@@ -103,9 +104,7 @@ public class ImportMain {
             logger.info("Restore from git is enabled.");
             logger.info("The git SSH URI = " + gitSSHURI);
             logger.info("The SSH key path = " + sshKeyPath);
-            if (passphrase != null) {
-                logger.info("The SSH key passphrase length = " + passphrase.length());
-            }
+            logger.info("The SSH key passphrase length = " + passphrase);
         }
         ImportConfig config = extractRestoreConfig();
         Importer importer = null;

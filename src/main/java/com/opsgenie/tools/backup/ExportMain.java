@@ -32,7 +32,8 @@ public class ExportMain {
                 "java -jar OpsGenieBackupExecutable apiKey\n" +
                 "java -jar OpsGenieBackupExecutable apiKey extractPath\n" +
                 "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath\n" +
-                "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath extractPath\n");
+                "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath extractPath\n"+
+                "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath\n");
 
         String extractPath = null;
         String gitSSHURI = null;
@@ -100,9 +101,7 @@ public class ExportMain {
             logger.info("Export the git is enabled.");
             logger.info("The git SSH URI = " + gitSSHURI);
             logger.info("The SSH key path = " + sshKeyPath);
-            if (passphrase != null) {
-                logger.info("The SSH key passphrase length = " + passphrase.length());
-            }
+            logger.info("The SSH key passphrase length = " + passphrase);
         }
 
         Exporter exporter = new Exporter(properties);
