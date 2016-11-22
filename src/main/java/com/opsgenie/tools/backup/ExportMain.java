@@ -32,12 +32,13 @@ public class ExportMain {
                 "java -jar OpsGenieBackupExecutable apiKey\n" +
                 "java -jar OpsGenieBackupExecutable apiKey extractPath\n" +
                 "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath\n" +
-                "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath extractPath");
+                "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath extractPath\n");
 
         String extractPath = null;
         String gitSSHURI = null;
         String sshKeyPath = null;
         String apiKey = null;
+        String passphrase = null;
 
         if (args.length == 1) {
             logger.info("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey");
@@ -57,6 +58,13 @@ public class ExportMain {
             gitSSHURI = args[1];
             sshKeyPath = args[2];
             extractPath = args[3];
+        } else if (args.length == 5) {
+            logger.info("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath");
+            apiKey = args[0];
+            gitSSHURI = args[1];
+            sshKeyPath = args[2];
+            passphrase = args[3];
+            extractPath = args[4];
         } else {
             logger.error("Your paramater number " + args.length + " is invalid.");
             logger.error("Please execute with a valid configuration.");
@@ -88,9 +96,13 @@ public class ExportMain {
             properties.setGitEnabled(true);
             properties.setGitSshUri(gitSSHURI);
             properties.setSshKeyPath(sshKeyPath);
+            properties.setPassphrase(passphrase);
             logger.info("Export the git is enabled.");
             logger.info("The git SSH URI = " + gitSSHURI);
             logger.info("The SSH key path = " + sshKeyPath);
+            if (passphrase != null) {
+                logger.info("The SSH key passphrase length = " + passphrase.length());
+            }
         }
 
         Exporter exporter = new Exporter(properties);

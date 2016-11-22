@@ -35,11 +35,12 @@ public class ImportMain {
                 "java -jar OpsGenieRestoreExecutable apiKey\n" +
                 "java -jar OpsGenieRestoreExecutable apiKey OpsGenieBackupsHomePath\n" +
                 "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath\n" +
-                "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath OpsGenieBackupsHomePath");
+                "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath OpsGenieBackupsHomePath\n");
 
         String backupFolderHomePath = null;
         String gitSSHURI = null;
         String sshKeyPath = null;
+        String passphrase = null;
         String apiKey = null;
 
         if (args.length == 1) {
@@ -60,6 +61,13 @@ public class ImportMain {
             gitSSHURI = args[1];
             sshKeyPath = args[2];
             backupFolderHomePath = args[3];
+        } else if (args.length == 5) {
+            logger.info("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath");
+            apiKey = args[0];
+            gitSSHURI = args[1];
+            sshKeyPath = args[2];
+            passphrase = args[3];
+            backupFolderHomePath = args[4];
         } else {
             logger.error("Your paramater number " + args.length + " is invalid.");
             logger.error("Please execute with a valid configuration.");
@@ -91,9 +99,13 @@ public class ImportMain {
             properties.setGitEnabled(true);
             properties.setGitSshUri(gitSSHURI);
             properties.setSshKeyPath(sshKeyPath);
+            properties.setPassphrase(passphrase);
             logger.info("Restore from git is enabled.");
             logger.info("The git SSH URI = " + gitSSHURI);
             logger.info("The SSH key path = " + sshKeyPath);
+            if (passphrase != null) {
+                logger.info("The SSH key passphrase length = " + passphrase.length());
+            }
         }
         ImportConfig config = extractRestoreConfig();
         Importer importer = null;
