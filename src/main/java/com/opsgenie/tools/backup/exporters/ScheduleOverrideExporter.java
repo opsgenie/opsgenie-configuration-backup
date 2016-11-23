@@ -16,8 +16,8 @@ import java.text.ParseException;
 import java.util.List;
 
 /**
- * This class exports Schedule overrides from Opsgenie account to local directory called
- * overrides
+ * This class exports Schedule overrides from OpsGenie account to local directory called
+ * scheduleOverrides
  *
  * @author Mehmet Mustafa Demir
  */
@@ -26,7 +26,7 @@ public class ScheduleOverrideExporter extends BaseExporter<ScheduleOverride> {
     private ListScheduleOverridesRequest listScheduleOverridesRequest = null;
 
     public ScheduleOverrideExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
-        super(opsGenieClient, backupRootDirectory, "overrides");
+        super(opsGenieClient, backupRootDirectory, "scheduleOverrides");
     }
 
     @Override

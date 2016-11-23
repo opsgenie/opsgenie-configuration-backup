@@ -22,18 +22,9 @@ public class ExportMain {
         logger.info("OpsGenieBackupExecutable is started!");
 
         String path = System.getProperty("user.dir");
-        logger.info("Running path is = " + path);
-        logger.info("Argument number is = " + args.length);
+        System.out.println("Running path is = " + path);
+        System.out.println("Argument number is = " + args.length);
 
-        for (int i = 0; i < args.length; i++) {
-            logger.info(i + ". argument is = " + args[i]);
-        }
-        logger.info("Possible run configurations are:\n" +
-                "java -jar OpsGenieBackupExecutable apiKey\n" +
-                "java -jar OpsGenieBackupExecutable apiKey extractPath\n" +
-                "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath\n" +
-                "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath extractPath\n"+
-                "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath\n");
 
         String extractPath = null;
         String gitSSHURI = null;
@@ -42,34 +33,40 @@ public class ExportMain {
         String passphrase = null;
 
         if (args.length == 1) {
-            logger.info("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey");
+            logger.debug("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey");
             apiKey = args[0];
         } else if (args.length == 2) {
-            logger.info("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey extractPath");
+            logger.debug("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey extractPath");
             apiKey = args[0];
             extractPath = args[1];
         } else if (args.length == 3) {
-            logger.info("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath");
+            logger.debug("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath");
             apiKey = args[0];
             gitSSHURI = args[1];
             sshKeyPath = args[2];
         } else if (args.length == 4) {
-            logger.info("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath extractPath");
+            logger.debug("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath extractPath");
             apiKey = args[0];
             gitSSHURI = args[1];
             sshKeyPath = args[2];
             extractPath = args[3];
         } else if (args.length == 5) {
-            logger.info("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath");
+            logger.debug("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath");
             apiKey = args[0];
             gitSSHURI = args[1];
             sshKeyPath = args[2];
             passphrase = args[3];
             extractPath = args[4];
         } else {
-            logger.error("Your paramater number " + args.length + " is invalid.");
-            logger.error("Please execute with a valid configuration.");
-            throw new RuntimeException("Invalid parameter number!");
+            System.err.println("Your paramater number " + args.length + " is invalid.");
+            System.err.println("Please execute with a valid configuration.");
+            System.out.println("Possible run configurations are:\n" +
+                    "java -jar OpsGenieBackupExecutable apiKey\n" +
+                    "java -jar OpsGenieBackupExecutable apiKey extractPath\n" +
+                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath\n" +
+                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath extractPath\n" +
+                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath\n");
+            System.exit(1);
         }
 
 
@@ -83,7 +80,7 @@ public class ExportMain {
 
         BackupProperties properties = new BackupProperties();
 
-        logger.info("The api Key is = " + apiKey);
+        logger.info("The api Key is = " + apiKey);//5 character ***
         properties.setApiKey(apiKey);
 
         if (extractPath != null) {
@@ -101,13 +98,23 @@ public class ExportMain {
             logger.info("Export the git is enabled.");
             logger.info("The git SSH URI = " + gitSSHURI);
             logger.info("The SSH key path = " + sshKeyPath);
-            logger.info("The SSH key passphrase length = " + passphrase);
+            logSecretKey("SSH key passphrase", passphrase);
         }
 
         Exporter exporter = new Exporter(properties);
         exporter.export();
 
-        logger.info("End");
+        logger.info("Finished");
 
+    }
+
+    private static void logSecretKey(String propName, String secretKey) {
+        if (secretKey != null) {
+            String criptedKey = secretKey.substring(0, secretKey.length() / 2);
+            for (int i = criptedKey.length(); i < secretKey.length(); i++) {
+                criptedKey += "*";
+            }
+            logger.info("The " + propName + " is = " + criptedKey);
+        }
     }
 }

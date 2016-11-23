@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class imports Team Routing rules from local directory called teamRoutingRules to Opsgenie
+ * This class imports schedule overrides from local directory called scheduleOverrides to Opsgenie
  * account.
  *
  * @author Mehmet Mustafa Demir
@@ -50,7 +50,7 @@ public class ScheduleOverrideImporter extends BaseImporter<ScheduleOverride> {
 
     @Override
     protected String getImportDirectoryName() {
-        return "overrides";
+        return "scheduleOverrides";
     }
 
     public void restore() throws RestoreException {

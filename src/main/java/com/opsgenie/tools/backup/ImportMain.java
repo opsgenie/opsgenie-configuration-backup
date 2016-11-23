@@ -25,18 +25,8 @@ public class ImportMain {
         logger.info("OpsGenieRestoreExecutable is started!");
 
         String path = System.getProperty("user.dir");
-        logger.info("Running path is = " + path);
-        logger.info("Argument number is = " + args.length);
-
-        for (int i = 0; i < args.length; i++) {
-            logger.info(i + ". argument is = " + args[i]);
-        }
-        logger.info("Possible run configurations are:\n" +
-                "java -jar OpsGenieRestoreExecutable apiKey\n" +
-                "java -jar OpsGenieRestoreExecutable apiKey OpsGenieBackupsHomePath\n" +
-                "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath\n" +
-                "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath OpsGenieBackupsHomePath\n" +
-                "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase OpsGenieBackupsHomePath\n");
+        System.out.println("Running path is = " + path);
+        System.out.println("Argument number is = " + args.length);
 
         String backupFolderHomePath = null;
         String gitSSHURI = null;
@@ -45,34 +35,40 @@ public class ImportMain {
         String apiKey = null;
 
         if (args.length == 1) {
-            logger.info("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey");
+            logger.debug("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey");
             apiKey = args[0];
         } else if (args.length == 2) {
-            logger.info("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey OpsGenieBackupsHomePath");
+            logger.debug("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey OpsGenieBackupsHomePath");
             apiKey = args[0];
             backupFolderHomePath = args[1];
         } else if (args.length == 3) {
-            logger.info("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath");
+            logger.debug("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath");
             apiKey = args[0];
             gitSSHURI = args[1];
             sshKeyPath = args[2];
         } else if (args.length == 4) {
-            logger.info("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath OpsGenieBackupsHomePath");
+            logger.debug("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath OpsGenieBackupsHomePath");
             apiKey = args[0];
             gitSSHURI = args[1];
             sshKeyPath = args[2];
             backupFolderHomePath = args[3];
         } else if (args.length == 5) {
-            logger.info("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath");
+            logger.debug("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath");
             apiKey = args[0];
             gitSSHURI = args[1];
             sshKeyPath = args[2];
             passphrase = args[3];
             backupFolderHomePath = args[4];
         } else {
-            logger.error("Your paramater number " + args.length + " is invalid.");
-            logger.error("Please execute with a valid configuration.");
-            throw new RuntimeException("Invalid parameter number!");
+            System.err.println("Your paramater number " + args.length + " is invalid.");
+            System.err.println("Please execute with a valid configuration.");
+            System.out.println("Possible run configurations are:\n" +
+                    "java -jar OpsGenieBackupExecutable apiKey\n" +
+                    "java -jar OpsGenieBackupExecutable apiKey extractPath\n" +
+                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath\n" +
+                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath extractPath\n" +
+                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath\n");
+            System.exit(1);
         }
 
 
@@ -86,7 +82,7 @@ public class ImportMain {
 
         BackupProperties properties = new BackupProperties();
 
-        logger.info("The api Key is = " + apiKey);
+        logSecretKey("api Key", apiKey);
         properties.setApiKey(apiKey);
 
         if (backupFolderHomePath != null) {
@@ -104,7 +100,7 @@ public class ImportMain {
             logger.info("Restore from git is enabled.");
             logger.info("The git SSH URI = " + gitSSHURI);
             logger.info("The SSH key path = " + sshKeyPath);
-            logger.info("The SSH key passphrase length = " + passphrase);
+            logSecretKey("SSH key passphrase", passphrase);
         }
         ImportConfig config = extractRestoreConfig();
         Importer importer = null;
@@ -115,20 +111,34 @@ public class ImportMain {
         }
         importer.restore();
 
-        logger.info("End");
+        logger.info("Finished");
 
     }
 
-    public static ImportConfig extractRestoreConfig() {
+    private static void logSecretKey(String propName, String secretKey) {
+        if (secretKey != null) {
+            String criptedKey = secretKey.substring(0, secretKey.length() / 2);
+            for (int i = criptedKey.length(); i < secretKey.length(); i++) {
+                criptedKey += "*";
+            }
+            logger.info("The " + propName + " is = " + criptedKey);
+        }
+    }
+
+    public static ImportConfig extractRestoreConfig() throws IOException {
         File configFile = new File("restoreConfig.properties");
         Properties props = null;
-        if (configFile.exists()) {
+        if (!configFile.exists()) {
+            logger.warn("restoreConfig.properties file cannot be found.");
+            logger.warn("Default Import configs will be used.");
+            return null;
+        } else {
+            FileReader reader = null;
             try {
                 ImportConfig config = new ImportConfig();
                 props = new Properties();
-                FileReader reader = new FileReader(configFile);
+                reader = new FileReader(configFile);
                 props.load(reader);
-                reader.close();
 
                 String str = props.getProperty("addNewHeartbeats");
                 if (str != null && str.contains("false")) {
@@ -244,9 +254,11 @@ public class ImportMain {
 
             } catch (Exception e) {
                 logger.error("Error at reading restoreConfig.properties file", e);
+            } finally {
+                if (reader != null) {
+                    reader.close();
+                }
             }
-        } else {
-            logger.warn("restoreConfig.properties file cannot be found.");
         }
         logger.warn("Default Import configs will be used.");
         return null;
