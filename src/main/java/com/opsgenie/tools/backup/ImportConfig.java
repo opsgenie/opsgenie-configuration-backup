@@ -24,6 +24,8 @@ public class ImportConfig {
 
     private boolean addNewUserForwarding = true, updateExistUserForwarding = true;
 
+    private boolean addNewScheduleOverrides = true, updateExistScheduleOverrides = true;
+
 
     public void setAllFalse() {
         addNewHeartbeats = false;
@@ -44,8 +46,8 @@ public class ImportConfig {
         updateExistTeamRoutingRules = false;
         addNewUserForwarding = false;
         updateExistUserForwarding = false;
-
-
+        addNewScheduleOverrides = false;
+        updateExistScheduleOverrides = false;
     }
 
     public boolean isAddNewHeartbeats() {
@@ -207,6 +209,24 @@ public class ImportConfig {
 
     public ImportConfig setUpdateExistUserForwarding(boolean updateExistUserForwarding) {
         this.updateExistUserForwarding = updateExistUserForwarding;
+        return this;
+    }
+
+    public boolean isAddNewScheduleOverrides() {
+        return addNewScheduleOverrides;
+    }
+
+    public ImportConfig setAddNewScheduleOverrides(boolean addNewScheduleOverrides) {
+        this.addNewScheduleOverrides = addNewScheduleOverrides;
+        return this;
+    }
+
+    public boolean isUpdateExistScheduleOverrides() {
+        return updateExistScheduleOverrides;
+    }
+
+    public ImportConfig setUpdateExistScheduleOverrides(boolean updateExistScheduleOverrides) {
+        this.updateExistScheduleOverrides = updateExistScheduleOverrides;
         return this;
     }
 }

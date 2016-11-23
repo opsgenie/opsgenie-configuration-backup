@@ -10,6 +10,7 @@ public class BackupProperties {
     private String gitSshUri;
     private String path;
     private String sshKeyPath;
+    private String passphrase;
     private boolean gitEnabled = false;
 
     public void validate() throws IllegalArgumentException {
@@ -129,6 +130,25 @@ public class BackupProperties {
      */
     public BackupProperties setGitEnabled(boolean gitEnabled) {
         this.gitEnabled = gitEnabled;
+        return this;
+    }
+
+    /**
+     * ssh file passphrase
+     *
+     * @return String passphrase
+     */
+    public String getPassphrase() {
+        return passphrase;
+    }
+
+    /**
+     * Sets ssh file passphrase
+     *
+     * @param passphrase String value
+     */
+    public BackupProperties setPassphrase(String passphrase) {
+        this.passphrase = passphrase;
         return this;
     }
 }

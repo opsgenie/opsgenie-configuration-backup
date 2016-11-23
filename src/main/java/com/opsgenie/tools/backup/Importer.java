@@ -6,6 +6,7 @@ import com.opsgenie.tools.backup.importers.GroupImporter;
 import com.opsgenie.tools.backup.importers.HeartbeatImporter;
 import com.opsgenie.tools.backup.importers.ImporterInterface;
 import com.opsgenie.tools.backup.importers.ScheduleImporter;
+import com.opsgenie.tools.backup.importers.ScheduleOverrideImporter;
 import com.opsgenie.tools.backup.importers.TeamImporter;
 import com.opsgenie.tools.backup.importers.TeamRoutingRuleImporter;
 import com.opsgenie.tools.backup.importers.UserForwardingImporter;
@@ -97,6 +98,9 @@ public class Importer extends BaseBackup {
 
         if (config.isAddNewUserForwarding() || config.isUpdateExistUserForwarding())
             importers.add(new UserForwardingImporter(opsGenieClient, rootPath, config.isAddNewUserForwarding(), config.isUpdateExistUserForwarding()));
+
+        if (config.isAddNewScheduleOverrides() || config.isUpdateExistScheduleOverrides())
+            importers.add(new ScheduleOverrideImporter(opsGenieClient, rootPath, config.isAddNewScheduleOverrides(), config.isUpdateExistScheduleOverrides()));
     }
 
     /**

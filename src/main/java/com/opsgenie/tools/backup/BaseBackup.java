@@ -3,6 +3,7 @@ package com.opsgenie.tools.backup;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UserInfo;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -12,11 +13,16 @@ import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.UnsupportedCredentialItem;
+import org.eclipse.jgit.transport.CredentialItem;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.CredentialsProviderUserInfo;
 import org.eclipse.jgit.transport.JschConfigSessionFactory;
 import org.eclipse.jgit.transport.OpenSshConfig;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.Transport;
+import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.util.FS;
 
 import java.io.File;
@@ -56,6 +62,27 @@ abstract class BaseBackup {
             @Override
             protected void configure(OpenSshConfig.Host hc, Session session) {
                 session.setConfig("StrictHostKeyChecking", "no");
+                CredentialsProvider provider = new CredentialsProvider() {
+                    @Override
+                    public boolean isInteractive() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean supports(CredentialItem... items) {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean get(URIish uri, CredentialItem... items) throws UnsupportedCredentialItem {
+                        for (CredentialItem item : items) {
+                            ((CredentialItem.StringType) item).setValue(backupProperties.getPassphrase());
+                        }
+                        return true;
+                    }
+                };
+                UserInfo userInfo = new CredentialsProviderUserInfo(session, provider);
+                session.setUserInfo(userInfo);
             }
 
             protected JSch createDefaultJSch(FS fs) throws JSchException {
