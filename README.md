@@ -1,9 +1,9 @@
 # OpsGenie Configuration Backup
 
-OpsGenie customers can backup their account configurations and restore it later using this script.
+OpsGenie customers can back up their account configuration and restore it later using this script.
 
 # Export
-During export, this features are exported to local directory or remote Git branch:
+During export, these features are exported to a local directory or remote Git branch:
 
 ```
 *User information (username-fullname-skypeUsername-timezone-userRole-userContacts-notificationRules)
@@ -49,12 +49,12 @@ This provides the ability to delete old entity files and automatically update cu
 
 ## File Format
 The script uses OpsGenie Java SDK to export and import.
-When it exports, it stores the entities as JSON and save those as separate files.
+When it exports, it stores the entities as JSON and saves those as separate files.
 When it imports, it reads the JSON files and imports them to the given API key’s OpsGenie account.
 
 ## Git Limitations
-Currently Git does not allow to push empty directors. For example, if the system does not have any schedules there will be no schedule file under schedule directory.
-When the script tries to push this schedule directory to the remote Git, it won’t be pushed. Another word, empty directories won’t be pushed to Git.
+Currently Git does not allow to push empty directories. For example, if the system does not have any schedules there will be no schedule file under schedule directory.
+When the script tries to push the schedule directory to the remote Git, it won’t be pushed. Another word, empty directories won’t be pushed to Git.
 
 
 # Import
@@ -66,8 +66,8 @@ However they should not change the file format. There should be one main folder 
 
 ## Update current data
 The script adds missing entities or updates current entities.
-This can be set by user by using import configs.
-For example if owner deletes a user after the backup, the script detects this deleted user and adds it to the current system, if addNewUsers parameter is set to true.
+This can be set by user by using the import configs.
+For example if OpsGenie account owner or admin deletes a user after the backup, the script detects this deleted user and adds it to the current system, if addNewUsers parameter is set to true.
 If the addNewUsers parameter is set to false, the script won't add the deleted users.
 If the updateExistUsers parameter is set to false, the script won't update the modified users.
 
