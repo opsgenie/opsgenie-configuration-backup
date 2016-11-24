@@ -64,20 +64,10 @@ public class ExportMain {
                     "java -jar OpsGenieBackupExecutable apiKey\n" +
                     "java -jar OpsGenieBackupExecutable apiKey extractPath\n" +
                     "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath\n" +
-                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath extractPath\n" +
-                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath\n");
+                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath GitClonePath\n" +
+                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase GitClonePath\n");
             System.exit(1);
         }
-
-
-        GetAccountInfoRequest getAccountInfoRequest = new GetAccountInfoRequest();
-        OpsGenieClient opsGenieClient = new OpsGenieClient();
-        opsGenieClient.setApiKey(apiKey);
-
-        GetAccountInfoResponse response = opsGenieClient.account().getAccount(getAccountInfoRequest);
-        logger.info("Account name is " + response.getAccount().getName());
-
-
         BackupProperties properties = new BackupProperties();
 
         logger.info("The api Key is = " + apiKey);//5 character ***
@@ -100,6 +90,14 @@ public class ExportMain {
             logger.info("The SSH key path = " + sshKeyPath);
             logSecretKey("SSH key passphrase", passphrase);
         }
+
+
+        GetAccountInfoRequest getAccountInfoRequest = new GetAccountInfoRequest();
+        OpsGenieClient opsGenieClient = new OpsGenieClient();
+        opsGenieClient.setApiKey(apiKey);
+
+        GetAccountInfoResponse response = opsGenieClient.account().getAccount(getAccountInfoRequest);
+        logger.info("Account name is " + response.getAccount().getName() + "\n");
 
         Exporter exporter = new Exporter(properties);
         exporter.export();
