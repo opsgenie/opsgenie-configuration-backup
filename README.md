@@ -62,7 +62,7 @@ In the import part, the script reads the data from remote Git repository or loca
 
 The file formats should be the same as export file formats.
 Since entities data is stored in JSON format, users can change it manually.
-However they should not change the file format. There should be one main folder named OpsGenieBackups and 7 sub-folders.
+However they should not change the file format. There should be one main folder named OpsGenieBackups and 8 sub-folders.
 
 ## Update current data
 The script adds missing entities or updates current entities.
@@ -102,16 +102,19 @@ This option extracts the OpsGenie configuration to the given path.
 
 java -jar OpsGenieBackupExecutable apiKey extractPath
 
+
 3. Run with apiKey, git SSH URI and  SSH Key Path parameters.
 This command clones the remote repository into a directory called OpsGenieBackupGitRepository.
 After the cloning process the export jar backs up the data into this directory under a folder called OpsGenieBackups.
 
 java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath
 
+
 4. Run with apiKey, git SSH URI,  SSH Key Path and GitClonePath parameters.
 This option clones the remote git to the given path.
 
 java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath GitClonePath
+
 
 5. Run with apiKey, git SSH URI,  SSH Key Path, sshPassphrase and GitClonePath parameters.
 If the SSH key has a passphrase you need to run this configuration.
@@ -153,6 +156,7 @@ After cloning it searches the folder named OpsGenieBackups
 If it finds the folder, the restore operation  is performed
 
 java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath
+
 
 4. Run with apiKey, git SSH URI,  SSH Key Path and  GitClonePath parameters.
 This configuration clones the remote git to a folder named OpsGenieBackupGitRepository under the given path.
