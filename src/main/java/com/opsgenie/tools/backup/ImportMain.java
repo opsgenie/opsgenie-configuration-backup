@@ -47,13 +47,13 @@ public class ImportMain {
             gitSSHURI = args[1];
             sshKeyPath = args[2];
         } else if (args.length == 4) {
-            logger.debug("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath OpsGenieBackupsHomePath");
+            logger.debug("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath GitClonePath");
             apiKey = args[0];
             gitSSHURI = args[1];
             sshKeyPath = args[2];
             backupFolderHomePath = args[3];
         } else if (args.length == 5) {
-            logger.debug("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath");
+            logger.debug("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase GitClonePath");
             apiKey = args[0];
             gitSSHURI = args[1];
             sshKeyPath = args[2];
@@ -63,22 +63,13 @@ public class ImportMain {
             System.err.println("Your paramater number " + args.length + " is invalid.");
             System.err.println("Please execute with a valid configuration.");
             System.out.println("Possible run configurations are:\n" +
-                    "java -jar OpsGenieBackupExecutable apiKey\n" +
-                    "java -jar OpsGenieBackupExecutable apiKey extractPath\n" +
-                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath\n" +
-                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath extractPath\n" +
-                    "java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase extractPath\n");
+                    "java -jar OpsGenieRestoreExecutable apiKey\n" +
+                    "java -jar OpsGenieRestoreExecutable apiKey OpsGenieBackupsHomePath\n" +
+                    "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath\n" +
+                    "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath GitClonePath\n" +
+                    "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase GitClonePath\n");
             System.exit(1);
         }
-
-
-        GetAccountInfoRequest getAccountInfoRequest = new GetAccountInfoRequest();
-        OpsGenieClient opsGenieClient = new OpsGenieClient();
-        opsGenieClient.setApiKey(apiKey);
-
-        GetAccountInfoResponse response = opsGenieClient.account().getAccount(getAccountInfoRequest);
-        logger.info("Account name is " + response.getAccount().getName());
-
 
         BackupProperties properties = new BackupProperties();
 
@@ -102,6 +93,14 @@ public class ImportMain {
             logger.info("The SSH key path = " + sshKeyPath);
             logSecretKey("SSH key passphrase", passphrase);
         }
+
+        GetAccountInfoRequest getAccountInfoRequest = new GetAccountInfoRequest();
+        OpsGenieClient opsGenieClient = new OpsGenieClient();
+        opsGenieClient.setApiKey(apiKey);
+
+        GetAccountInfoResponse response = opsGenieClient.account().getAccount(getAccountInfoRequest);
+        logger.info("Account name is " + response.getAccount().getName() + "\n");
+
         ImportConfig config = extractRestoreConfig();
         Importer importer = null;
         if (config != null) {
