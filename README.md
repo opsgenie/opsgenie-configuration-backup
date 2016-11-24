@@ -6,26 +6,27 @@ OpsGenie customers can backup their account configurations and restore it later 
 During export, this features are exported to local directory or remote Git branch:
 
 ```
-User information (username-fullname-skypeUsername-timezone-userRole-userContacts-notificationRules)
-Group information (name -users-description)
-Team information (name-members-memberRoles-description)
-Escalation information (name-rules-team-description-repeatInterval)
-Schedule information (name-timeZone-rotations-team -enabled-description)
-Heartbeat information (name-description-interval-intervalUnit-enabled)
+*User information (username-fullname-skypeUsername-timezone-userRole-userContacts-notificationRules)
+*Group information (name -users-description)
+*Team information (name-members-memberRoles-description)
+*Escalation information (name-rules-team-description-repeatInterval)
+*Schedule information (name-timeZone-rotations-team -enabled-description-overrides)
+*Heartbeat information (name-description-interval-intervalUnit-enabled)
         
 ```
 
 The script exports data to a folder named OpsGenieBackups.
-There are 7 sub-folders inside this main folder.
+There are 8 sub-folders inside this main folder.
 
 ```
-users
-groups
-teams
-escalations
-schedules
-heartbeats
-notifications
+*users
+*groups
+*teams
+*escalations
+*schedules
+*scheduleOverrides
+*heartbeats
+*notifications
 ```
 
 The script exports the data to those sub-folders according to their types.
@@ -75,6 +76,117 @@ If the owner does not import missing users (which he/she can do it with ImportCo
 Therefore, the owner should be careful about changing ImportConfig.
 Another word, if the owner only imports some entities, he/she should consider the relations with the other entities.
 If the script encounters such an error, it will generate a logger error and simply skip this entity and continue to import other entities.
+
+
+
+# Installing
+
+##Executable Jars
+You can download the executable jars from [releases]( https://github.com/opsgenie/opsgenie-configuration-backup/releases).
+
+Possible run configurations for OpsGenieBackupExecutable: 
+```
+Run only with apiKey parameter. 
+This option simply export the OpsGenie config to run path (the directory which the jar file is located in) in a folder named OpsGenieBackups.
+
+java -jar OpsGenieBackupExecutable apiKey
+
+
+Run with apiKey and extractPath parameters. 
+This option will extract the  OpsGenie  configuration to given path.
+
+java -jar OpsGenieBackupExecutable apiKey extractPath
+
+Run with apiKey, git SSH URI and  SSH Key Path parameters. 
+This command will clone the remote repository into a directory called OpsGenieBackupGitRepository to the run path.
+After the cloning process the export jar will backup the data to this directory under a folder called OpsGenieBackups.
+
+java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath
+
+
+Run with apiKey, git SSH URI,  SSH Key Path and GitClonePath parameters. 
+This option will clone the remote git to given path.
+
+java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath GitClonePath
+
+Run with apiKey, git SSH URI,  SSH Key Path, sshPassphrase and GitClonePath parameters. 
+If the ssh key has a passphrase you need to run this configuration.
+
+java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase GitClonePath
+
+```
+
+apiKey: 	    OpsGenie api key
+extractPath:    local path for extracting OpsGenieBackup folder
+gitSSHURI: 	    SSH URI of the repository which OpsGenie configuration files will be pushed.
+SSHKeyPath:     Path of the ssh file which is storing the ssh key.
+sshPassphrase:  Passphrase of the given SSH Key file.
+GitClonePath:   local path for cloning given git repository to folder called OpsGenieBackupGitRepository.
+
+
+
+Possible run configurations for OpsGenieRestoreExecutable: 
+```
+Run only with apiKey parameter. 
+This option search for OpsGenieBackups folder in run path (the directory which the jar file is located in)
+If it finds the folder it will start restoring the configurations to account which api key is given.
+
+java -jar OpsGenieRestoreExecutable apiKey
+
+
+Run with apiKey and extractPath parameters. 
+This option search for OpsGenieBackup folder in given path
+If it finds the folder named OpsGenieBackups it will start restoring the configurations to account which api key is given.
+
+java -jar OpsGenieRestoreExecutable apiKey OpsGenieBackupsHomePath
+
+
+Run with apiKey, git SSH URI and  SSH Key Path parameters. 
+This option clone the remote git to run path.
+After cloning it search the folder named OpsGenieBackups 
+if it find the folder the restore operation will start
+
+java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath
+
+
+Run with apiKey, git SSH URI,  SSH Key Path and  GitClonePath parameters. 
+This configuration clone the remote git to given path under a folder named OpsGenieBackupGitRepository
+
+java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath GitClonePath
+
+
+Run with apiKey, git SSH URI,  SSH Key Path, sshPassphrase and  GitClonePath parameters. 
+If the ssh key has a passphrase you need to run this configuration.
+
+java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase GitClonePath
+
+```
+
+##Add as dependency
+You can use Maven or Gradle dependencies.
+
+## Maven
+You can add OpsGenie Configuration Backup as maven dependency. Example:
+
+```
+<dependencies>
+  	<dependency>
+  		<groupId>com.opsgenie.tools</groupId>
+  		<artifactId>configuration-backup</artifactId>
+  		<version>[0.3.0,)</version>
+  	</dependency>
+  </dependencies>
+```
+
+## Gradle
+
+You can add OpsGenie Configuration Backup as gradle dependency. Example:
+
+```
+dependencies {
+	compile "com.opsgenie.tools:configuration-backup:+"
+}
+```
 
 
 #Example of Export
@@ -141,37 +253,14 @@ properties.setApiKey("1b2f5900-dasd-4055-214s-dsad21asd");
 properties.setPath("/home/user/Desktop/BackupFolder");
 
 ImportConfig config = new ImportConfig();
-config.setAddNewUsers(false);
-config.setAddNewTeams(false);
-config.setUpdateExistSchedules(false);
+config.setAllFalse();
+config.setAddNewUsers(true).setAddNewTeams(true).setUpdateExistSchedules(true);
 
 Importer importer = new Importer(properties,config);
 importer.restore();
         
 ```
 
-# Maven
-You can add OpsGenie Configuration Backup as dependency. Example:
-
-```
-<dependencies>
-  	<dependency>
-  		<groupId>com.opsgenie.tools</groupId>
-  		<artifactId>configuration-backup</artifactId>
-  		<version>[0.1.0,)</version>
-  	</dependency>
-  </dependencies>
-```
-
-# Gradle
-
-You can add OpsGenie Configuration Backup as dependency. Example:
-
-```
-dependencies {
-	compile "com.opsgenie.tools:configuration-backup:+"
-}
-```
 
 
 ## Build
