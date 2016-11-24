@@ -94,30 +94,30 @@ Possible run configurations for OpsGenieBackupExecutable:
 Run only with apiKey parameter.
 This option simply exports the OpsGenie configuration to run path (the directory which the jar file is located in) in a folder named OpsGenieBackups.
 
-java -jar OpsGenieBackupExecutable apiKey
+1. java -jar OpsGenieBackupExecutable apiKey
 
 
 Run with apiKey and extractPath parameters.
 This option extracts the OpsGenie configuration to the given path.
 
-java -jar OpsGenieBackupExecutable apiKey extractPath
+2. java -jar OpsGenieBackupExecutable apiKey extractPath
 
 Run with apiKey, git SSH URI and  SSH Key Path parameters.
 This command clones the remote repository into a directory called OpsGenieBackupGitRepository.
 After the cloning process the export jar backs up the data into this directory under a folder called OpsGenieBackups.
 
-java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath
+3. java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath
 
 
 Run with apiKey, git SSH URI,  SSH Key Path and GitClonePath parameters.
 This option clones the remote git to the given path.
 
-java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath GitClonePath
+4. java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath GitClonePath
 
 Run with apiKey, git SSH URI,  SSH Key Path, sshPassphrase and GitClonePath parameters.
 If the SSH key has a passphrase you need to run this configuration.
 
-java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase GitClonePath
+5. java -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase GitClonePath
 
 ```
 
@@ -138,14 +138,14 @@ Run only with apiKey parameter.
 This option searches for OpsGenieBackups folder in run path (the directory which the jar file is located in)
 If it finds the folder it restores the configurations to the OpsGenie account whose API key is given.
 
-java -jar OpsGenieRestoreExecutable apiKey
+1. java -jar OpsGenieRestoreExecutable apiKey
 
 
 Run with apiKey and extractPath parameters.
 This option searches for OpsGenieBackup folder in given path
 If it finds the folder named OpsGenieBackups it restores the configurations to the OpsGenie account whose API key is given.
 
-java -jar OpsGenieRestoreExecutable apiKey OpsGenieBackupsHomePath
+2. java -jar OpsGenieRestoreExecutable apiKey OpsGenieBackupsHomePath
 
 
 Run with apiKey, git SSH URI and  SSH Key Path parameters.
@@ -154,20 +154,20 @@ After cloning it searches the folder named OpsGenieBackups
 If it finds the folder, the restore operation  is performed
 
 
-java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath
+3. java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath
 
 
 Run with apiKey, git SSH URI,  SSH Key Path and  GitClonePath parameters.
 This configuration clones the remote git to a folder named OpsGenieBackupGitRepository under the given path.
 
 
-java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath GitClonePath
+4. java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath GitClonePath
 
 
 Run with apiKey, git SSH URI,  SSH Key Path, sshPassphrase and  GitClonePath parameters.
 If the SSH key has a passphrase you need to run this configuration.
 
-java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase GitClonePath
+5. java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase GitClonePath
 
 ```
 
