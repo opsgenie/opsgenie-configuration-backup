@@ -70,7 +70,7 @@ public class ExportMain {
         }
         BackupProperties properties = new BackupProperties();
 
-        logger.info("The api Key is = " + apiKey);//5 character ***
+        logger.info("The api Key is = " + apiKey);
         properties.setApiKey(apiKey);
 
         if (extractPath != null) {

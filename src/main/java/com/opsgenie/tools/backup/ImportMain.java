@@ -73,7 +73,7 @@ public class ImportMain {
 
         BackupProperties properties = new BackupProperties();
 
-        logSecretKey("api Key", apiKey);
+        logger.info("The api Key is = " + apiKey);
         properties.setApiKey(apiKey);
 
         if (backupFolderHomePath != null) {
