@@ -181,7 +181,7 @@ As an alternative to using the executible jars, you can use Maven or Gradle depe
 ## Maven
 You can add OpsGenie Configuration Backup as a Maven dependency. Example:
 
-```
+```xml
 <dependencies>
   	<dependency>
   		<groupId>com.opsgenie.tools</groupId>
@@ -195,7 +195,7 @@ You can add OpsGenie Configuration Backup as a Maven dependency. Example:
 
 You can add OpsGenie Configuration Backup as a Gradle dependency. Example:
 
-```
+```groovy
 dependencies {
 	compile "com.opsgenie.tools:configuration-backup:+"
 }
@@ -221,7 +221,7 @@ Windows:
 
 ##Export to Local Path
 
-```
+```java
 BackupProperties properties = new BackupProperties();
 properties.setApiKey("1b2f5900-dasd-4055-214s-dsad21asd");
 properties.setPath("/home/user/Desktop/BackupFolder");
@@ -232,7 +232,7 @@ exporter.export();
 
 ##Export to Remote Git
 
-```
+```java
 BackupProperties properties = new BackupProperties();
 properties.setApiKey("1b2f5900-dasd-4055-214s-dsad21asd");
 properties.setPath("/home/user/Desktop/BackupFolder");
@@ -248,7 +248,7 @@ exporter.export();
 
 ##Import from Local Path
 
-```
+```java
 BackupProperties properties = new BackupProperties();
 properties.setApiKey("1b2f5900-dasd-4055-214s-dsad21asd");
 properties.setPath("/home/user/Desktop/BackupFolder");
@@ -260,7 +260,7 @@ importer.restore();
 
 ##Import from Remote Git
 
-```
+```java
 BackupProperties properties = new BackupProperties();
 properties.setApiKey("1b2f5900-dasd-4055-214s-dsad21asd");
 properties.setPath("/home/user/Desktop/BackupFolder");
@@ -275,7 +275,7 @@ importer.restore();
 
 ##Import with Config
 
-```
+```java
 BackupProperties properties = new BackupProperties();
 properties.setApiKey("1b2f5900-dasd-4055-214s-dsad21asd");
 properties.setPath("/home/user/Desktop/BackupFolder");
