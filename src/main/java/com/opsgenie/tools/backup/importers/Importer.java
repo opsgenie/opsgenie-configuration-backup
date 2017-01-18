@@ -7,6 +7,6 @@ import com.opsgenie.tools.backup.RestoreException;
  *
  * @author Mehmet Mustafa Demir
  */
-public interface ImporterInterface {
+public interface Importer {
     void restore() throws RestoreException;
 }

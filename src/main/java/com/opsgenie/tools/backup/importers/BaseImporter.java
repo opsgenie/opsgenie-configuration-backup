@@ -6,7 +6,6 @@ import com.ifountain.opsgenie.client.model.beans.Bean;
 import com.ifountain.opsgenie.client.util.JsonUtils;
 import com.opsgenie.tools.backup.BackupUtils;
 import com.opsgenie.tools.backup.RestoreException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,7 +18,7 @@ import java.util.List;
 /**
  * @author Mehmet Mustafa Demir
  */
-abstract class BaseImporter<T extends Bean> implements ImporterInterface {
+abstract class BaseImporter<T extends Bean> implements Importer {
     private final Logger logger = LogManager.getLogger(BaseImporter.class);
     private OpsGenieClient opsGenieClient;
     private File importDirectory;
@@ -47,7 +46,6 @@ abstract class BaseImporter<T extends Bean> implements ImporterInterface {
             return;
         }
 
-
         List<T> backups = new ArrayList<T>();
         for (String fileName : files) {
             T bean = readEntity(fileName);
@@ -68,7 +66,7 @@ abstract class BaseImporter<T extends Bean> implements ImporterInterface {
 
     protected T readEntity(String fileName) {
         try {
-            String beanJson = BackupUtils.readFileAsJson(importDirectory.getAbsolutePath() + "/" + fileName);
+            String beanJson = BackupUtils.readFile(importDirectory.getAbsolutePath() + "/" + fileName);
             T bean = getBean();
             JsonUtils.fromJson(bean, beanJson);
             return bean;

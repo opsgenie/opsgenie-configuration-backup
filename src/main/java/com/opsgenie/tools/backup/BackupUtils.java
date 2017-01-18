@@ -1,10 +1,10 @@
 package com.opsgenie.tools.backup;
 
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.util.Scanner;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Common utils for export and import procedure.
@@ -12,11 +12,19 @@ import java.util.Scanner;
  * @author Mehmet Mustafa Demir
  */
 public class BackupUtils {
-    public static String readFileAsJson(String fileName) throws FileNotFoundException {
-        Scanner scan = new Scanner(new File(fileName));
-        String json = scan.nextLine();
-        scan.close();
-        return json;
+    public static String readFile(String fileName) throws IOException {
+        InputStream is = new FileInputStream(fileName);
+        BufferedReader buf = new BufferedReader(new InputStreamReader(is));
+
+        String line = buf.readLine();
+        StringBuilder sb = new StringBuilder();
+
+        while (line != null) {
+            sb.append(line).append("\n");
+            line = buf.readLine();
+        }
+
+        return sb.toString();
     }
 
     public static String[] getFileListOf(File directory) {
@@ -54,5 +62,18 @@ public class BackupUtils {
             }
         }
         return dir.delete();
+    }
+
+    public static List<String> findIntegrationDirectories(String path) {
+        List<String> files = new ArrayList<String>();
+        File[] list = new File(path).listFiles();
+        if (list == null) return Collections.emptyList();
+
+        for (File integrationType : list) {
+            for (File integrationFolder : integrationType.listFiles()) {
+                files.add(integrationFolder.getAbsolutePath());
+            }
+        }
+        return files;
     }
 }

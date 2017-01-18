@@ -1,18 +1,7 @@
 package com.opsgenie.tools.backup;
 
 import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.opsgenie.tools.backup.exporters.EscalationExporter;
-import com.opsgenie.tools.backup.exporters.ExporterInterface;
-import com.opsgenie.tools.backup.exporters.GroupExporter;
-import com.opsgenie.tools.backup.exporters.HeartbeatExporter;
-import com.opsgenie.tools.backup.exporters.ScheduleExporter;
-import com.opsgenie.tools.backup.exporters.ScheduleOverrideExporter;
-import com.opsgenie.tools.backup.exporters.TeamExporter;
-import com.opsgenie.tools.backup.exporters.TeamRoutingRuleExporter;
-import com.opsgenie.tools.backup.exporters.UserExporter;
-import com.opsgenie.tools.backup.exporters.UserForwardingExporter;
-import com.opsgenie.tools.backup.exporters.UserNotificationExporter;
-
+import com.opsgenie.tools.backup.exporters.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.PushCommand;
@@ -30,11 +19,11 @@ import java.util.List;
  *
  * @author Mehmet Mustafa Demir
  */
-public class Exporter extends BaseBackup {
-    private static List<ExporterInterface> exporters;
-    private final Logger logger = LogManager.getLogger(Exporter.class);
+public class ConfigurationExporter extends BaseBackup {
+    private static List<Exporter> exporters;
+    private final Logger logger = LogManager.getLogger(ConfigurationExporter.class);
 
-    public Exporter(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
+    public ConfigurationExporter(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
         super(backupProperties);
     }
 
@@ -55,7 +44,7 @@ public class Exporter extends BaseBackup {
     }
 
     private void initializeExporters(String rootPath, OpsGenieClient opsGenieClient) {
-        exporters = new ArrayList<ExporterInterface>();
+        exporters = new ArrayList<com.opsgenie.tools.backup.exporters.Exporter>();
         exporters.add(new HeartbeatExporter(opsGenieClient, rootPath));
         exporters.add(new UserExporter(opsGenieClient, rootPath));
         exporters.add(new UserNotificationExporter(opsGenieClient, rootPath));
@@ -66,6 +55,7 @@ public class Exporter extends BaseBackup {
         exporters.add(new EscalationExporter(opsGenieClient, rootPath));
         exporters.add(new UserForwardingExporter(opsGenieClient, rootPath));
         exporters.add(new ScheduleOverrideExporter(opsGenieClient, rootPath));
+        exporters.add(new IntegrationExporter(opsGenieClient.getApiKey(), rootPath));
     }
 
     /**
@@ -80,7 +70,7 @@ public class Exporter extends BaseBackup {
         }
         init();
         logger.info("Export operation started!");
-        for (ExporterInterface exporter : exporters) {
+        for (com.opsgenie.tools.backup.exporters.Exporter exporter : exporters) {
             exporter.export();
         }
         if (getBackupProperties().isGitEnabled()) {

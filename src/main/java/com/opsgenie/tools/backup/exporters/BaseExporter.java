@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * @author Mehmet Mustafa Demir
  */
-abstract class BaseExporter<T extends Bean> implements ExporterInterface {
+abstract class BaseExporter<T extends Bean> implements Exporter {
     private final Logger logger = LogManager.getLogger(BaseExporter.class);
     private OpsGenieClient opsGenieClient;
     private File exportDirectory;

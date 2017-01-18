@@ -5,6 +5,6 @@ package com.opsgenie.tools.backup.exporters;
  *
  * @author Mehmet Mustafa Demir
  */
-public interface ExporterInterface {
+public interface Exporter {
     public void export();
 }

@@ -4,7 +4,6 @@ import com.ifountain.opsgenie.client.OpsGenieClient;
 import com.ifountain.opsgenie.client.OpsGenieClientException;
 import com.ifountain.opsgenie.client.model.account.GetAccountInfoRequest;
 import com.ifountain.opsgenie.client.model.account.GetAccountInfoResponse;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -99,7 +98,7 @@ public class ExportMain {
         GetAccountInfoResponse response = opsGenieClient.account().getAccount(getAccountInfoRequest);
         logger.info("Account name is " + response.getAccount().getName() + "\n");
 
-        Exporter exporter = new Exporter(properties);
+        ConfigurationExporter exporter = new ConfigurationExporter(properties);
         exporter.export();
 
         logger.info("Finished");

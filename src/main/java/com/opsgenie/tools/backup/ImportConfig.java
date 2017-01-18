@@ -6,48 +6,50 @@ package com.opsgenie.tools.backup;
  * @author Mehmet Mustafa Demir
  */
 public class ImportConfig {
-    private boolean addNewHeartbeats = true, updateExistHeartbeats = true;
+    private boolean addNewHeartbeats = true, updateExistingHeartbeats = true;
 
-    private boolean addNewUsers = true, updateExistUsers = true;
+    private boolean addNewUsers = true, updateExistingUsers = true;
 
-    private boolean addNewGroups = true, updateExistGroups = true;
+    private boolean addNewGroups = true, updateExistingGroups = true;
 
-    private boolean addNewTeams = true, updateExistTeams = true;
+    private boolean addNewTeams = true, updateExistingTeams = true;
 
-    private boolean addNewSchedules = true, updateExistSchedules = true;
+    private boolean addNewSchedules = true, updateExistingSchedules = true;
 
-    private boolean addNewEscalations = true, updateExistEscalations = true;
+    private boolean addNewEscalations = true, updateExistingEscalations = true;
 
-    private boolean addNewNotifications = true, updateExistNotifications = true;
+    private boolean addNewNotifications = true, updateExistingNotifications = true;
 
-    private boolean addNewTeamRoutingRules = true, updateExistTeamRoutingRules = true;
+    private boolean addNewTeamRoutingRules = true, updateExistingTeamRoutingRules = true;
 
-    private boolean addNewUserForwarding = true, updateExistUserForwarding = true;
+    private boolean addNewUserForwarding = true, updateExistingUserForwarding = true;
 
-    private boolean addNewScheduleOverrides = true, updateExistScheduleOverrides = true;
+    private boolean addNewScheduleOverrides = true, updateExistingScheduleOverrides = true;
+
+    private boolean addNewIntegrations = true, updateExistingIntegrations = true;
 
 
     public void setAllFalse() {
         addNewHeartbeats = false;
-        updateExistHeartbeats = false;
+        updateExistingHeartbeats = false;
         addNewUsers = false;
-        updateExistUsers = false;
+        updateExistingUsers = false;
         addNewGroups = false;
-        updateExistGroups = false;
+        updateExistingGroups = false;
         addNewTeams = false;
-        updateExistTeams = false;
+        updateExistingTeams = false;
         addNewSchedules = false;
-        updateExistSchedules = false;
+        updateExistingSchedules = false;
         addNewEscalations = false;
-        updateExistEscalations = false;
+        updateExistingEscalations = false;
         addNewNotifications = false;
-        updateExistNotifications = false;
+        updateExistingNotifications = false;
         addNewTeamRoutingRules = false;
-        updateExistTeamRoutingRules = false;
+        updateExistingTeamRoutingRules = false;
         addNewUserForwarding = false;
-        updateExistUserForwarding = false;
+        updateExistingUserForwarding = false;
         addNewScheduleOverrides = false;
-        updateExistScheduleOverrides = false;
+        updateExistingScheduleOverrides = false;
     }
 
     public boolean isAddNewHeartbeats() {
@@ -59,12 +61,12 @@ public class ImportConfig {
         return this;
     }
 
-    public boolean isUpdateExistHeartbeats() {
-        return updateExistHeartbeats;
+    public boolean isUpdateExistingHeartbeats() {
+        return updateExistingHeartbeats;
     }
 
-    public ImportConfig setUpdateExistHeartbeats(boolean updateExistHeartbeats) {
-        this.updateExistHeartbeats = updateExistHeartbeats;
+    public ImportConfig setUpdateExistingHeartbeats(boolean updateExistingHeartbeats) {
+        this.updateExistingHeartbeats = updateExistingHeartbeats;
         return this;
     }
 
@@ -77,12 +79,12 @@ public class ImportConfig {
         return this;
     }
 
-    public boolean isUpdateExistUsers() {
-        return updateExistUsers;
+    public boolean isUpdateExistingUsers() {
+        return updateExistingUsers;
     }
 
-    public ImportConfig setUpdateExistUsers(boolean updateExistUsers) {
-        this.updateExistUsers = updateExistUsers;
+    public ImportConfig setUpdateExistingUsers(boolean updateExistingUsers) {
+        this.updateExistingUsers = updateExistingUsers;
         return this;
     }
 
@@ -95,12 +97,12 @@ public class ImportConfig {
         return this;
     }
 
-    public boolean isUpdateExistGroups() {
-        return updateExistGroups;
+    public boolean isUpdateExistingGroups() {
+        return updateExistingGroups;
     }
 
-    public ImportConfig setUpdateExistGroups(boolean updateExistGroups) {
-        this.updateExistGroups = updateExistGroups;
+    public ImportConfig setUpdateExistingGroups(boolean updateExistingGroups) {
+        this.updateExistingGroups = updateExistingGroups;
         return this;
     }
 
@@ -113,12 +115,12 @@ public class ImportConfig {
         return this;
     }
 
-    public boolean isUpdateExistTeams() {
-        return updateExistTeams;
+    public boolean isUpdateExistingTeams() {
+        return updateExistingTeams;
     }
 
-    public ImportConfig setUpdateExistTeams(boolean updateExistTeams) {
-        this.updateExistTeams = updateExistTeams;
+    public ImportConfig setUpdateExistingTeams(boolean updateExistingTeams) {
+        this.updateExistingTeams = updateExistingTeams;
         return this;
     }
 
@@ -131,12 +133,12 @@ public class ImportConfig {
         return this;
     }
 
-    public boolean isUpdateExistSchedules() {
-        return updateExistSchedules;
+    public boolean isUpdateExistingSchedules() {
+        return updateExistingSchedules;
     }
 
-    public ImportConfig setUpdateExistSchedules(boolean updateExistSchedules) {
-        this.updateExistSchedules = updateExistSchedules;
+    public ImportConfig setUpdateExistingSchedules(boolean updateExistingSchedules) {
+        this.updateExistingSchedules = updateExistingSchedules;
         return this;
     }
 
@@ -149,12 +151,12 @@ public class ImportConfig {
         return this;
     }
 
-    public boolean isUpdateExistEscalations() {
-        return updateExistEscalations;
+    public boolean isUpdateExistingEscalations() {
+        return updateExistingEscalations;
     }
 
-    public ImportConfig setUpdateExistEscalations(boolean updateExistEscalations) {
-        this.updateExistEscalations = updateExistEscalations;
+    public ImportConfig setUpdateExistingEscalations(boolean updateExistingEscalations) {
+        this.updateExistingEscalations = updateExistingEscalations;
         return this;
     }
 
@@ -167,12 +169,12 @@ public class ImportConfig {
         return this;
     }
 
-    public boolean isUpdateExistNotifications() {
-        return updateExistNotifications;
+    public boolean isUpdateExistingNotifications() {
+        return updateExistingNotifications;
     }
 
-    public ImportConfig setUpdateExistNotifications(boolean updateExistNotifications) {
-        this.updateExistNotifications = updateExistNotifications;
+    public ImportConfig setUpdateExistingNotifications(boolean updateExistingNotifications) {
+        this.updateExistingNotifications = updateExistingNotifications;
         return this;
     }
 
@@ -185,12 +187,12 @@ public class ImportConfig {
         return this;
     }
 
-    public boolean isUpdateExistTeamRoutingRules() {
-        return updateExistTeamRoutingRules;
+    public boolean isUpdateExistingTeamRoutingRules() {
+        return updateExistingTeamRoutingRules;
     }
 
-    public ImportConfig setUpdateExistTeamRoutingRules(boolean updateExistTeamRoutingRules) {
-        this.updateExistTeamRoutingRules = updateExistTeamRoutingRules;
+    public ImportConfig setUpdateExistingTeamRoutingRules(boolean updateExistingTeamRoutingRules) {
+        this.updateExistingTeamRoutingRules = updateExistingTeamRoutingRules;
         return this;
     }
 
@@ -203,12 +205,12 @@ public class ImportConfig {
         return this;
     }
 
-    public boolean isUpdateExistUserForwarding() {
-        return updateExistUserForwarding;
+    public boolean isUpdateExistingUserForwarding() {
+        return updateExistingUserForwarding;
     }
 
-    public ImportConfig setUpdateExistUserForwarding(boolean updateExistUserForwarding) {
-        this.updateExistUserForwarding = updateExistUserForwarding;
+    public ImportConfig setUpdateExistingUserForwarding(boolean updateExistingUserForwarding) {
+        this.updateExistingUserForwarding = updateExistingUserForwarding;
         return this;
     }
 
@@ -221,12 +223,30 @@ public class ImportConfig {
         return this;
     }
 
-    public boolean isUpdateExistScheduleOverrides() {
-        return updateExistScheduleOverrides;
+    public boolean isUpdateExistingScheduleOverrides() {
+        return updateExistingScheduleOverrides;
     }
 
-    public ImportConfig setUpdateExistScheduleOverrides(boolean updateExistScheduleOverrides) {
-        this.updateExistScheduleOverrides = updateExistScheduleOverrides;
+    public ImportConfig setUpdateExistingScheduleOverrides(boolean updateExistingScheduleOverrides) {
+        this.updateExistingScheduleOverrides = updateExistingScheduleOverrides;
+        return this;
+    }
+
+    public boolean isUpdateExistingIntegrations() {
+        return updateExistingIntegrations;
+    }
+
+    public ImportConfig setUpdateExistingIntegrations(boolean updateExistingIntegrations) {
+        this.updateExistingIntegrations = updateExistingIntegrations;
+        return this;
+    }
+
+    public boolean isAddNewIntegrations() {
+        return updateExistingIntegrations;
+    }
+
+    public ImportConfig setAddNewIntegrations(boolean updateExistingIntegrations) {
+        this.updateExistingIntegrations = updateExistingIntegrations;
         return this;
     }
 }

@@ -4,7 +4,6 @@ import com.ifountain.opsgenie.client.OpsGenieClient;
 import com.ifountain.opsgenie.client.OpsGenieClientException;
 import com.ifountain.opsgenie.client.model.account.GetAccountInfoRequest;
 import com.ifountain.opsgenie.client.model.account.GetAccountInfoResponse;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -102,11 +101,11 @@ public class ImportMain {
         logger.info("Account name is " + response.getAccount().getName() + "\n");
 
         ImportConfig config = extractRestoreConfig();
-        Importer importer = null;
+        ConfigurationImporter importer = null;
         if (config != null) {
-            importer = new Importer(properties, config);
+            importer = new ConfigurationImporter(properties, config);
         } else {
-            importer = new Importer(properties);
+            importer = new ConfigurationImporter(properties);
         }
         importer.restore();
 
@@ -144,9 +143,9 @@ public class ImportMain {
                     config.setAddNewHeartbeats(false);
                     logger.warn("Adding new heartbeats disabled.");
                 }
-                str = props.getProperty("updateExistHeartbeats");
+                str = props.getProperty("updateExistingHeartbeats");
                 if (str != null && str.contains("false")) {
-                    config.setUpdateExistHeartbeats(false);
+                    config.setUpdateExistingHeartbeats(false);
                     logger.warn("Updating existing heartbeats disabled.");
                 }
 
@@ -155,9 +154,9 @@ public class ImportMain {
                     config.setAddNewUsers(false);
                     logger.warn("Adding new users disabled.");
                 }
-                str = props.getProperty("updateExistUsers");
+                str = props.getProperty("updateExistingUsers");
                 if (str != null && str.contains("false")) {
-                    config.setUpdateExistUsers(false);
+                    config.setUpdateExistingUsers(false);
                     logger.warn("Updating existing users disabled.");
                 }
 
@@ -166,9 +165,9 @@ public class ImportMain {
                     config.setAddNewGroups(false);
                     logger.warn("Adding new groups disabled.");
                 }
-                str = props.getProperty("updateExistGroups");
+                str = props.getProperty("updateExistingGroups");
                 if (str != null && str.contains("false")) {
-                    config.setUpdateExistGroups(false);
+                    config.setUpdateExistingGroups(false);
                     logger.warn("Updating existing groups disabled.");
                 }
 
@@ -177,9 +176,9 @@ public class ImportMain {
                     config.setAddNewTeams(false);
                     logger.warn("Adding new teams disabled.");
                 }
-                str = props.getProperty("updateExistTeams");
+                str = props.getProperty("updateExistingTeams");
                 if (str != null && str.contains("false")) {
-                    config.setUpdateExistTeams(false);
+                    config.setUpdateExistingTeams(false);
                     logger.warn("Updating existing teams disabled.");
                 }
 
@@ -188,9 +187,9 @@ public class ImportMain {
                     config.setAddNewSchedules(false);
                     logger.warn("Adding new schedules disabled.");
                 }
-                str = props.getProperty("updateExistSchedules");
+                str = props.getProperty("updateExistingSchedules");
                 if (str != null && str.contains("false")) {
-                    config.setUpdateExistSchedules(false);
+                    config.setUpdateExistingSchedules(false);
                     logger.warn("Updating existing schedules disabled.");
                 }
 
@@ -199,9 +198,9 @@ public class ImportMain {
                     config.setAddNewEscalations(false);
                     logger.warn("Adding new escalations disabled.");
                 }
-                str = props.getProperty("updateExistEscalations");
+                str = props.getProperty("updateExistingEscalations");
                 if (str != null && str.contains("false")) {
-                    config.setUpdateExistEscalations(false);
+                    config.setUpdateExistingEscalations(false);
                     logger.warn("Updating existing escalations disabled.");
                 }
 
@@ -210,9 +209,9 @@ public class ImportMain {
                     config.setAddNewNotifications(false);
                     logger.warn("Adding new notifications disabled.");
                 }
-                str = props.getProperty("updateExistNotifications");
+                str = props.getProperty("updateExistingNotifications");
                 if (str != null && str.contains("false")) {
-                    config.setUpdateExistNotifications(false);
+                    config.setUpdateExistingNotifications(false);
                     logger.warn("Updating existing notifications disabled.");
                 }
 
@@ -221,9 +220,9 @@ public class ImportMain {
                     config.setAddNewTeamRoutingRules(false);
                     logger.warn("Adding new team routing rules disabled.");
                 }
-                str = props.getProperty("updateExistTeamRoutingRules");
+                str = props.getProperty("updateExistingTeamRoutingRules");
                 if (str != null && str.contains("false")) {
-                    config.setUpdateExistTeamRoutingRules(false);
+                    config.setUpdateExistingTeamRoutingRules(false);
                     logger.warn("Updating existing team routing rules  disabled.");
                 }
 
@@ -232,9 +231,9 @@ public class ImportMain {
                     config.setAddNewUserForwarding(false);
                     logger.warn("Adding new user forwarding disabled.");
                 }
-                str = props.getProperty("updateExistUserForwarding");
+                str = props.getProperty("updateExistingUserForwarding");
                 if (str != null && str.contains("false")) {
-                    config.setUpdateExistUserForwarding(false);
+                    config.setUpdateExistingUserForwarding(false);
                     logger.warn("Updating existing user forwarding disabled.");
                 }
 
@@ -243,10 +242,22 @@ public class ImportMain {
                     config.setAddNewScheduleOverrides(false);
                     logger.warn("Adding new schedule overrides disabled.");
                 }
-                str = props.getProperty("updateExistScheduleOverrides");
+                str = props.getProperty("updateExistingScheduleOverrides");
                 if (str != null && str.contains("false")) {
-                    config.setUpdateExistScheduleOverrides(false);
+                    config.setUpdateExistingScheduleOverrides(false);
                     logger.warn("Updating existing schedule overrides disabled.");
+                }
+
+                str = props.getProperty("updateExistingIntegrations");
+                if (str != null && str.contains("false")) {
+                    config.setUpdateExistingIntegrations(false);
+                    logger.warn("Updating existing integrations disabled.");
+                }
+
+                str = props.getProperty("addNewIntegrations");
+                if (str != null && str.contains("false")) {
+                    config.setAddNewIntegrations(false);
+                    logger.warn("Adding new integrations disabled.");
                 }
 
                 return config;
