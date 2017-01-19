@@ -12,11 +12,12 @@ During export, these features are exported to a local directory or remote Git br
 *Escalation information (name-rules-team-description-repeatInterval)
 *Schedule information (name-timeZone-rotations-team -enabled-description-overrides)
 *Heartbeat information (name-description-interval-intervalUnit-enabled)
+*Integration information (enabled-allowConfigurationAccess-allowWriteAccess-isAdvanced-suppressNotifications-isDefaultIntegration-isGlobal-name-type)
         
 ```
 
 The script exports data to a folder named OpsGenieBackups.
-There are 8 sub-folders inside this main folder.
+There are 9 sub-folders inside this main folder.
 
 ```
 *users
@@ -27,6 +28,7 @@ There are 8 sub-folders inside this main folder.
 *scheduleOverrides
 *heartbeats
 *notifications
+*integrations
 ```
 
 The script exports the data to those sub-folders according to their types.
@@ -48,7 +50,7 @@ The script deletes old backup files in order to backup current system configurat
 This provides the ability to delete old entity files and automatically update current entities.
 
 ## File Format
-The script uses OpsGenie Java SDK to export and import.
+The script uses OpsGenie Java SDK and Integrations API to export and import.
 When it exports, it stores the entities as JSON and saves those as separate files.
 When it imports, it reads the JSON files and imports them to the given API key’s OpsGenie account.
 
@@ -56,13 +58,12 @@ When it imports, it reads the JSON files and imports them to the given API key�
 Currently Git does not allow to push empty directories. For example, if the system does not have any schedules there will be no schedule file under schedule directory.
 When the script tries to push the schedule directory to the remote Git, it won’t be pushed. Another word, empty directories won’t be pushed to Git.
 
-
 # Import
-In the import part, the script reads the data from remote Git repository or local path.
+While importing, the script reads the data from remote Git repository or local path.
 
 The file formats should be the same as export file formats.
 Since entities data is stored in JSON format, users can change it manually.
-However they should not change the file format. There should be one main folder named OpsGenieBackups and 8 sub-folders.
+However they should not change the file format. There should be one main folder named OpsGenieBackups and 9 sub-folders.
 
 ## Update current data
 The script adds missing entities or updates current entities.
@@ -77,6 +78,19 @@ Therefore, the owner should be careful about changing ImportConfig.
 Another word, if the owner only imports some entities, he/she should consider the relations with the other entities.
 If the script encounters such an error, it will generate a logger error and simply skip this entity and continue to import other entities.
 
+## Integration Export/Import Exceptional Cases
+### Not Supported
+* PingdomWebHook
+* Nagios
+* Observium
+* NagiosXI
+* Hipchat
+* Incoming Call
+### Only Update Supported*
+* SlackAppIntegration
+* Slack
+* HipChat
+* FlowDockV2
 
 
 # Installing
