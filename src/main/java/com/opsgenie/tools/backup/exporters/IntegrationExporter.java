@@ -45,8 +45,9 @@ public class IntegrationExporter implements Exporter {
         final String integrationId = integrationMeta.get("id").toString();
         final String integrationType = integrationMeta.get("type").toString();
         try {
+            logger.info("Get request for integration " + integrationId);
             final Map<String, Object> integration = apiRequester.getIntegration(integrationId);
-            logger.info("Exporting integration: " + integration.get("name") + " id:" + integrationId);
+            logger.info("Exporting integration: " + integration.get("name"));
             File file = new File(exportDirectoryRoot + "/" + integrationType + "/" + integrationId);
             file.mkdirs();
             integration.remove("_readOnly");

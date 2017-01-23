@@ -65,7 +65,6 @@ public class IntegrationApiRequester {
     private Map<String, Object> executeRequest(HttpUriRequest request) throws Exception {
         final HttpResponse httpResponse = client.execute(request);
         final int responseCode = httpResponse.getStatusLine().getStatusCode();
-
         if (isSuccessful(responseCode)) {
             return convertEntityToMap(httpResponse.getEntity());
         } else {
@@ -89,7 +88,11 @@ public class IntegrationApiRequester {
     }
 
     private Map<String, Object> convertEntityToMap(HttpEntity httpEntity) throws IOException {
-        final String json = new Scanner(httpEntity.getContent(), "UTF-8").useDelimiter("\\A").next();
+        final Scanner scanner = new Scanner(httpEntity.getContent(), "UTF-8").useDelimiter("\\A");
+        String json = "{}";
+        if (scanner.hasNext()) {
+            json = scanner.next();
+        }
         return (Map<String, Object>) JsonUtils.parse(json);
     }
 

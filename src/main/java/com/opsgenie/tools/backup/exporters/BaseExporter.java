@@ -32,7 +32,7 @@ abstract class BaseExporter<T extends Bean> implements Exporter {
             PrintWriter writer = new PrintWriter(fileName, "UTF-8");
             writer.print(JsonUtils.toJson(bean));
             writer.close();
-            logger.info(getBeanFileName(bean) + " file writed.");
+            logger.info(getBeanFileName(bean) + " file written.");
         } catch (Exception e) {
             logger.error("Error at writing entity, fileName=" + fileName, e);
         }

@@ -3,7 +3,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 group 'com.opsgenie.tools'
-version '0.3.0'
+version '0.4.0'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -29,8 +29,6 @@ dependencies {
     compile "org.slf4j:slf4j-simple:1.7.5"
 }
 
-
-
 jar {
     manifest {
         attributes("Built-By": "http://www.opsgenie.com",
@@ -44,6 +42,46 @@ jar {
                 "Implementation-Version": project.version,
         )
     }
+}
+
+task importUtilJar(type: Jar) {
+    manifest {
+        attributes("Built-By": "http://www.opsgenie.com",
+                "Specification-Title": "OpsGenie Configuration Backup Tool",
+                "Specification-Product": "opsgenie-configuration-backup",
+                "Specification-Version": project.version,
+                "Specification-Vendor": "http://www.opsgenie.com",
+                "Implementation-Title": "OpsGenie Configuration Backup Tool",
+                "Implementation-Product": "opsgenie-configuration-backup",
+                "Implementation-Vendor": "http://www.opsgenie.com",
+                "Implementation-Version": project.version,
+                "Main-Class": "com.opsgenie.tools.backup.ImportMain"
+        )
+    }
+    baseName = "OpsgenieImportUtil"
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
+    with jar
+}
+
+task exportUtilJar(type: Jar) {
+    manifest {
+        attributes("Built-By": "http://www.opsgenie.com",
+                "Specification-Title": "OpsGenie Configuration Backup Tool",
+                "Specification-Product": "opsgenie-configuration-backup",
+                "Specification-Version": project.version,
+                "Specification-Vendor": "http://www.opsgenie.com",
+                "Implementation-Title": "OpsGenie Configuration Backup Tool",
+                "Implementation-Product": "opsgenie-configuration-backup",
+                "Implementation-Vendor": "http://www.opsgenie.com",
+                "Implementation-Version": project.version,
+                "Main-Class": "com.opsgenie.tools.backup.ExportMain"
+        )
+    }
+    baseName = "OpsgenieExportUtil"
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
+    with jar
 }
 
 task sourcesJar(type: Jar) {
