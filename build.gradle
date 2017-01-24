@@ -25,7 +25,7 @@ dependencies {
     compile 'org.apache.logging.log4j:log4j:2.7'
     compile 'org.apache.logging.log4j:log4j-core:2.7'
     compile 'org.eclipse.jgit:org.eclipse.jgit:4.5.0.201609210915-r'
-    compile "com.opsgenie.integration:sdk-shaded:2.5.1"
+    compile "com.opsgenie.integration:sdk-shaded:2.6.1"
     compile "org.slf4j:slf4j-simple:1.7.5"
 }
 

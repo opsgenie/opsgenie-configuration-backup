@@ -56,7 +56,7 @@ public class UserImporter extends BaseImporter<User> {
         request.setUsername(bean.getUsername());
         request.setFullname(bean.getFullname());
         request.setLocale(bean.getLocale());
-        request.setRole(bean.getRole());
+        request.setUserRole(bean.getUserRole());
         if (BackupUtils.checkValidString(bean.getSkypeUsername()))
             request.setSkypeUsername(bean.getSkypeUsername());
         request.setTimeZone(bean.getTimeZone());
@@ -70,7 +70,7 @@ public class UserImporter extends BaseImporter<User> {
         request.setId(bean.getId());
         request.setFullname(bean.getFullname());
         request.setLocale(bean.getLocale());
-        request.setRole(bean.getRole());
+        request.setUserRole(bean.getUserRole());
         if (BackupUtils.checkValidString(bean.getSkypeUsername()))
             request.setSkypeUsername(bean.getSkypeUsername());
         request.setTimeZone(bean.getTimeZone());

@@ -74,10 +74,13 @@ public class ConfigurationImporter extends BaseBackup {
             importers.add(new GroupImporter(opsGenieClient, rootPath, config.isAddNewGroups(), config.isUpdateExistingGroups()));
 
         if (config.isAddNewSchedules() || config.isUpdateExistingSchedules())
-            importers.add(new ScheduleImporter(opsGenieClient, rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
+            importers.add(new ScheduleTemplateImporter(opsGenieClient, rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
 
         if (config.isAddNewEscalations() || config.isUpdateExistingEscalations())
             importers.add(new EscalationImporter(opsGenieClient, rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
+
+        if (config.isAddNewSchedules() || config.isUpdateExistingSchedules())
+            importers.add(new ScheduleImporter(opsGenieClient, rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
 
         if (config.isAddNewNotifications() || config.isUpdateExistingNotifications())
             importers.add(new UserNotificationImporter(opsGenieClient, rootPath, config.isAddNewNotifications(), config.isUpdateExistingNotifications()));
