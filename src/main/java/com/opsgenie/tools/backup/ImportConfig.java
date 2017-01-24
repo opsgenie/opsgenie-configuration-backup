@@ -50,6 +50,8 @@ public class ImportConfig {
         updateExistingUserForwarding = false;
         addNewScheduleOverrides = false;
         updateExistingScheduleOverrides = false;
+        addNewIntegrations = false;
+        updateExistingIntegrations = false;
     }
 
     public boolean isAddNewHeartbeats() {
@@ -232,20 +234,20 @@ public class ImportConfig {
         return this;
     }
 
+    public boolean isAddNewIntegrations() {
+        return addNewIntegrations;
+    }
+
+    public ImportConfig setAddNewIntegrations(boolean addNewIntegrations) {
+        this.addNewIntegrations = addNewIntegrations;
+        return this;
+    }
+
     public boolean isUpdateExistingIntegrations() {
         return updateExistingIntegrations;
     }
 
     public ImportConfig setUpdateExistingIntegrations(boolean updateExistingIntegrations) {
-        this.updateExistingIntegrations = updateExistingIntegrations;
-        return this;
-    }
-
-    public boolean isAddNewIntegrations() {
-        return updateExistingIntegrations;
-    }
-
-    public ImportConfig setAddNewIntegrations(boolean updateExistingIntegrations) {
         this.updateExistingIntegrations = updateExistingIntegrations;
         return this;
     }
