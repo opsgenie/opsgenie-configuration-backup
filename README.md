@@ -78,20 +78,13 @@ Therefore, the owner should be careful about changing ImportConfig.
 Another word, if the owner only imports some entities, he/she should consider the relations with the other entities.
 If the script encounters such an error, it will generate a logger error and simply skip this entity and continue to import other entities.
 
-## Integration Export/Import Exceptional Cases
-### Not Supported
-* PingdomWebHook
-* Nagios
-* Observium
-* NagiosXI
-* Hipchat
-* Incoming Call
-### Only Update Supported*
-* SlackAppIntegration
-* Slack
-* HipChat
-* FlowDockV2
+##Current Limitations
+Currently, there is no api to export custom role configs. Creating rules before importing users is recommended
 
+Exporting some integration types is not possible they are not supported at api
+
+Not supported: PingdomWebHook, Nagios, Observium, NagiosXI, Hipchat, Incoming Call   
+Update Only: Slack App Integration, Slack, HipChat, FlowDockV2
 
 # Installing
 
