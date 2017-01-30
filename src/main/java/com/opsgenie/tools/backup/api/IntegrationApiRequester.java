@@ -33,7 +33,7 @@ public class IntegrationApiRequester {
     private String apiKey;
 
     private static final String INTEGRATION_API_URI = "/v2/integrations/";
-    private static final String TARGET_HOST = "http://api.opsgenie.com";
+    private static final String TARGET_HOST = "https://api.opsgenie.com";
 
     private static int retryCount = 1;
     private static final int MAX_RETRY_COUNT = 5;
