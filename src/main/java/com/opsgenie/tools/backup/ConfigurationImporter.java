@@ -95,7 +95,7 @@ public class ConfigurationImporter extends BaseBackup {
             importers.add(new ScheduleOverrideImporter(opsGenieClient, rootPath, config.isAddNewScheduleOverrides(), config.isUpdateExistingScheduleOverrides()));
 
         if (config.isAddNewIntegrations() || config.isUpdateExistingIntegrations())
-            importers.add(new IntegrationImporter(rootPath, opsGenieClient.getApiKey(), config.isAddNewScheduleOverrides(), config.isUpdateExistingScheduleOverrides()));
+            importers.add(new IntegrationImporter(rootPath, opsGenieClient.getApiKey(), config.isAddNewIntegrations(), config.isUpdateExistingIntegrations()));
     }
 
     /**
