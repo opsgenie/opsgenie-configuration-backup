@@ -1,6 +1,9 @@
 package com.opsgenie.tools.backup;
 
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +15,9 @@ import java.util.List;
  * @author Mehmet Mustafa Demir
  */
 public class BackupUtils {
+
+    private static final Logger logger = LogManager.getLogger(BackupUtils.class);
+
     public static String readFile(String fileName) throws IOException {
         InputStream is = new FileInputStream(fileName);
         BufferedReader buf = new BufferedReader(new InputStreamReader(is));
@@ -68,10 +74,13 @@ public class BackupUtils {
         List<String> files = new ArrayList<String>();
         File[] list = new File(path).listFiles();
         if (list == null) return Collections.emptyList();
-
         for (File integrationType : list) {
-            for (File integrationFolder : integrationType.listFiles()) {
-                files.add(integrationFolder.getAbsolutePath());
+            if (integrationType.isDirectory()) {
+                for (File integrationFolder : integrationType.listFiles()) {
+                    files.add(integrationFolder.getAbsolutePath());
+                }
+            } else {
+                logger.warn(integrationType.getAbsolutePath() + " is invalid. There should be folders only in this path.");
             }
         }
         return files;
