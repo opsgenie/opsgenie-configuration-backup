@@ -1,6 +1,7 @@
 package com.opsgenie.tools.backup;
 
 import com.ifountain.opsgenie.client.OpsGenieClient;
+import com.opsgenie.tools.backup.api.IntegrationApiRequester;
 import com.opsgenie.tools.backup.exporters.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,7 +56,7 @@ public class ConfigurationExporter extends BaseBackup {
         exporters.add(new EscalationExporter(opsGenieClient, rootPath));
         exporters.add(new UserForwardingExporter(opsGenieClient, rootPath));
         exporters.add(new ScheduleOverrideExporter(opsGenieClient, rootPath));
-        exporters.add(new IntegrationExporter(opsGenieClient.getApiKey(), rootPath));
+        exporters.add(new IntegrationExporter(new IntegrationApiRequester(opsGenieClient.getApiKey(), getBackupProperties().getOpsgenieUrl()), rootPath));
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.opsgenie.tools.backup;
 
+import com.beust.jcommander.JCommander;
 import com.ifountain.opsgenie.client.OpsGenieClient;
 import com.ifountain.opsgenie.client.OpsGenieClientException;
 import com.ifountain.opsgenie.client.model.account.GetAccountInfoRequest;
@@ -14,88 +15,52 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Properties;
 
-/**
- * @author Mehmet Mustafa Demir
- */
 public class ImportMain {
     private final static Logger logger = LogManager.getLogger(ImportMain.class);
 
     public static void main(String[] args) throws IOException, GitAPIException, ParseException, OpsGenieClientException {
-        logger.info("OpsGenieRestoreExecutable is started!");
-
-        String path = System.getProperty("user.dir");
-        System.out.println("Running path is = " + path);
-        System.out.println("Argument number is = " + args.length);
-
-        String backupFolderHomePath = null;
-        String gitSSHURI = null;
-        String sshKeyPath = null;
-        String passphrase = null;
-        String apiKey = null;
-
-        if (args.length == 1) {
-            logger.debug("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey");
-            apiKey = args[0];
-        } else if (args.length == 2) {
-            logger.debug("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey OpsGenieBackupsHomePath");
-            apiKey = args[0];
-            backupFolderHomePath = args[1];
-        } else if (args.length == 3) {
-            logger.debug("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath");
-            apiKey = args[0];
-            gitSSHURI = args[1];
-            sshKeyPath = args[2];
-        } else if (args.length == 4) {
-            logger.debug("Your run configuration is:\njava -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath GitClonePath");
-            apiKey = args[0];
-            gitSSHURI = args[1];
-            sshKeyPath = args[2];
-            backupFolderHomePath = args[3];
-        } else if (args.length == 5) {
-            logger.debug("Your run configuration is:\njava -jar OpsGenieBackupExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase GitClonePath");
-            apiKey = args[0];
-            gitSSHURI = args[1];
-            sshKeyPath = args[2];
-            passphrase = args[3];
-            backupFolderHomePath = args[4];
-        } else {
-            System.err.println("Your paramater number " + args.length + " is invalid.");
-            System.err.println("Please execute with a valid configuration.");
-            System.out.println("Possible run configurations are:\n" +
-                    "java -jar OpsGenieRestoreExecutable apiKey\n" +
-                    "java -jar OpsGenieRestoreExecutable apiKey OpsGenieBackupsHomePath\n" +
-                    "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath\n" +
-                    "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath GitClonePath\n" +
-                    "java -jar OpsGenieRestoreExecutable apiKey gitSSHURI SSHKeyPath sshPassphrase GitClonePath\n");
+        CommandLineArgs commandLineArgs = new CommandLineArgs();
+        final JCommander argumentParser = new JCommander(commandLineArgs);
+        argumentParser.setProgramName("OpsGenieConfigImporter");
+        try {
+            argumentParser.parse(args);
+        } catch (Exception e) {
+            argumentParser.usage();
             System.exit(1);
         }
 
+        final String backupPath = commandLineArgs.getBackupPath();
+        final String apiKey = commandLineArgs.getApiKey();
+        final String sshUrl = commandLineArgs.getGitSshUrl();
+        final String sshKeyPath = commandLineArgs.getSshKeyPath();
+        final String sshPassphrase = commandLineArgs.getSshPassphrase();
+        final String opsGenieHost = commandLineArgs.getOpsGenieHost();
         BackupProperties properties = new BackupProperties();
 
-        logger.info("The api Key is = " + apiKey);
+        logger.info("Import directory path: " + backupPath);
+        properties.setPath(backupPath);
+
+        logger.info("Api Key: " + apiKey);
         properties.setApiKey(apiKey);
 
-        if (backupFolderHomePath != null) {
-            path = backupFolderHomePath;
-        }
+        logger.info("Opsgenie host: " + opsGenieHost);
+        properties.setOpsgenieUrl(opsGenieHost);
 
-        logger.info("The OpsGenieBackups folder Home Path path is = " + path);
-        properties.setPath(path);
-
-        if (gitSSHURI != null && sshKeyPath != null) {
+        if (sshUrl != null && sshKeyPath != null) {
             properties.setGitEnabled(true);
-            properties.setGitSshUri(gitSSHURI);
+            properties.setGitSshUri(sshUrl);
             properties.setSshKeyPath(sshKeyPath);
-            properties.setPassphrase(passphrase);
+            properties.setPassphrase(sshPassphrase);
             logger.info("Restore from git is enabled.");
-            logger.info("The git SSH URI = " + gitSSHURI);
-            logger.info("The SSH key path = " + sshKeyPath);
-            logSecretKey("SSH key passphrase", passphrase);
+            logger.info("Git ssh url:" + sshUrl);
+            logger.info("Ssh key path: " + sshKeyPath);
+            logSecretKey("Ssh key passphrase: ", sshPassphrase);
         }
 
         GetAccountInfoRequest getAccountInfoRequest = new GetAccountInfoRequest();
         OpsGenieClient opsGenieClient = new OpsGenieClient();
         opsGenieClient.setApiKey(apiKey);
+        opsGenieClient.setRootUri(opsGenieHost);
 
         GetAccountInfoResponse response = opsGenieClient.account().getAccount(getAccountInfoRequest);
         logger.info("Account name is " + response.getAccount().getName() + "\n");

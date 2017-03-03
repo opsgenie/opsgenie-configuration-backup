@@ -1,6 +1,7 @@
 package com.opsgenie.tools.backup;
 
 import com.ifountain.opsgenie.client.OpsGenieClient;
+import com.opsgenie.tools.backup.api.IntegrationApiRequester;
 import com.opsgenie.tools.backup.importers.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,6 +57,7 @@ public class ConfigurationImporter extends BaseBackup {
 
         OpsGenieClient opsGenieClient = new OpsGenieClient();
         opsGenieClient.setApiKey(getBackupProperties().getApiKey());
+        opsGenieClient.setRootUri(getBackupProperties().getOpsgenieUrl());
         initializeImporters(rootPath, opsGenieClient);
     }
 
@@ -94,8 +96,10 @@ public class ConfigurationImporter extends BaseBackup {
         if (config.isAddNewScheduleOverrides() || config.isUpdateExistingScheduleOverrides())
             importers.add(new ScheduleOverrideImporter(opsGenieClient, rootPath, config.isAddNewScheduleOverrides(), config.isUpdateExistingScheduleOverrides()));
 
-        if (config.isAddNewIntegrations() || config.isUpdateExistingIntegrations())
-            importers.add(new IntegrationImporter(rootPath, opsGenieClient.getApiKey(), config.isAddNewIntegrations(), config.isUpdateExistingIntegrations()));
+        if (config.isAddNewIntegrations() || config.isUpdateExistingIntegrations()) {
+            final IntegrationApiRequester integrationApiRequester = new IntegrationApiRequester(opsGenieClient.getApiKey(), getBackupProperties().getOpsgenieUrl());
+            importers.add(new IntegrationImporter(rootPath, integrationApiRequester, config.isAddNewIntegrations(), config.isUpdateExistingIntegrations()));
+        }
     }
 
     /**

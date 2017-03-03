@@ -7,6 +7,7 @@ package com.opsgenie.tools.backup;
  */
 public class BackupProperties {
     private String apiKey;
+    private String opsgenieUrl;
     private String gitSshUri;
     private String path;
     private String sshKeyPath;
@@ -149,6 +150,15 @@ public class BackupProperties {
      */
     public BackupProperties setPassphrase(String passphrase) {
         this.passphrase = passphrase;
+        return this;
+    }
+
+    public String getOpsgenieUrl() {
+        return opsgenieUrl;
+    }
+
+    public BackupProperties setOpsgenieUrl(String opsgenieUrl) {
+        this.opsgenieUrl = opsgenieUrl;
         return this;
     }
 }

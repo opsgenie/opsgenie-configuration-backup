@@ -3,7 +3,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 group 'com.opsgenie.tools'
-version '0.4.2'
+version '0.4.3'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -24,6 +24,7 @@ repositories {
 dependencies {
     compile 'org.apache.logging.log4j:log4j:2.7'
     compile 'org.apache.logging.log4j:log4j-core:2.7'
+    compile "com.beust:jcommander:1.48"
     compile 'org.eclipse.jgit:org.eclipse.jgit:4.5.0.201609210915-r'
     compile "com.opsgenie.integration:sdk-shaded:2.6.1"
     compile "org.slf4j:slf4j-simple:1.7.5"
@@ -58,7 +59,7 @@ task importUtilJar(type: Jar) {
                 "Main-Class": "com.opsgenie.tools.backup.ImportMain"
         )
     }
-    baseName = "OpsgenieImportUtil"
+    baseName = "OpsGenieImportUtil"
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
     with jar
@@ -78,7 +79,7 @@ task exportUtilJar(type: Jar) {
                 "Main-Class": "com.opsgenie.tools.backup.ExportMain"
         )
     }
-    baseName = "OpsgenieExportUtil"
+    baseName = "OpsGenieExportUtil"
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
     with jar

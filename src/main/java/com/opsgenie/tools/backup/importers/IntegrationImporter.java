@@ -23,11 +23,11 @@ public class IntegrationImporter implements Importer {
     private IntegrationApiRequester integrationApiRequester;
     private List<Map<String, Object>> existingIntegrations;
 
-    public IntegrationImporter(String backupRootDirectory, String apiKey, boolean addEntityEnabled, boolean updateEntityEnabled) {
+    public IntegrationImporter(String backupRootDirectory, IntegrationApiRequester integrationApiRequester, boolean addEntityEnabled, boolean updateEntityEnabled) {
         this.addEntityEnabled = addEntityEnabled;
         this.updateEntityEnabled = updateEntityEnabled;
         this.importDirectory = new File(backupRootDirectory + "/integrations/");
-        integrationApiRequester = new IntegrationApiRequester(apiKey);
+        this.integrationApiRequester = integrationApiRequester;
     }
 
     public void restore() {

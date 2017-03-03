@@ -22,8 +22,8 @@ public class IntegrationExporter implements Exporter {
     private String exportDirectoryRoot;
     private IntegrationApiRequester apiRequester;
 
-    public IntegrationExporter(String apiKey, String backupRootDirectory) {
-        apiRequester = new IntegrationApiRequester(apiKey);
+    public IntegrationExporter(IntegrationApiRequester apiRequester, String backupRootDirectory) {
+        this.apiRequester = apiRequester;
         exportDirectoryRoot = backupRootDirectory + "/integrations/";
     }
 
@@ -51,6 +51,17 @@ public class IntegrationExporter implements Exporter {
             File file = new File(exportDirectoryRoot + "/" + integrationType + "/" + integrationId);
             file.mkdirs();
             integration.remove("_readOnly");
+
+            try {
+                if (integration.get("isGlobal").equals(false)) {
+                    Map<String, Object> team = (Map<String, Object>) integration.get("ownerTeam");
+                    team.remove("id");
+                }
+            } catch (Exception e) {
+                logger.error("-------------------------");
+                logger.error("Could not remove team id.");
+            }
+
             exportFile(file.getAbsolutePath() + "/integration.json", integration);
             if (isIntegrationAdvanced(integration)) {
                 exportIntegrationAction(integrationId, file);
@@ -65,6 +76,8 @@ public class IntegrationExporter implements Exporter {
     private void exportIntegrationAction(String integrationId, File file) throws Exception {
         final Map<String, Object> integrationActions = apiRequester.getIntegrationActions(integrationId);
         integrationActions.remove("_parent");
+
+
         exportFile(file.getAbsolutePath() + "/integration-actions.json", integrationActions);
     }
 

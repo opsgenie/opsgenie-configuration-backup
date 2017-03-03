@@ -28,7 +28,6 @@ public class ImportConfig {
 
     private boolean addNewIntegrations = true, updateExistingIntegrations = true;
 
-
     public void setAllFalse() {
         addNewHeartbeats = false;
         updateExistingHeartbeats = false;

@@ -31,9 +31,9 @@ public class IntegrationApiRequester {
 
     private HttpClient client;
     private String apiKey;
+    private String opsgenieUrl;
 
     private static final String INTEGRATION_API_URI = "/v2/integrations/";
-    private static final String TARGET_HOST = "https://api.opsgenie.com";
 
     private static int retryCount = 1;
     private static final int MAX_RETRY_COUNT = 5;
@@ -46,13 +46,14 @@ public class IntegrationApiRequester {
     private static final int UNAUTHORIZED_INTERNAL = 40301;
 
 
-    public IntegrationApiRequester(String apiKey) {
+    public IntegrationApiRequester(String apiKey, String opsgenieUrl) {
         this.apiKey = apiKey;
         this.client = new DefaultHttpClient();
+        this.opsgenieUrl = opsgenieUrl;
     }
 
     public Map<String, Object> getIntegration(String id) throws Exception {
-        final HttpGet request = new HttpGet(TARGET_HOST + INTEGRATION_API_URI + id);
+        final HttpGet request = new HttpGet(opsgenieUrl + INTEGRATION_API_URI + id);
         setRequestAuthorizationHeader(request);
         final Map<String, Object> response = executeRequest(request);
         return (Map<String, Object>) response.get("data");
@@ -117,7 +118,7 @@ public class IntegrationApiRequester {
     }
 
     public List<Map<String, Object>> listIntegrations() throws Exception {
-        final HttpGet request = new HttpGet(TARGET_HOST + INTEGRATION_API_URI);
+        final HttpGet request = new HttpGet(opsgenieUrl + INTEGRATION_API_URI);
         setRequestAuthorizationHeader(request);
         final Map<String, Object> response = executeRequest(request);
 
@@ -125,7 +126,7 @@ public class IntegrationApiRequester {
     }
 
     public Map<String, Object> getIntegrationActions(String id) throws Exception {
-        final HttpGet request = new HttpGet(TARGET_HOST + INTEGRATION_API_URI + id + "/actions");
+        final HttpGet request = new HttpGet(opsgenieUrl + INTEGRATION_API_URI + id + "/actions");
         setRequestAuthorizationHeader(request);
 
         final Map<String, Object> response = executeRequest(request);
@@ -134,7 +135,7 @@ public class IntegrationApiRequester {
     }
 
     public Map<String, Object> updateIntegrationAction(Map<String, Object> integrationAction, String integrationId) throws Exception {
-        final HttpPut request = new HttpPut(TARGET_HOST + INTEGRATION_API_URI + integrationId + "/actions");
+        final HttpPut request = new HttpPut(opsgenieUrl + INTEGRATION_API_URI + integrationId + "/actions");
         setRequestAuthorizationHeader(request);
         setRequestEntity(request, integrationAction);
 
@@ -148,7 +149,7 @@ public class IntegrationApiRequester {
     }
 
     public Map<String, Object> createIntegration(Map<String, Object> integration) throws Exception {
-        final HttpPost request = new HttpPost(TARGET_HOST + INTEGRATION_API_URI);
+        final HttpPost request = new HttpPost(opsgenieUrl + INTEGRATION_API_URI);
         setRequestAuthorizationHeader(request);
         setRequestEntity(request, integration);
 
@@ -156,7 +157,7 @@ public class IntegrationApiRequester {
     }
 
     public Map<String, Object> updateIntegration(Map<String, Object> integration, String integrationId) throws Exception {
-        final HttpPut request = new HttpPut(TARGET_HOST + INTEGRATION_API_URI + integrationId);
+        final HttpPut request = new HttpPut(opsgenieUrl + INTEGRATION_API_URI + integrationId);
         setRequestAuthorizationHeader(request);
         setRequestEntity(request, integration);
 
