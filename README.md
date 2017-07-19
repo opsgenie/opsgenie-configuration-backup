@@ -110,7 +110,7 @@ This option extracts the OpsGenie configuration to the given path.
 java -jar OpsGenieConfigExporter --apiKey YOUR_API_KEY --backupPath EXTRACT_PATH
 
 
-3. Run with apiKey, git SSH URI and  SSH Key Path parameters.
+3. Run with apiKey, git sshUrl and  sshKeyPath parameters.
 This command clones the remote repository into a directory called OpsGenieBackupGitRepository.
 After the cloning process the export jar backs up the data into this directory under a folder called OpsGenieBackups.
 
