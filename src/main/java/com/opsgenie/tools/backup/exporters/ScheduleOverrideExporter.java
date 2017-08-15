@@ -1,32 +1,30 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Schedule;
-import com.ifountain.opsgenie.client.model.beans.ScheduleOverride;
-import com.ifountain.opsgenie.client.model.schedule.ListScheduleOverridesRequest;
-import com.ifountain.opsgenie.client.model.schedule.ListSchedulesRequest;
-
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.ScheduleApi;
+import com.opsgenie.client.api.ScheduleOverrideApi;
+import com.opsgenie.client.model.ListScheduleOverridesRequest;
+import com.opsgenie.client.model.Schedule;
+import com.opsgenie.client.model.ScheduleOverride;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * This class exports Schedule overrides from OpsGenie account to local directory called
- * scheduleOverrides
- *
- * @author Mehmet Mustafa Demir
- */
 public class ScheduleOverrideExporter extends BaseExporter<ScheduleOverride> {
     private final Logger logger = LogManager.getLogger(ScheduleOverrideExporter.class);
-    private ListScheduleOverridesRequest listScheduleOverridesRequest = null;
 
-    public ScheduleOverrideExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
-        super(opsGenieClient, backupRootDirectory, "scheduleOverrides");
+    private static ScheduleApi scheduleApi = new ScheduleApi();
+    private static ScheduleOverrideApi overrideApi = new ScheduleOverrideApi();
+
+    private static String scheduleId;
+
+    public ScheduleOverrideExporter(String backupRootDirectory) {
+        super(backupRootDirectory, "scheduleOverrides");
     }
 
     @Override
@@ -37,12 +35,10 @@ public class ScheduleOverrideExporter extends BaseExporter<ScheduleOverride> {
     @Override
     public void export() {
         try {
-            ListSchedulesRequest listSchedulesRequest = new ListSchedulesRequest();
-            List<Schedule> scheduleList = getOpsGenieClient().schedule().listSchedules(listSchedulesRequest).getSchedules();
-            listScheduleOverridesRequest = new ListScheduleOverridesRequest();
+            List<Schedule> scheduleList = scheduleApi.listSchedules(Collections.<String>emptyList()).getData();
             for (Schedule schedule : scheduleList) {
                 try {
-                    listScheduleOverridesRequest.setSchedule(schedule.getName());
+                    scheduleId = schedule.getId();
                     List<ScheduleOverride> overrides = retrieveEntities();
                     if (overrides != null && overrides.size() > 0) {
                         File scheduleDirectory = new File(getExportDirectory().getAbsolutePath() + "/" + schedule.getName());
@@ -62,9 +58,8 @@ public class ScheduleOverrideExporter extends BaseExporter<ScheduleOverride> {
 
     }
 
-
     @Override
-    protected List<ScheduleOverride> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        return getOpsGenieClient().schedule().listScheduleOverrides(listScheduleOverridesRequest).getOverrides();
+    protected List<ScheduleOverride> retrieveEntities() throws ParseException, IOException, ApiException {
+        return overrideApi.listScheduleOverride(new ListScheduleOverridesRequest().identifier(scheduleId)).getData();
     }
 }

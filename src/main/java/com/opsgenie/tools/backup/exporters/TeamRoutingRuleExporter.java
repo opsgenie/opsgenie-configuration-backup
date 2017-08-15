@@ -1,32 +1,28 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Team;
-import com.ifountain.opsgenie.client.model.beans.TeamRoutingRule;
-import com.ifountain.opsgenie.client.model.team.ListTeamsRequest;
-import com.ifountain.opsgenie.client.model.team.routing_rule.ListTeamRoutingRulesRequest;
 
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.TeamApi;
+import com.opsgenie.client.api.TeamRoutingRuleApi;
+import com.opsgenie.client.model.ListTeamRoutingRulesRequest;
+import com.opsgenie.client.model.Team;
+import com.opsgenie.client.model.TeamRoutingRule;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * This class exports Team Routing rules from Opsgenie account to local directory called
- * teamRoutingRules
- *
- * @author Mehmet Mustafa Demir
- */
+
 public class TeamRoutingRuleExporter extends BaseExporter<TeamRoutingRule> {
     private final Logger logger = LogManager.getLogger(TeamRoutingRuleExporter.class);
-    private ListTeamRoutingRulesRequest listTeamRoutingRulesRequest = null;
+    private static TeamApi teamApi = new TeamApi();
+    private static TeamRoutingRuleApi teamRoutingRuleApi = new TeamRoutingRuleApi();
+    private static String teamId;
 
-    public TeamRoutingRuleExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
-        super(opsGenieClient, backupRootDirectory, "teamRoutingRules");
+    public TeamRoutingRuleExporter(String backupRootDirectory) {
+        super(backupRootDirectory, "teamRoutingRules");
     }
 
     @Override
@@ -37,12 +33,10 @@ public class TeamRoutingRuleExporter extends BaseExporter<TeamRoutingRule> {
     @Override
     public void export() {
         try {
-            ListTeamsRequest listTeamsRequest = new ListTeamsRequest();
-            List<Team> currentTeamList = getOpsGenieClient().team().listTeams(listTeamsRequest).getTeams();
-            listTeamRoutingRulesRequest = new ListTeamRoutingRulesRequest();
+            List<Team> currentTeamList = teamApi.listTeams(Collections.<String>emptyList()).getData();
             for (Team team : currentTeamList) {
                 try {
-                    listTeamRoutingRulesRequest.setTeamName(team.getName());
+                    teamId = team.getId();
                     List<TeamRoutingRule> teamRoutingRules = retrieveEntities();
                     if (teamRoutingRules != null && teamRoutingRules.size() > 0) {
                         File teamFile = new File(getExportDirectory().getAbsolutePath() + "/" + team.getName());
@@ -64,7 +58,7 @@ public class TeamRoutingRuleExporter extends BaseExporter<TeamRoutingRule> {
 
 
     @Override
-    protected List<TeamRoutingRule> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        return getOpsGenieClient().team().listTeamRoutingRules(listTeamRoutingRulesRequest).getRules();
+    protected List<TeamRoutingRule> retrieveEntities() throws ApiException {
+        return teamRoutingRuleApi.listTeamRoutingRules(new ListTeamRoutingRulesRequest().identifier(teamId)).getData();
     }
 }

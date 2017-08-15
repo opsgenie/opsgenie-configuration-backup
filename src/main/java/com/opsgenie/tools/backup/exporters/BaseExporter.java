@@ -1,9 +1,7 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Bean;
-import com.ifountain.opsgenie.client.util.JsonUtils;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.tools.backup.BackupUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,16 +11,11 @@ import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.List;
 
-/**
- * @author Mehmet Mustafa Demir
- */
-abstract class BaseExporter<T extends Bean> implements Exporter {
+abstract class BaseExporter<T> implements Exporter {
     private final Logger logger = LogManager.getLogger(BaseExporter.class);
-    private OpsGenieClient opsGenieClient;
     private File exportDirectory;
 
-    public BaseExporter(OpsGenieClient opsGenieClient, String backupRootDirectory, String exportDirectoryName) {
-        this.opsGenieClient = opsGenieClient;
+    public BaseExporter(String backupRootDirectory, String exportDirectoryName) {
         this.exportDirectory = new File(backupRootDirectory + "/" + exportDirectoryName + "/");
         this.exportDirectory.mkdirs();
     }
@@ -30,7 +23,7 @@ abstract class BaseExporter<T extends Bean> implements Exporter {
     protected void exportFile(String fileName, T bean) {
         try {
             PrintWriter writer = new PrintWriter(fileName, "UTF-8");
-            writer.print(JsonUtils.toJson(bean));
+            writer.print(BackupUtils.toJson(bean));
             writer.close();
             logger.info(getBeanFileName(bean) + " file written.");
         } catch (Exception e) {
@@ -54,11 +47,7 @@ abstract class BaseExporter<T extends Bean> implements Exporter {
 
     protected abstract String getBeanFileName(T bean);
 
-    protected abstract List<T> retrieveEntities() throws ParseException, OpsGenieClientException, IOException;
-
-    protected OpsGenieClient getOpsGenieClient() {
-        return opsGenieClient;
-    }
+    protected abstract List<T> retrieveEntities() throws ParseException, IOException, ApiException;
 
     protected File getExportDirectory() {
         return exportDirectory;

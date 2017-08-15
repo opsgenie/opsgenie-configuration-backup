@@ -1,9 +1,5 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Bean;
-import com.ifountain.opsgenie.client.util.JsonUtils;
 import com.opsgenie.tools.backup.BackupUtils;
 import com.opsgenie.tools.backup.RestoreException;
 import org.apache.logging.log4j.LogManager;
@@ -15,20 +11,15 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author Mehmet Mustafa Demir
- */
-abstract class BaseImporter<T extends Bean> implements Importer {
+abstract class BaseImporter<T> implements Importer {
     private final Logger logger = LogManager.getLogger(BaseImporter.class);
-    private OpsGenieClient opsGenieClient;
     private File importDirectory;
     private boolean addEntityEnabled;
     private boolean updateEntityEnabled;
 
-    BaseImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntityEnabled, boolean updateEntityEnabled) {
+    BaseImporter(String backupRootDirectory, boolean addEntityEnabled, boolean updateEntityEnabled) {
         this.addEntityEnabled = addEntityEnabled;
         this.updateEntityEnabled = updateEntityEnabled;
-        this.opsGenieClient = opsGenieClient;
         this.importDirectory = new File(backupRootDirectory + "/" + getImportDirectoryName() + "/");
     }
 
@@ -68,7 +59,7 @@ abstract class BaseImporter<T extends Bean> implements Importer {
         try {
             String beanJson = BackupUtils.readFile(importDirectory.getAbsolutePath() + "/" + fileName);
             T bean = getBean();
-            JsonUtils.fromJson(bean, beanJson);
+            BackupUtils.fromJson(bean, beanJson);
             return bean;
         } catch (Exception e) {
             logger.error("Error at reading " + getImportDirectoryName() + " file " + fileName, e);
@@ -118,15 +109,11 @@ abstract class BaseImporter<T extends Bean> implements Importer {
 
     protected abstract String getImportDirectoryName();
 
-    protected abstract void addBean(T bean) throws ParseException, OpsGenieClientException, IOException;
+    protected abstract void addBean(T bean) throws ParseException, IOException;
 
-    protected abstract void updateBean(T bean) throws ParseException, OpsGenieClientException, IOException;
+    protected abstract void updateBean(T bean) throws ParseException, IOException;
 
-    protected abstract List<T> retrieveEntities() throws ParseException, OpsGenieClientException, IOException;
-
-    protected OpsGenieClient getOpsGenieClient() {
-        return opsGenieClient;
-    }
+    protected abstract List<T> retrieveEntities() throws ParseException, IOException;
 
     File getImportDirectory() {
         return importDirectory;

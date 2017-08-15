@@ -1,35 +1,29 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Forwarding;
-import com.ifountain.opsgenie.client.model.user.forward.ListForwardingsRequest;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.ForwardingRuleApi;
+import com.opsgenie.client.model.ForwardingRule;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 
-/**
- * This class exports user forwarding from Opsgenie account to local directory called
- * forwardings
- *
- * @author Mehmet Mustafa Demir
- */
-public class UserForwardingExporter extends BaseExporter<Forwarding> {
+public class UserForwardingExporter extends BaseExporter<ForwardingRule> {
 
-    public UserForwardingExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
-        super(opsGenieClient, backupRootDirectory, "forwardings");
+    private static ForwardingRuleApi forwardingRuleApi = new ForwardingRuleApi();
+
+    public UserForwardingExporter(String backupRootDirectory) {
+        super(backupRootDirectory, "forwardings");
     }
 
     @Override
-    protected String getBeanFileName(Forwarding bean) {
+    protected String getBeanFileName(ForwardingRule bean) {
         return bean.getFromUser() + "-" + bean.getId();
     }
 
 
     @Override
-    protected List<Forwarding> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        ListForwardingsRequest listForwardingsRequest = new ListForwardingsRequest();
-        return getOpsGenieClient().user().listForwardings(listForwardingsRequest).getForwardings();
+    protected List<ForwardingRule> retrieveEntities() throws ParseException, IOException, ApiException {
+        return forwardingRuleApi.listForwardingRules().getData();
     }
 }

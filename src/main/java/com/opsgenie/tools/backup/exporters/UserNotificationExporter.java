@@ -1,32 +1,26 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.NotificationRule;
-import com.ifountain.opsgenie.client.model.beans.User;
-import com.ifountain.opsgenie.client.model.notification_rule.ListNotificationRulesRequest;
-import com.ifountain.opsgenie.client.model.user.ListUsersRequest;
-
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.NotificationRuleApi;
+import com.opsgenie.client.api.UserApi;
+import com.opsgenie.client.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This class exports Notification rules from Opsgenie account to local directory called
- * notifications
- *
- * @author Mehmet Mustafa Demir
- */
 public class UserNotificationExporter extends BaseExporter<NotificationRule> {
     private final Logger logger = LogManager.getLogger(UserNotificationExporter.class);
-    private ListNotificationRulesRequest listNotificationRulesRequest = null;
+    private static NotificationRuleApi notificationRuleApi = new NotificationRuleApi();
+    private static UserApi userApi = new UserApi();
+    private static String userId;
 
-    public UserNotificationExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
-        super(opsGenieClient, backupRootDirectory, "notifications");
+    public UserNotificationExporter(String backupRootDirectory) {
+        super(backupRootDirectory, "notifications");
     }
 
     @Override
@@ -37,12 +31,10 @@ public class UserNotificationExporter extends BaseExporter<NotificationRule> {
     @Override
     public void export() {
         try {
-            ListUsersRequest request = new ListUsersRequest();
-            List<User> currentUserList = getOpsGenieClient().user().listUsers(request).getUsers();
-            listNotificationRulesRequest = new ListNotificationRulesRequest();
-            for (User user : currentUserList) {
+            final List<User> users = userApi.listUsers(new ListUsersRequest()).getData();
+            for (User user : users) {
                 try {
-                    listNotificationRulesRequest.setUsername(user.getUsername());
+                    userId = user.getId();
                     List<NotificationRule> notificationRuleList = retrieveEntities();
                     if (notificationRuleList != null) {
                         File userNotificationFile = new File(getExportDirectory().getAbsolutePath() + "/" + user.getUsername());
@@ -64,7 +56,12 @@ public class UserNotificationExporter extends BaseExporter<NotificationRule> {
 
 
     @Override
-    protected List<NotificationRule> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        return getOpsGenieClient().notificationRule().listNotificationRule(listNotificationRulesRequest).getRules();
+    protected List<NotificationRule> retrieveEntities() throws ParseException, IOException, ApiException {
+        final List<NotificationRuleMeta> data = notificationRuleApi.listNotificationRules(userId).getData();
+        List<NotificationRule> rules = new ArrayList<NotificationRule>();
+        for (NotificationRuleMeta meta : data) {
+            rules.add(notificationRuleApi.getNotificationRule(new GetNotificationRuleRequest().identifier(meta.getId())).getData());
+        }
+        return rules;
     }
 }

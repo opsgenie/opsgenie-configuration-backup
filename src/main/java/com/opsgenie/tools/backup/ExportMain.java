@@ -5,6 +5,8 @@ import com.ifountain.opsgenie.client.OpsGenieClient;
 import com.ifountain.opsgenie.client.OpsGenieClientException;
 import com.ifountain.opsgenie.client.model.account.GetAccountInfoRequest;
 import com.ifountain.opsgenie.client.model.account.GetAccountInfoResponse;
+import com.opsgenie.client.ApiClient;
+import com.opsgenie.client.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -61,6 +63,11 @@ public class ExportMain {
         GetAccountInfoRequest getAccountInfoRequest = new GetAccountInfoRequest();
         OpsGenieClient opsGenieClient = new OpsGenieClient();
         opsGenieClient.setApiKey(apiKey);
+
+        final ApiClient defaultApiClient = Configuration.getDefaultApiClient();
+        defaultApiClient.setApiKeyPrefix("GenieKey");
+        defaultApiClient.setApiKey(apiKey);
+        defaultApiClient.setBasePath(opsGenieHost);
 
         GetAccountInfoResponse response = opsGenieClient.account().getAccount(getAccountInfoRequest);
         logger.info("Account name is " + response.getAccount().getName() + "\n");

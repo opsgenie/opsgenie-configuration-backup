@@ -44,19 +44,17 @@ public class ConfigurationExporter extends BaseBackup {
         initializeExporters(rootPath, opsGenieClient);
     }
 
-    private void initializeExporters(String rootPath, OpsGenieClient opsGenieClient) {
+    private void initializeExporters(String rootPath) {
         exporters = new ArrayList<com.opsgenie.tools.backup.exporters.Exporter>();
-        exporters.add(new HeartbeatExporter(opsGenieClient, rootPath));
-        exporters.add(new UserExporter(opsGenieClient, rootPath));
-        exporters.add(new UserNotificationExporter(opsGenieClient, rootPath));
-        exporters.add(new GroupExporter(opsGenieClient, rootPath));
-        exporters.add(new TeamExporter(opsGenieClient, rootPath));
-        exporters.add(new TeamRoutingRuleExporter(opsGenieClient, rootPath));
-        exporters.add(new ScheduleExporter(opsGenieClient, rootPath));
-        exporters.add(new EscalationExporter(opsGenieClient, rootPath));
-        exporters.add(new UserForwardingExporter(opsGenieClient, rootPath));
-        exporters.add(new ScheduleOverrideExporter(opsGenieClient, rootPath));
-        exporters.add(new IntegrationExporter(new IntegrationApiRequester(opsGenieClient.getApiKey(), getBackupProperties().getOpsgenieUrl()), rootPath));
+        exporters.add(new UserExporter(rootPath));
+        exporters.add(new UserNotificationExporter(rootPath));
+        exporters.add(new TeamExporter(rootPath));
+        exporters.add(new TeamRoutingRuleExporter(rootPath));
+        exporters.add(new ScheduleExporter(rootPath));
+        exporters.add(new EscalationExporter(rootPath));
+        exporters.add(new UserForwardingExporter(rootPath));
+        exporters.add(new ScheduleOverrideExporter(rootPath));
+        exporters.add(new IntegrationExporter(rootPath));
     }
 
     /**

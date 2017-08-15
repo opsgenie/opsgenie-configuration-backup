@@ -1,22 +1,18 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Team;
-import com.ifountain.opsgenie.client.model.team.ListTeamsRequest;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.TeamApi;
+import com.opsgenie.client.model.Team;
 
-import java.io.IOException;
-import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * This class exports Teams from Opsgenie account to local directory called teams
- *
- * @author Mehmet Mustafa Demir
- */
 public class TeamExporter extends BaseExporter<Team> {
-    public TeamExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
-        super(opsGenieClient, backupRootDirectory, "teams");
+
+    private static TeamApi teamApi = new TeamApi();
+
+    public TeamExporter(String backupRootDirectory) {
+        super(backupRootDirectory, "teams");
     }
 
     @Override
@@ -26,8 +22,7 @@ public class TeamExporter extends BaseExporter<Team> {
 
 
     @Override
-    protected List<Team> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        ListTeamsRequest request = new ListTeamsRequest();
-        return getOpsGenieClient().team().listTeams(request).getTeams();
+    protected List<Team> retrieveEntities() throws ApiException {
+        return teamApi.listTeams(Collections.<String>emptyList()).getData();
     }
 }

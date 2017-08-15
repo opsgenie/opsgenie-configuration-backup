@@ -1,19 +1,17 @@
 package com.opsgenie.tools.backup;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Common utils for export and import procedure.
- *
- * @author Mehmet Mustafa Demir
- */
 public class BackupUtils {
 
     private static final Logger logger = LogManager.getLogger(BackupUtils.class);
@@ -68,6 +66,18 @@ public class BackupUtils {
             }
         }
         return dir.delete();
+    }
+
+    public static String toJson(Object object) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(object);
+    }
+
+    public static void fromJson(Object object, String json) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        mapper.readerForUpdating(object).readValue(json);
+        mapper.setDateFormat(sdf);
     }
 
     public static List<String> findIntegrationDirectories(String path) {

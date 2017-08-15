@@ -1,22 +1,20 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Schedule;
-import com.ifountain.opsgenie.client.model.schedule.ListSchedulesRequest;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.ScheduleApi;
+import com.opsgenie.client.model.Schedule;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * This class exports Schedules from Opsgenie account to local directory called schedules
- *
- * @author Mehmet Mustafa Demir
- */
 public class ScheduleExporter extends BaseExporter<Schedule> {
-    public ScheduleExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
-        super(opsGenieClient, backupRootDirectory, "schedules");
+
+    private static ScheduleApi scheduleApi = new ScheduleApi();
+
+    public ScheduleExporter(String backupRootDirectory) {
+        super(backupRootDirectory, "schedules");
     }
 
     @Override
@@ -26,8 +24,7 @@ public class ScheduleExporter extends BaseExporter<Schedule> {
 
 
     @Override
-    protected List<Schedule> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        ListSchedulesRequest request = new ListSchedulesRequest();
-        return getOpsGenieClient().schedule().listSchedules(request).getSchedules();
+    protected List<Schedule> retrieveEntities() throws ParseException, IOException, ApiException {
+        return scheduleApi.listSchedules(Collections.<String>emptyList()).getData();
     }
 }
