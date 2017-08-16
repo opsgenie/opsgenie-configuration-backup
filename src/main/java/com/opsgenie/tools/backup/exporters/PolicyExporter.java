@@ -8,19 +8,18 @@ import com.opsgenie.client.model.AlertPolicyMeta;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AlertPolicyExporter extends BaseExporter<AlertPolicy> {
+public class PolicyExporter extends BaseExporter<AlertPolicy> {
 
     private static PolicyApi policyApi = new PolicyApi();
 
-    public AlertPolicyExporter(String backupRootDirectory) {
+    public PolicyExporter(String backupRootDirectory) {
         super(backupRootDirectory, "policies");
     }
 
     @Override
     protected String getBeanFileName(AlertPolicy bean) {
-        return bean.getName() + "-" + bean.getId();
+        return bean.getId();
     }
-
 
     @Override
     protected List<AlertPolicy> retrieveEntities() throws ApiException {

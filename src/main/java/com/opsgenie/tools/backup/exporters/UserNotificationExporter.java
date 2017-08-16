@@ -60,7 +60,8 @@ public class UserNotificationExporter extends BaseExporter<NotificationRule> {
         final List<NotificationRuleMeta> data = notificationRuleApi.listNotificationRules(userId).getData();
         List<NotificationRule> rules = new ArrayList<NotificationRule>();
         for (NotificationRuleMeta meta : data) {
-            rules.add(notificationRuleApi.getNotificationRule(new GetNotificationRuleRequest().identifier(meta.getId())).getData());
+            final NotificationRule notificationRule = notificationRuleApi.getNotificationRule(new GetNotificationRuleRequest().identifier(userId).ruleId(meta.getId())).getData();
+            rules.add(notificationRule);
         }
         return rules;
     }
