@@ -25,6 +25,6 @@ public class ScheduleExporter extends BaseExporter<Schedule> {
 
     @Override
     protected List<Schedule> retrieveEntities() throws ParseException, IOException, ApiException {
-        return scheduleApi.listSchedules(Collections.<String>emptyList()).getData();
+        return scheduleApi.listSchedules(Collections.singletonList("rotation")).getData();
     }
 }

@@ -23,6 +23,6 @@ public class TeamExporter extends BaseExporter<Team> {
 
     @Override
     protected List<Team> retrieveEntities() throws ApiException {
-        return teamApi.listTeams(Collections.<String>emptyList()).getData();
+        return teamApi.listTeams(Collections.singletonList("member")).getData();
     }
 }
