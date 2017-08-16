@@ -1,28 +1,19 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Contact;
-import com.ifountain.opsgenie.client.model.beans.User;
-import com.ifountain.opsgenie.client.model.contact.AddContactRequest;
-import com.ifountain.opsgenie.client.model.contact.ListContactsRequest;
-import com.ifountain.opsgenie.client.model.user.AddUserRequest;
-import com.ifountain.opsgenie.client.model.user.ListUsersRequest;
-import com.ifountain.opsgenie.client.model.user.UpdateUserRequest;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.ContactApi;
+import com.opsgenie.client.api.UserApi;
+import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.List;
 
-/**
- * This class imports Users from local directory called users to Opsgenie account.
- *
- * @author Mehmet Mustafa Demir
- */
 public class UserImporter extends BaseImporter<User> {
-    public UserImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
-        super(opsGenieClient, backupRootDirectory, addEntity, updateEntitiy);
+
+    private static UserApi userApi = new UserApi();
+    private static ContactApi contactApi = new ContactApi();
+    public UserImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
+        super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
@@ -41,7 +32,7 @@ public class UserImporter extends BaseImporter<User> {
     }
 
     @Override
-    protected User getBean() throws IOException, ParseException {
+    protected User getBean() {
         return new User();
     }
 
@@ -51,54 +42,76 @@ public class UserImporter extends BaseImporter<User> {
     }
 
     @Override
-    protected void addBean(User bean) throws ParseException, OpsGenieClientException, IOException {
-        AddUserRequest request = new AddUserRequest();
-        request.setUsername(bean.getUsername());
-        request.setFullname(bean.getFullname());
-        request.setLocale(bean.getLocale());
-        request.setUserRole(bean.getUserRole());
+    protected void addBean(User bean) throws ApiException {
+        CreateUserPayload payload = new CreateUserPayload();
+        payload.setUsername(bean.getUsername());
+        payload.setFullName(bean.getFullName());
+        payload.setLocale(bean.getLocale());
+        payload.setRole(bean.getRole());
+        payload.setDetails(bean.getDetails());
+        payload.setUserAddress(bean.getUserAddress());
+        payload.setSkypeUsername(bean.getSkypeUsername());
+        payload.setTags(bean.getTags());
+        payload.setTimeZone(bean.getTimeZone());
+        payload.setInvitationDisabled(false);
+
         if (BackupUtils.checkValidString(bean.getSkypeUsername()))
-            request.setSkypeUsername(bean.getSkypeUsername());
-        request.setTimeZone(bean.getTimeZone());
-        getOpsGenieClient().user().addUser(request);
+            payload.setSkypeUsername(bean.getSkypeUsername());
+
+        payload.setTimeZone(bean.getTimeZone());
+
+        userApi.createUser(payload);
         addContacts(bean);
     }
 
     @Override
-    protected void updateBean(User bean) throws ParseException, OpsGenieClientException, IOException {
-        UpdateUserRequest request = new UpdateUserRequest();
-        request.setId(bean.getId());
-        request.setFullname(bean.getFullname());
-        request.setLocale(bean.getLocale());
-        request.setUserRole(bean.getUserRole());
+    protected void updateBean(User bean) throws ApiException {
+        UpdateUserPayload payload = new UpdateUserPayload();
+        payload.setUsername(bean.getUsername());
+        payload.setFullName(bean.getFullName());
+        payload.setLocale(bean.getLocale());
+        payload.setRole(bean.getRole());
+        payload.setDetails(bean.getDetails());
+        payload.setUserAddress(bean.getUserAddress());
+        payload.setSkypeUsername(bean.getSkypeUsername());
+        payload.setTags(bean.getTags());
+        payload.setTimeZone(bean.getTimeZone());
+
         if (BackupUtils.checkValidString(bean.getSkypeUsername()))
-            request.setSkypeUsername(bean.getSkypeUsername());
-        request.setTimeZone(bean.getTimeZone());
-        getOpsGenieClient().user().updateUser(request);
+            payload.setSkypeUsername(bean.getSkypeUsername());
+
+        payload.setTimeZone(bean.getTimeZone());
+
+        UpdateUserRequest request = new UpdateUserRequest();
+        request.setIdentifier(bean.getId());
+        request.setBody(payload);
+
+        userApi.updateUser(request);
         addContacts(bean);
     }
 
-    private void addContacts(User user) throws ParseException, OpsGenieClientException, IOException {
-        AddContactRequest addContactRequest = new AddContactRequest();
-        addContactRequest.setUsername(user.getUsername());
-        ListContactsRequest listContactsRequest = new ListContactsRequest();
-        listContactsRequest.setUsername(user.getUsername());
-        List<Contact> currentContactList = getOpsGenieClient().contact().listContact(listContactsRequest).getUserContacts();
-        List<Contact> backupContactList = user.getUserContacts();
-        for (Contact userContact : backupContactList) {
-            if (userContact.getMethod() != null && !userContact.getMethod().equals(Contact.Method.MOBILE_APP)) {
+    private void addContacts(User user) throws ApiException {
+        CreateContactRequest createContactRequest = new CreateContactRequest();
+        createContactRequest.setIdentifier(user.getUsername());
+
+        List<ContactWithApplyOrder> currentContactList = contactApi.listContacts(user.getUsername()).getData();
+        List<UserContact> backupContactList = user.getUserContacts();
+
+        for (UserContact userContact : backupContactList) {
+            if (userContact.getContactMethod() != null && !userContact.getContactMethod().equals(UserContact.ContactMethodEnum.MOBILE)) {
                 boolean notExist = true;
-                for (Contact currentContact : currentContactList) {
+                for (ContactWithApplyOrder currentContact : currentContactList) {
                     if (userContact.getTo().equals(currentContact.getTo())
-                            && userContact.getMethod().equals(currentContact.getMethod())) {
+                            && userContact.getContactMethod().equals(currentContact.getMethod())) {
                         notExist = false;
                         break;
                     }
                 }
                 if (notExist) {
-                    addContactRequest.setTo(userContact.getTo());
-                    addContactRequest.setMethod(userContact.getMethod());
-                    getOpsGenieClient().contact().addContact(addContactRequest);
+                    CreateContactPayload payload = new CreateContactPayload();
+                    payload.setMethod(CreateContactPayload.MethodEnum.fromValue(userContact.getContactMethod().getValue()));
+                    payload.setTo(userContact.getTo());
+                    contactApi.createContact(createContactRequest);
                 }
 
             }
@@ -106,20 +119,9 @@ public class UserImporter extends BaseImporter<User> {
     }
 
     @Override
-    protected List<User> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
+    protected List<User> retrieveEntities() throws ApiException {
         ListUsersRequest request = new ListUsersRequest();
-        return getOpsGenieClient().user().listUsers(request).getUsers();
-    }
-
-    @Override
-    protected boolean isSame(User oldEntity, User currentEntity) {
-        oldEntity.setEscalations(null);
-        oldEntity.setGroups(null);
-        oldEntity.setSchedules(null);
-        currentEntity.setEscalations(null);
-        currentEntity.setGroups(null);
-        currentEntity.setSchedules(null);
-        return super.isSame(oldEntity, currentEntity);
+        return userApi.listUsers(request).getData();
     }
 
     @Override

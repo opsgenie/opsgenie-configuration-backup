@@ -1,25 +1,18 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Escalation;
-import com.ifountain.opsgenie.client.model.escalation.AddEscalationRequest;
-import com.ifountain.opsgenie.client.model.escalation.ListEscalationsRequest;
-import com.ifountain.opsgenie.client.model.escalation.UpdateEscalationRequest;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.EscalationApi;
+import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.List;
 
-/**
- * This class imports Escalations from local directory called escalations to Opsgenie account.
- *
- * @author Mehmet Mustafa Demir
- */
 public class EscalationImporter extends BaseImporter<Escalation> {
-    public EscalationImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
-        super(opsGenieClient, backupRootDirectory, addEntity, updateEntitiy);
+
+    private static EscalationApi api = new EscalationApi();
+
+    public EscalationImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
+        super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
@@ -37,7 +30,7 @@ public class EscalationImporter extends BaseImporter<Escalation> {
     }
 
     @Override
-    protected Escalation getBean() throws IOException, ParseException {
+    protected Escalation getBean() {
         return new Escalation();
     }
 
@@ -47,34 +40,42 @@ public class EscalationImporter extends BaseImporter<Escalation> {
     }
 
     @Override
-    protected void addBean(Escalation bean) throws ParseException, OpsGenieClientException, IOException {
-        AddEscalationRequest request = new AddEscalationRequest();
-        request.setName(bean.getName());
+    protected void addBean(Escalation bean) throws ApiException {
+        CreateEscalationPayload payload = new CreateEscalationPayload();
+        payload.setName(bean.getName());
+
         if (BackupUtils.checkValidString(bean.getDescription()))
-            request.setDescription(bean.getDescription());
-        request.setTeam(bean.getTeam());
-        request.setRepeatInterval(bean.getRepeatInterval());
-        request.setRules(bean.getRules());
-        getOpsGenieClient().escalation().addEscalation(request);
+            payload.setDescription(bean.getDescription());
+
+        payload.setOwnerTeam(bean.getOwnerTeam());
+        payload.setRules(bean.getRules());
+
+        api.createEscalation(payload);
     }
 
     @Override
-    protected void updateBean(Escalation bean) throws ParseException, OpsGenieClientException, IOException {
+    protected void updateBean(Escalation bean) throws ApiException {
+
+        UpdateEscalationPayload payload = new UpdateEscalationPayload();
+        payload.setName(bean.getName());
+
+        if (BackupUtils.checkValidString(bean.getDescription()))
+            payload.setDescription(bean.getDescription());
+
+        payload.setOwnerTeam(bean.getOwnerTeam());
+        payload.setRules(bean.getRules());
+
         UpdateEscalationRequest request = new UpdateEscalationRequest();
-        request.setId(bean.getId());
-        request.setName(bean.getName());
-        if (BackupUtils.checkValidString(bean.getDescription()))
-            request.setDescription(bean.getDescription());
-        request.setTeam(bean.getTeam());
-        request.setRepeatInterval(bean.getRepeatInterval());
-        request.setRules(bean.getRules());
-        getOpsGenieClient().escalation().updateEscalation(request);
+        request.setIdentifier(bean.getId());
+        request.setIdentifierType(UpdateEscalationRequest.IdentifierTypeEnum.ID);
+        request.setBody(payload);
+
+        api.updateEscalation(request);
     }
 
     @Override
-    protected List<Escalation> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        ListEscalationsRequest listEscalationsRequest = new ListEscalationsRequest();
-        return getOpsGenieClient().escalation().listEscalations(listEscalationsRequest).getEscalations();
+    protected List<Escalation> retrieveEntities() throws ApiException {
+        return api.listEscalations().getData();
     }
 
     @Override

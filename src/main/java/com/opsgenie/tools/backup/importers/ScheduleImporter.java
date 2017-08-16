@@ -1,26 +1,20 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Schedule;
-import com.ifountain.opsgenie.client.model.beans.ScheduleRotation;
-import com.ifountain.opsgenie.client.model.schedule.AddScheduleRequest;
-import com.ifountain.opsgenie.client.model.schedule.ListSchedulesRequest;
-import com.ifountain.opsgenie.client.model.schedule.UpdateScheduleRequest;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.ScheduleApi;
+import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
 
-import java.io.IOException;
-import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * This class imports Schedules from local directory called schedules to Opsgenie account.
- *
- * @author Mehmet Mustafa Demir
- */
 public class ScheduleImporter extends BaseImporter<Schedule> {
-    public ScheduleImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
-        super(opsGenieClient, backupRootDirectory, addEntity, updateEntitiy);
+
+    private static ScheduleApi api = new ScheduleApi();
+
+    public ScheduleImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
+        super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
@@ -38,7 +32,7 @@ public class ScheduleImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected Schedule getBean() throws IOException, ParseException {
+    protected Schedule getBean() {
         return new Schedule();
     }
 
@@ -48,48 +42,71 @@ public class ScheduleImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected void addBean(Schedule bean) throws ParseException, OpsGenieClientException, IOException {
-        AddScheduleRequest request = new AddScheduleRequest();
-        request.setName(bean.getName());
+    protected void addBean(Schedule bean) throws ApiException {
+        CreateSchedulePayload payload = new CreateSchedulePayload();
+        payload.setName(bean.getName());
+
         if (BackupUtils.checkValidString(bean.getDescription()))
-            request.setDescription(bean.getDescription());
-        request.setTimeZone(bean.getTimeZone());
-        request.setEnabled(bean.isEnabled());
-        request.setTeam(bean.getTeam());
-        if (bean.getRotations() != null && bean.getRotations().size() > 0) {
-            for (ScheduleRotation rotation : bean.getRotations()) {
-                if (rotation.getRotationLength() == null || rotation.getRotationLength() < 1)
-                    rotation.setRotationLength(1);
-            }
-            request.setRotations(bean.getRotations());
-        }
-        getOpsGenieClient().schedule().addSchedule(request);
+            payload.setDescription(bean.getDescription());
+
+        payload.setTimezone(bean.getTimezone());
+        payload.setEnabled(bean.isEnabled());
+        payload.setOwnerTeam(bean.getOwnerTeam());
+        payload.setRotations(constructCreateScheduleRotationPayloads(bean));
+
+        api.createSchedule(payload);
     }
 
     @Override
-    protected void updateBean(Schedule bean) throws ParseException, OpsGenieClientException, IOException {
+    protected void updateBean(Schedule bean) throws ApiException {
+        UpdateSchedulePayload payload = new UpdateSchedulePayload();
+        payload.setName(bean.getName());
+
+        if (BackupUtils.checkValidString(bean.getDescription()))
+            payload.setDescription(bean.getDescription());
+
+        payload.setTimezone(bean.getTimezone());
+        payload.setEnabled(bean.isEnabled());
+        payload.setOwnerTeam(bean.getOwnerTeam());
+        payload.setRotations(constructCreateScheduleRotationPayloads(bean));
+
         UpdateScheduleRequest request = new UpdateScheduleRequest();
-        request.setId(bean.getId());
-        request.setName(bean.getName());
-        if (BackupUtils.checkValidString(bean.getDescription()))
-            request.setDescription(bean.getDescription());
-        request.setTimeZone(bean.getTimeZone());
-        request.setEnabled(bean.isEnabled());
-        request.setTeam(bean.getTeam());
+        request.setIdentifier(bean.getId());
+        request.setIdentifierType(UpdateScheduleRequest.IdentifierTypeEnum.ID);
+        request.setBody(payload);
+
+        api.updateSchedule(request);
+    }
+
+    private List<CreateScheduleRotationPayload> constructCreateScheduleRotationPayloads(Schedule bean) {
+
+        List<CreateScheduleRotationPayload> createScheduleRotationPayloadList = new ArrayList<CreateScheduleRotationPayload>();
+
         if (bean.getRotations() != null && bean.getRotations().size() > 0) {
+
             for (ScheduleRotation rotation : bean.getRotations()) {
-                if (rotation.getRotationLength() == null || rotation.getRotationLength() < 1)
-                    rotation.setRotationLength(1);
+                if (rotation.getLength() == null || rotation.getLength() < 1) {
+                    rotation.setLength(1);
+                }
+
+                createScheduleRotationPayloadList.add(new CreateScheduleRotationPayload()
+                        .name(rotation.getName())
+                        .startDate(rotation.getStartDate())
+                        .endDate(rotation.getEndDate())
+                        .length(rotation.getLength())
+                        .participants(rotation.getParticipants())
+                        .timeRestriction(rotation.getTimeRestriction())
+                        .type(CreateScheduleRotationPayload.TypeEnum.fromValue(rotation.getType().getValue()))
+                );
             }
-            request.setRotations(bean.getRotations());
         }
-        getOpsGenieClient().schedule().updateSchedule(request);
+
+        return createScheduleRotationPayloadList;
     }
 
     @Override
-    protected List<Schedule> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        ListSchedulesRequest listSchedulesRequest = new ListSchedulesRequest();
-        return getOpsGenieClient().schedule().listSchedules(listSchedulesRequest).getSchedules();
+    protected List<Schedule> retrieveEntities() throws ApiException {
+        return api.listSchedules(Collections.singletonList("rotation")).getData();
     }
 
     @Override

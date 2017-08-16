@@ -6,11 +6,8 @@ package com.opsgenie.tools.backup;
  * @author Mehmet Mustafa Demir
  */
 public class ImportConfig {
-    private boolean addNewHeartbeats = true, updateExistingHeartbeats = true;
 
     private boolean addNewUsers = true, updateExistingUsers = true;
-
-    private boolean addNewGroups = true, updateExistingGroups = true;
 
     private boolean addNewTeams = true, updateExistingTeams = true;
 
@@ -28,13 +25,11 @@ public class ImportConfig {
 
     private boolean addNewIntegrations = true, updateExistingIntegrations = true;
 
+    private boolean addNewPolicies = true, updateExistingPolicies = true;
+
     public void setAllFalse() {
-        addNewHeartbeats = false;
-        updateExistingHeartbeats = false;
         addNewUsers = false;
         updateExistingUsers = false;
-        addNewGroups = false;
-        updateExistingGroups = false;
         addNewTeams = false;
         updateExistingTeams = false;
         addNewSchedules = false;
@@ -51,24 +46,8 @@ public class ImportConfig {
         updateExistingScheduleOverrides = false;
         addNewIntegrations = false;
         updateExistingIntegrations = false;
-    }
-
-    public boolean isAddNewHeartbeats() {
-        return addNewHeartbeats;
-    }
-
-    public ImportConfig setAddNewHeartbeats(boolean addNewHeartbeats) {
-        this.addNewHeartbeats = addNewHeartbeats;
-        return this;
-    }
-
-    public boolean isUpdateExistingHeartbeats() {
-        return updateExistingHeartbeats;
-    }
-
-    public ImportConfig setUpdateExistingHeartbeats(boolean updateExistingHeartbeats) {
-        this.updateExistingHeartbeats = updateExistingHeartbeats;
-        return this;
+        addNewPolicies = false;
+        updateExistingPolicies = false;
     }
 
     public boolean isAddNewUsers() {
@@ -86,24 +65,6 @@ public class ImportConfig {
 
     public ImportConfig setUpdateExistingUsers(boolean updateExistingUsers) {
         this.updateExistingUsers = updateExistingUsers;
-        return this;
-    }
-
-    public boolean isAddNewGroups() {
-        return addNewGroups;
-    }
-
-    public ImportConfig setAddNewGroups(boolean addNewGroups) {
-        this.addNewGroups = addNewGroups;
-        return this;
-    }
-
-    public boolean isUpdateExistingGroups() {
-        return updateExistingGroups;
-    }
-
-    public ImportConfig setUpdateExistingGroups(boolean updateExistingGroups) {
-        this.updateExistingGroups = updateExistingGroups;
         return this;
     }
 
@@ -249,5 +210,21 @@ public class ImportConfig {
     public ImportConfig setUpdateExistingIntegrations(boolean updateExistingIntegrations) {
         this.updateExistingIntegrations = updateExistingIntegrations;
         return this;
+    }
+
+    public boolean isAddNewPolicies() {
+        return addNewPolicies;
+    }
+
+    public void setAddNewPolicies(boolean addNewPolicies) {
+        this.addNewPolicies = addNewPolicies;
+    }
+
+    public boolean isUpdateExistingPolicies() {
+        return updateExistingPolicies;
+    }
+
+    public void setUpdateExistingPolicies(boolean updateExistingPolicies) {
+        this.updateExistingPolicies = updateExistingPolicies;
     }
 }

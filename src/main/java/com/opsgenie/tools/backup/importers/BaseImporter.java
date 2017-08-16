@@ -1,5 +1,6 @@
 package com.opsgenie.tools.backup.importers;
 
+import com.opsgenie.client.ApiException;
 import com.opsgenie.tools.backup.BackupUtils;
 import com.opsgenie.tools.backup.RestoreException;
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +29,11 @@ abstract class BaseImporter<T> implements Importer {
 
         if (!importDirectory.exists()) {
             logger.error("Error : " + getImportDirectoryName() + " does not exist. Restoring " + getImportDirectoryName() + " skipeed");
+            return;
+        }
+
+        if(!addEntityEnabled && !updateEntityEnabled){
+            logger.info("Skipping importing " + getImportDirectoryName() + " because both add and update is disabled");
             return;
         }
 
@@ -109,11 +115,11 @@ abstract class BaseImporter<T> implements Importer {
 
     protected abstract String getImportDirectoryName();
 
-    protected abstract void addBean(T bean) throws ParseException, IOException;
+    protected abstract void addBean(T bean) throws ParseException, IOException, ApiException;
 
-    protected abstract void updateBean(T bean) throws ParseException, IOException;
+    protected abstract void updateBean(T bean) throws ParseException, IOException, ApiException;
 
-    protected abstract List<T> retrieveEntities() throws ParseException, IOException;
+    protected abstract List<T> retrieveEntities() throws ParseException, IOException, ApiException;
 
     File getImportDirectory() {
         return importDirectory;

@@ -1,20 +1,19 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Schedule;
-import com.ifountain.opsgenie.client.model.schedule.AddScheduleRequest;
-import com.ifountain.opsgenie.client.model.schedule.ListSchedulesRequest;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.ScheduleApi;
+import com.opsgenie.client.model.CreateSchedulePayload;
+import com.opsgenie.client.model.Schedule;
 
-import java.io.IOException;
-import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 
-// Creates all schedules with just their names to prevent "schedule not found" errors while importing escalations
-// ScheduleImporter imports schedules after escalations
 public class ScheduleTemplateImporter extends BaseImporter<Schedule> {
-    public ScheduleTemplateImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
-        super(opsGenieClient, backupRootDirectory, addEntity, updateEntitiy);
+
+    private static ScheduleApi api = new ScheduleApi();
+
+    public ScheduleTemplateImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
+        super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
@@ -32,7 +31,7 @@ public class ScheduleTemplateImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected Schedule getBean() throws IOException, ParseException {
+    protected Schedule getBean() {
         return new Schedule();
     }
 
@@ -42,21 +41,20 @@ public class ScheduleTemplateImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected void addBean(Schedule bean) throws ParseException, OpsGenieClientException, IOException {
-        AddScheduleRequest request = new AddScheduleRequest();
-        request.setName(bean.getName());
-        getOpsGenieClient().schedule().addSchedule(request);
+    protected void addBean(Schedule bean) throws ApiException {
+        CreateSchedulePayload payload = new CreateSchedulePayload();
+        payload.setName(bean.getName());
+        api.createSchedule(payload);
     }
 
     @Override
-    protected void updateBean(Schedule bean) throws ParseException, OpsGenieClientException, IOException {
+    protected void updateBean(Schedule bean) {
 
     }
 
     @Override
-    protected List<Schedule> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        ListSchedulesRequest listSchedulesRequest = new ListSchedulesRequest();
-        return getOpsGenieClient().schedule().listSchedules(listSchedulesRequest).getSchedules();
+    protected List<Schedule> retrieveEntities() throws ApiException {
+        return api.listSchedules(Collections.singletonList("rotation")).getData();
     }
 
     @Override

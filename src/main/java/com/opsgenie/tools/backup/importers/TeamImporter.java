@@ -1,25 +1,19 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Team;
-import com.ifountain.opsgenie.client.model.team.AddTeamRequest;
-import com.ifountain.opsgenie.client.model.team.ListTeamsRequest;
-import com.ifountain.opsgenie.client.model.team.UpdateTeamRequest;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.TeamApi;
+import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
 
-import java.io.IOException;
-import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * This class imports Teams from local directory called teams to Opsgenie account.
- *
- * @author Mehmet Mustafa Demir
- */
 public class TeamImporter extends BaseImporter<Team> {
-    public TeamImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
-        super(opsGenieClient, backupRootDirectory, addEntity, updateEntitiy);
+
+    private static TeamApi api = new TeamApi();
+
+    public TeamImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
+        super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
@@ -37,7 +31,7 @@ public class TeamImporter extends BaseImporter<Team> {
     }
 
     @Override
-    protected Team getBean() throws IOException, ParseException {
+    protected Team getBean() {
         return new Team();
     }
 
@@ -47,43 +41,37 @@ public class TeamImporter extends BaseImporter<Team> {
     }
 
     @Override
-    protected void addBean(Team bean) throws ParseException, OpsGenieClientException, IOException {
-        AddTeamRequest request = new AddTeamRequest();
-        request.setName(bean.getName());
+    protected void addBean(Team bean) throws ApiException {
+        CreateTeamPayload payload = new CreateTeamPayload();
+        payload.setName(bean.getName());
+
         if (BackupUtils.checkValidString(bean.getDescription()))
-            request.setDescription(bean.getDescription());
-        request.setMembers(bean.getMembers());
-        getOpsGenieClient().team().addTeam(request);
+            payload.setDescription(bean.getDescription());
+
+        payload.setMembers(bean.getMembers());
+        api.createTeam(payload);
     }
 
     @Override
-    protected void updateBean(Team bean) throws ParseException, OpsGenieClientException, IOException {
-        UpdateTeamRequest request = new UpdateTeamRequest();
-        request.setId(bean.getId());
-        request.setName(bean.getName());
+    protected void updateBean(Team bean) throws ApiException {
+        UpdateTeamPayload payload = new UpdateTeamPayload();
+        payload.setName(bean.getName());
+
         if (BackupUtils.checkValidString(bean.getDescription()))
-            request.setDescription(bean.getDescription());
-        request.setMembers(bean.getMembers());
-        getOpsGenieClient().team().updateTeam(request);
+            payload.setDescription(bean.getDescription());
+
+        payload.setMembers(bean.getMembers());
+
+        api.updateTeam(bean.getId(), payload);
     }
 
     @Override
-    protected List<Team> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        ListTeamsRequest request = new ListTeamsRequest();
-        return getOpsGenieClient().team().listTeams(request).getTeams();
+    protected List<Team> retrieveEntities() throws ApiException {
+        return api.listTeams(Collections.singletonList("member")).getData();
     }
 
     @Override
     protected String getEntityIdentifierName(Team entitiy) {
         return "Team " + entitiy.getName();
-    }
-
-    @Override
-    protected boolean isSame(Team oldEntity, Team currentEntity) {
-        oldEntity.setSchedules(null);
-        oldEntity.setEscalations(null);
-        currentEntity.setSchedules(null);
-        currentEntity.setEscalations(null);
-        return super.isSame(oldEntity, currentEntity);
     }
 }

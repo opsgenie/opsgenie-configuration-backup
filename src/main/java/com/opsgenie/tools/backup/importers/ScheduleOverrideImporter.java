@@ -1,37 +1,28 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Schedule;
-import com.ifountain.opsgenie.client.model.beans.ScheduleOverride;
-import com.ifountain.opsgenie.client.model.schedule.AddScheduleOverrideRequest;
-import com.ifountain.opsgenie.client.model.schedule.ListScheduleOverridesRequest;
-import com.ifountain.opsgenie.client.model.schedule.ListSchedulesRequest;
-import com.ifountain.opsgenie.client.model.schedule.UpdateScheduleOverrideRequest;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.ScheduleApi;
+import com.opsgenie.client.api.ScheduleOverrideApi;
+import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
 import com.opsgenie.tools.backup.RestoreException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * This class imports schedule overrides from local directory called scheduleOverrides to Opsgenie
- * account.
- *
- * @author Mehmet Mustafa Demir
- */
 public class ScheduleOverrideImporter extends BaseImporter<ScheduleOverride> {
+
+    private static ScheduleApi scheduleApi = new ScheduleApi();
+    private static ScheduleOverrideApi scheduleOverrideApi = new ScheduleOverrideApi();
     private final Logger logger = LogManager.getLogger(ScheduleOverrideImporter.class);
     private String scheduleName;
 
-    public ScheduleOverrideImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
-        super(opsGenieClient, backupRootDirectory, addEntity, updateEntitiy);
+    public ScheduleOverrideImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
+        super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
@@ -44,7 +35,7 @@ public class ScheduleOverrideImporter extends BaseImporter<ScheduleOverride> {
     }
 
     @Override
-    protected ScheduleOverride getBean() throws IOException, ParseException {
+    protected ScheduleOverride getBean() {
         return new ScheduleOverride();
     }
 
@@ -113,8 +104,7 @@ public class ScheduleOverrideImporter extends BaseImporter<ScheduleOverride> {
 
     private List<Schedule> retrieveScheduleList() throws RestoreException {
         try {
-            ListSchedulesRequest request = new ListSchedulesRequest();
-            return getOpsGenieClient().schedule().listSchedules(request).getSchedules();
+            return scheduleApi.listSchedules(Collections.singletonList("rotation")).getData();
         } catch (Exception e) {
             throw new RestoreException("Error at listing schedules for schedule overrides", e);
         }
@@ -122,37 +112,46 @@ public class ScheduleOverrideImporter extends BaseImporter<ScheduleOverride> {
     }
 
     @Override
-    protected void addBean(ScheduleOverride bean) throws ParseException, OpsGenieClientException, IOException {
-        AddScheduleOverrideRequest request = new AddScheduleOverrideRequest();
-        request.setSchedule(scheduleName);
-        request.setRotationIds(bean.getRotationIds());
-        request.setUser(bean.getUser());
-        request.setEndDate(bean.getEndDate());
-        request.setStartDate(bean.getStartDate());
-        request.setTimeZone(bean.getTimeZone());
-        request.setAlias(bean.getAlias());
-        getOpsGenieClient().schedule().addScheduleOverride(request);
+    protected void addBean(ScheduleOverride bean) throws ApiException {
+        CreateScheduleOverridePayload payload = new CreateScheduleOverridePayload();
+        payload.setUser(bean.getUser());
+        payload.setAlias(bean.getAlias());
+        payload.setEndDate(bean.getEndDate());
+        payload.setStartDate(bean.getStartDate());
+        payload.setRotations(bean.getRotations());
+
+        CreateScheduleOverrideRequest request = new CreateScheduleOverrideRequest();
+        request.setIdentifier(scheduleName);
+        request.setScheduleIdentifierType(CreateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
+        request.setBody(payload);
+
+        scheduleOverrideApi.createScheduleOverride(request);
     }
 
     @Override
-    protected void updateBean(ScheduleOverride bean) throws ParseException, OpsGenieClientException, IOException {
+    protected void updateBean(ScheduleOverride bean) throws ApiException {
+        UpdateScheduleOverridePayload payload = new UpdateScheduleOverridePayload();
+        payload.setUser(bean.getUser());
+        payload.setEndDate(bean.getEndDate());
+        payload.setStartDate(bean.getStartDate());
+        payload.setRotations(bean.getRotations());
+
         UpdateScheduleOverrideRequest request = new UpdateScheduleOverrideRequest();
-        request.setSchedule(scheduleName);
-        request.setRotationIds(bean.getRotationIds());
-        request.setUser(bean.getUser());
-        request.setEndDate(bean.getEndDate());
-        request.setStartDate(bean.getStartDate());
-        request.setTimeZone(bean.getTimeZone());
         request.setAlias(bean.getAlias());
-        getOpsGenieClient().schedule().updateScheduleOverride(request);
+        request.setBody(payload);
+        request.setIdentifier(scheduleName);
+        request.setScheduleIdentifierType(UpdateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
+
+        scheduleOverrideApi.updateScheduleOverride(request);
     }
 
 
     @Override
-    protected List<ScheduleOverride> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
+    protected List<ScheduleOverride> retrieveEntities() throws ApiException {
         ListScheduleOverridesRequest listScheduleOverridesRequest = new ListScheduleOverridesRequest();
-        listScheduleOverridesRequest.setSchedule(scheduleName);
-        return getOpsGenieClient().schedule().listScheduleOverrides(listScheduleOverridesRequest).getOverrides();
+        listScheduleOverridesRequest.setIdentifier(scheduleName);
+        listScheduleOverridesRequest.setScheduleIdentifierType(ListScheduleOverridesRequest.ScheduleIdentifierTypeEnum.NAME);
+        return scheduleOverrideApi.listScheduleOverride(listScheduleOverridesRequest).getData();
     }
 
 

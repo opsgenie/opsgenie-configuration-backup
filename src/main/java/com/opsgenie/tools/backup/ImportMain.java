@@ -1,10 +1,10 @@
 package com.opsgenie.tools.backup;
 
 import com.beust.jcommander.JCommander;
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.account.GetAccountInfoRequest;
-import com.ifountain.opsgenie.client.model.account.GetAccountInfoResponse;
+import com.opsgenie.client.ApiClient;
+import com.opsgenie.client.Configuration;
+import com.opsgenie.client.api.AccountApi;
+import com.opsgenie.client.model.GetAccountInfoResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -18,7 +18,7 @@ import java.util.Properties;
 public class ImportMain {
     private final static Logger logger = LogManager.getLogger(ImportMain.class);
 
-    public static void main(String[] args) throws IOException, GitAPIException, ParseException, OpsGenieClientException {
+    public static void main(String[] args) throws Exception {
         CommandLineArgs commandLineArgs = new CommandLineArgs();
         final JCommander argumentParser = new JCommander(commandLineArgs);
         argumentParser.setProgramName("OpsGenieConfigImporter");
@@ -57,13 +57,14 @@ public class ImportMain {
             logSecretKey("Ssh key passphrase: ", sshPassphrase);
         }
 
-        GetAccountInfoRequest getAccountInfoRequest = new GetAccountInfoRequest();
-        OpsGenieClient opsGenieClient = new OpsGenieClient();
-        opsGenieClient.setApiKey(apiKey);
-        opsGenieClient.setRootUri(opsGenieHost);
+        final ApiClient defaultApiClient = Configuration.getDefaultApiClient();
+        defaultApiClient.setApiKeyPrefix("GenieKey");
+        defaultApiClient.setApiKey(apiKey);
+        defaultApiClient.setBasePath(opsGenieHost);
 
-        GetAccountInfoResponse response = opsGenieClient.account().getAccount(getAccountInfoRequest);
-        logger.info("Account name is " + response.getAccount().getName() + "\n");
+        AccountApi accountApi = new AccountApi();
+        final GetAccountInfoResponse info = accountApi.getInfo();
+        logger.info("Account name is " + info.getData().getName() + "\n");
 
         ImportConfig config = extractRestoreConfig();
         ConfigurationImporter importer = null;
@@ -103,18 +104,7 @@ public class ImportMain {
                 reader = new FileReader(configFile);
                 props.load(reader);
 
-                String str = props.getProperty("addNewHeartbeats");
-                if (str != null && str.contains("false")) {
-                    config.setAddNewHeartbeats(false);
-                    logger.warn("Adding new heartbeats disabled.");
-                }
-                str = props.getProperty("updateExistingHeartbeats");
-                if (str != null && str.contains("false")) {
-                    config.setUpdateExistingHeartbeats(false);
-                    logger.warn("Updating existing heartbeats disabled.");
-                }
-
-                str = props.getProperty("addNewUsers");
+                String str = props.getProperty("addNewUsers");
                 if (str != null && str.contains("false")) {
                     config.setAddNewUsers(false);
                     logger.warn("Adding new users disabled.");
@@ -123,17 +113,6 @@ public class ImportMain {
                 if (str != null && str.contains("false")) {
                     config.setUpdateExistingUsers(false);
                     logger.warn("Updating existing users disabled.");
-                }
-
-                str = props.getProperty("addNewGroups");
-                if (str != null && str.contains("false")) {
-                    config.setAddNewGroups(false);
-                    logger.warn("Adding new groups disabled.");
-                }
-                str = props.getProperty("updateExistingGroups");
-                if (str != null && str.contains("false")) {
-                    config.setUpdateExistingGroups(false);
-                    logger.warn("Updating existing groups disabled.");
                 }
 
                 str = props.getProperty("addNewTeams");
@@ -223,6 +202,18 @@ public class ImportMain {
                 if (str != null && str.contains("false")) {
                     config.setAddNewIntegrations(false);
                     logger.warn("Adding new integrations disabled.");
+                }
+
+                str = props.getProperty("addNewPolicies");
+                if (str != null && str.contains("false")) {
+                    config.setAddNewPolicies(false);
+                    logger.warn("Adding new policies disabled.");
+                }
+
+                str = props.getProperty("updateExistingPolicies");
+                if (str != null && str.contains("false")) {
+                    config.setUpdateExistingPolicies(false);
+                    logger.warn("Updating existing policies disabled.");
                 }
 
                 return config;

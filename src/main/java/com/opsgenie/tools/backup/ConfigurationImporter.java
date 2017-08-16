@@ -1,7 +1,5 @@
 package com.opsgenie.tools.backup;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.opsgenie.tools.backup.api.IntegrationApiRequester;
 import com.opsgenie.tools.backup.importers.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,13 +11,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/**
- * This is the base importer class. It takes {@link BackupProperties} and {@link ImportConfig}
- * objects to set import settings.
- *
- * @author Mehmet Mustafa Demir
- */
 public class ConfigurationImporter extends BaseBackup {
     private static List<Importer> importers;
     private final Logger logger = LogManager.getLogger(ConfigurationImporter.class);
@@ -54,52 +45,28 @@ public class ConfigurationImporter extends BaseBackup {
             logger.error(rootPath + " is not a directory!", e);
             throw e;
         }
-
-        OpsGenieClient opsGenieClient = new OpsGenieClient();
-        opsGenieClient.setApiKey(getBackupProperties().getApiKey());
-        opsGenieClient.setRootUri(getBackupProperties().getOpsgenieUrl());
-        initializeImporters(rootPath, opsGenieClient);
+        initializeImporters(rootPath);
     }
 
-    private void initializeImporters(String rootPath, OpsGenieClient opsGenieClient) {
+    private void initializeImporters(String rootPath) {
         importers = new ArrayList<com.opsgenie.tools.backup.importers.Importer>();
-        if (config.isAddNewHeartbeats() || config.isUpdateExistingHeartbeats())
-            importers.add(new HeartbeatImporter(opsGenieClient, rootPath, config.isAddNewHeartbeats(), config.isUpdateExistingEscalations()));
+            importers.add(new UserImporter(rootPath, config.isAddNewUsers(), config.isUpdateExistingUsers()));
 
-        if (config.isAddNewUsers() || config.isUpdateExistingUsers())
-            importers.add(new UserImporter(opsGenieClient, rootPath, config.isAddNewUsers(), config.isUpdateExistingUsers()));
+            importers.add(new TeamImporter(rootPath, config.isAddNewTeams(), config.isUpdateExistingTeams()));
 
-        if (config.isAddNewTeams() || config.isUpdateExistingTeams())
-            importers.add(new TeamImporter(opsGenieClient, rootPath, config.isAddNewTeams(), config.isUpdateExistingTeams()));
+            importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
 
-        if (config.isAddNewGroups() || config.isUpdateExistingGroups())
-            importers.add(new GroupImporter(opsGenieClient, rootPath, config.isAddNewGroups(), config.isUpdateExistingGroups()));
+            importers.add(new EscalationImporter(rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
 
-        if (config.isAddNewSchedules() || config.isUpdateExistingSchedules())
-            importers.add(new ScheduleTemplateImporter(opsGenieClient, rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
+            importers.add(new ScheduleImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
 
-        if (config.isAddNewEscalations() || config.isUpdateExistingEscalations())
-            importers.add(new EscalationImporter(opsGenieClient, rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
+            importers.add(new UserNotificationImporter(rootPath, config.isAddNewNotifications(), config.isUpdateExistingNotifications()));
 
-        if (config.isAddNewSchedules() || config.isUpdateExistingSchedules())
-            importers.add(new ScheduleImporter(opsGenieClient, rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
+            importers.add(new TeamRoutingRuleImporter(rootPath, config.isAddNewTeamRoutingRules(), config.isUpdateExistingTeamRoutingRules()));
 
-        if (config.isAddNewNotifications() || config.isUpdateExistingNotifications())
-            importers.add(new UserNotificationImporter(opsGenieClient, rootPath, config.isAddNewNotifications(), config.isUpdateExistingNotifications()));
-
-        if (config.isAddNewTeamRoutingRules() || config.isUpdateExistingTeamRoutingRules())
-            importers.add(new TeamRoutingRuleImporter(opsGenieClient, rootPath, config.isAddNewTeamRoutingRules(), config.isUpdateExistingTeamRoutingRules()));
-
-        if (config.isAddNewUserForwarding() || config.isUpdateExistingUserForwarding())
-            importers.add(new UserForwardingImporter(opsGenieClient, rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
-
-        if (config.isAddNewScheduleOverrides() || config.isUpdateExistingScheduleOverrides())
-            importers.add(new ScheduleOverrideImporter(opsGenieClient, rootPath, config.isAddNewScheduleOverrides(), config.isUpdateExistingScheduleOverrides()));
-
-        if (config.isAddNewIntegrations() || config.isUpdateExistingIntegrations()) {
-            final IntegrationApiRequester integrationApiRequester = new IntegrationApiRequester(opsGenieClient.getApiKey(), getBackupProperties().getOpsgenieUrl());
-            importers.add(new IntegrationImporter(rootPath, integrationApiRequester, config.isAddNewIntegrations(), config.isUpdateExistingIntegrations()));
-        }
+            importers.add(new UserForwardingImporter(rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
+            importers.add(new ScheduleOverrideImporter(rootPath, config.isAddNewScheduleOverrides(), config.isUpdateExistingScheduleOverrides()));
+            importers.add(new PolicyImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
     }
 
     /**
