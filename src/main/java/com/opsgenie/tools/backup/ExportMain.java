@@ -1,23 +1,17 @@
 package com.opsgenie.tools.backup;
 
 import com.beust.jcommander.JCommander;
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.account.GetAccountInfoRequest;
-import com.ifountain.opsgenie.client.model.account.GetAccountInfoResponse;
 import com.opsgenie.client.ApiClient;
 import com.opsgenie.client.Configuration;
+import com.opsgenie.client.api.AccountApi;
+import com.opsgenie.client.model.GetAccountInfoResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jgit.api.errors.GitAPIException;
-
-import java.io.IOException;
-import java.text.ParseException;
 
 public class ExportMain {
     private final static Logger logger = LogManager.getLogger(ExportMain.class);
 
-    public static void main(String[] args) throws IOException, GitAPIException, ParseException, OpsGenieClientException {
+    public static void main(String[] args) throws Exception {
         CommandLineArgs commandLineArgs = new CommandLineArgs();
         final JCommander argumentParser = new JCommander(commandLineArgs);
         argumentParser.setProgramName("OpsGenieConfigExporter");
@@ -60,17 +54,15 @@ public class ExportMain {
             properties.setPassphrase(sshPassphrase);
         }
 
-        GetAccountInfoRequest getAccountInfoRequest = new GetAccountInfoRequest();
-        OpsGenieClient opsGenieClient = new OpsGenieClient();
-        opsGenieClient.setApiKey(apiKey);
 
         final ApiClient defaultApiClient = Configuration.getDefaultApiClient();
         defaultApiClient.setApiKeyPrefix("GenieKey");
         defaultApiClient.setApiKey(apiKey);
         defaultApiClient.setBasePath(opsGenieHost);
 
-        GetAccountInfoResponse response = opsGenieClient.account().getAccount(getAccountInfoRequest);
-        logger.info("Account name is " + response.getAccount().getName() + "\n");
+        AccountApi accountApi = new AccountApi();
+        final GetAccountInfoResponse info = accountApi.getInfo();
+        logger.info("Account name is " + info.getData().getName() + "\n");
 
         ConfigurationExporter exporter = new ConfigurationExporter(properties);
         exporter.export();

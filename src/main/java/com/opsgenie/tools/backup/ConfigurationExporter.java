@@ -1,7 +1,5 @@
 package com.opsgenie.tools.backup;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.opsgenie.tools.backup.api.IntegrationApiRequester;
 import com.opsgenie.tools.backup.exporters.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,13 +33,10 @@ public class ConfigurationExporter extends BaseBackup {
             logger.warn("Destination path " + rootPath + " already exists and is not an empty directory");
             logger.warn("Destination path " + rootPath + " will be deleted inorder to export current system");
             BackupUtils.deleteDirectory(backupRootFile);
-            backupRootFile.mkdirs();
-        } else {
-            backupRootFile.mkdirs();
+
         }
-        OpsGenieClient opsGenieClient = new OpsGenieClient();
-        opsGenieClient.setApiKey(getBackupProperties().getApiKey());
-        initializeExporters(rootPath, opsGenieClient);
+        backupRootFile.mkdirs();
+        initializeExporters(rootPath);
     }
 
     private void initializeExporters(String rootPath) {
@@ -54,7 +49,7 @@ public class ConfigurationExporter extends BaseBackup {
         exporters.add(new EscalationExporter(rootPath));
         exporters.add(new UserForwardingExporter(rootPath));
         exporters.add(new ScheduleOverrideExporter(rootPath));
-        exporters.add(new IntegrationExporter(rootPath));
+        exporters.add(new AlertPolicyExporter(rootPath));
     }
 
     /**
@@ -69,7 +64,7 @@ public class ConfigurationExporter extends BaseBackup {
         }
         init();
         logger.info("Export operation started!");
-        for (com.opsgenie.tools.backup.exporters.Exporter exporter : exporters) {
+        for (Exporter exporter : exporters) {
             exporter.export();
         }
         if (getBackupProperties().isGitEnabled()) {
