@@ -28,7 +28,7 @@ abstract class BaseImporter<T> implements Importer {
         logger.info("Restoring " + getImportDirectoryName() + " operation is started");
 
         if (!importDirectory.exists()) {
-            logger.error("Error : " + getImportDirectoryName() + " does not exist. Restoring " + getImportDirectoryName() + " skipeed");
+            logger.warn("Warning: " + getImportDirectoryName() + " does not exist. Restoring " + getImportDirectoryName() + " skipped");
             return;
         }
 

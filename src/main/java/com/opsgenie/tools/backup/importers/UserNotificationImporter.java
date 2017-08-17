@@ -60,13 +60,13 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
         logger.info("Restoring " + getImportDirectoryName() + " operation is started");
 
         if (!getImportDirectory().exists()) {
-            logger.error("Error : " + getImportDirectoryName() + " does not exist. Restoring " + getImportDirectoryName() + " skipped");
+            logger.warn("Warning: " + getImportDirectoryName() + " does not exist. Restoring " + getImportDirectoryName() + " skipped");
             return;
         }
 
         File[] fileList = getImportDirectory().listFiles();
         if (fileList == null || fileList.length == 0) {
-            logger.error("Error : " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipped");
+            logger.warn("Warning : " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipped");
             return;
         }
 
