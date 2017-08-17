@@ -1,5 +1,6 @@
 package com.opsgenie.tools.backup;
 
+import com.opsgenie.client.ApiException;
 import com.opsgenie.tools.backup.importers.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,23 +51,23 @@ public class ConfigurationImporter extends BaseBackup {
 
     private void initializeImporters(String rootPath) {
         importers = new ArrayList<com.opsgenie.tools.backup.importers.Importer>();
-            importers.add(new UserImporter(rootPath, config.isAddNewUsers(), config.isUpdateExistingUsers()));
+        importers.add(new UserImporter(rootPath, config.isAddNewUsers(), config.isUpdateExistingUsers()));
 
-            importers.add(new TeamImporter(rootPath, config.isAddNewTeams(), config.isUpdateExistingTeams()));
+        importers.add(new TeamImporter(rootPath, config.isAddNewTeams(), config.isUpdateExistingTeams()));
 
-            importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
+        importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
 
-            importers.add(new EscalationImporter(rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
+        importers.add(new EscalationImporter(rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
 
-            importers.add(new ScheduleImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
+        importers.add(new ScheduleImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
 
-            importers.add(new UserNotificationImporter(rootPath, config.isAddNewNotifications(), config.isUpdateExistingNotifications()));
+        importers.add(new UserNotificationImporter(rootPath, config.isAddNewNotifications(), config.isUpdateExistingNotifications()));
 
-            importers.add(new TeamRoutingRuleImporter(rootPath, config.isAddNewTeamRoutingRules(), config.isUpdateExistingTeamRoutingRules()));
+        importers.add(new TeamRoutingRuleImporter(rootPath, config.isAddNewTeamRoutingRules(), config.isUpdateExistingTeamRoutingRules()));
 
-            importers.add(new UserForwardingImporter(rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
-            importers.add(new ScheduleOverrideImporter(rootPath, config.isAddNewScheduleOverrides(), config.isUpdateExistingScheduleOverrides()));
-            importers.add(new PolicyImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
+        importers.add(new UserForwardingImporter(rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
+        importers.add(new ScheduleOverrideImporter(rootPath, config.isAddNewScheduleOverrides(), config.isUpdateExistingScheduleOverrides()));
+        importers.add(new PolicyImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
     }
 
     /**
@@ -83,11 +84,13 @@ public class ConfigurationImporter extends BaseBackup {
         init();
 
         logger.info("Import operation started!");
-        for (com.opsgenie.tools.backup.importers.Importer importer : importers) {
+        for (Importer importer : importers) {
             try {
                 importer.restore();
             } catch (RestoreException e) {
                 logger.error("Error at restoring.", e);
+            } catch (ApiException e) {
+                logger.error("Api request error",e);
             }
         }
         logger.info("Import operation finished!");

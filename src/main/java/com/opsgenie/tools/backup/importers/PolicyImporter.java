@@ -22,17 +22,13 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     }
 
     @Override
-    protected BeanStatus checkEntities(AlertPolicy oldEntity, AlertPolicy currentEntity) {
-        if (oldEntity.getId().equals(currentEntity.getId())) {
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
+    protected void getEntityWithId(AlertPolicy entity) throws ApiException {
+        api.getAlertPolicy(entity.getId());
+    }
 
-        if (oldEntity.getName().equals(currentEntity.getName())) {
-            oldEntity.setId(currentEntity.getId());
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-
-        return BeanStatus.NOT_EXIST;
+    @Override
+    protected BeanStatus checkEntity(AlertPolicy oldEntity) throws ApiException {
+        return null;
     }
 
     @Override
@@ -81,21 +77,7 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
         bean.getTimeRestrictions().setType(null);
         request.setBody(bean);
         request.setPolicyId(bean.getId());
-
         api.updateAlertPolicy(request);
-    }
-
-    @Override
-    protected List<AlertPolicy> retrieveEntities() throws ApiException {
-        List<AlertPolicyMeta> metaList = api.listAlertPolicies().getData();
-        List<AlertPolicy> alertPolicyList = new ArrayList<AlertPolicy>();
-
-        for (AlertPolicyMeta meta: metaList){
-            GetAlertPolicyResponse response = api.getAlertPolicy(meta.getId());
-            alertPolicyList.add(response.getData());
-        }
-
-        return alertPolicyList;
     }
 
     @Override

@@ -13,13 +13,13 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserNotificationExporter extends BaseExporter<NotificationRule> {
-    private final Logger logger = LogManager.getLogger(UserNotificationExporter.class);
+public class UserNotificationRuleExporter extends BaseExporter<NotificationRule> {
+    private final Logger logger = LogManager.getLogger(UserNotificationRuleExporter.class);
     private static NotificationRuleApi notificationRuleApi = new NotificationRuleApi();
     private static UserApi userApi = new UserApi();
     private static String userId;
 
-    public UserNotificationExporter(String backupRootDirectory) {
+    public UserNotificationRuleExporter(String backupRootDirectory) {
         super(backupRootDirectory, "notifications");
     }
 

@@ -16,17 +16,8 @@ public class EscalationImporter extends BaseImporter<Escalation> {
     }
 
     @Override
-    protected BeanStatus checkEntities(Escalation oldEntity, Escalation currentEntity) {
-        if (oldEntity.getId().equals(currentEntity.getId())) {
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-
-        if (oldEntity.getName().equals(currentEntity.getName())) {
-            oldEntity.setId(currentEntity.getId());
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-
-        return BeanStatus.NOT_EXIST;
+    protected void getEntityWithId(Escalation escalation) throws ApiException {
+        api.getEscalation(new GetEscalationRequest().identifier(escalation.getId()));
     }
 
     @Override
@@ -82,11 +73,6 @@ public class EscalationImporter extends BaseImporter<Escalation> {
         request.setBody(payload);
 
         api.updateEscalation(request);
-    }
-
-    @Override
-    protected List<Escalation> retrieveEntities() throws ApiException {
-        return api.listEscalations().getData();
     }
 
     @Override

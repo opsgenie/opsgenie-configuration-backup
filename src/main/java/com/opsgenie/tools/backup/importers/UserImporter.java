@@ -12,23 +12,14 @@ public class UserImporter extends BaseImporter<User> {
 
     private static UserApi userApi = new UserApi();
     private static ContactApi contactApi = new ContactApi();
+
     public UserImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
-    protected BeanStatus checkEntities(User oldEntity, User currentEntity) {
-        if (oldEntity.getId().equals(currentEntity.getId())) {
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-
-        if (oldEntity.getUsername().equals(currentEntity.getUsername())) {
-            oldEntity.setId(currentEntity.getId());
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-
-        return BeanStatus.NOT_EXIST;
-
+    protected void getEntityWithId(User user) throws ApiException {
+        userApi.getUser(new GetUserRequest().identifier(user.getId()));
     }
 
     @Override
@@ -102,7 +93,7 @@ public class UserImporter extends BaseImporter<User> {
                 boolean notExist = true;
                 for (ContactWithApplyOrder currentContact : currentContactList) {
                     if (userContact.getTo().equals(currentContact.getTo())
-                            && userContact.getContactMethod().equals(currentContact.getMethod())) {
+                            && userContact.getContactMethod().getValue().equals(currentContact.getMethod())) {
                         notExist = false;
                         break;
                     }
@@ -116,12 +107,6 @@ public class UserImporter extends BaseImporter<User> {
 
             }
         }
-    }
-
-    @Override
-    protected List<User> retrieveEntities() throws ApiException {
-        ListUsersRequest request = new ListUsersRequest();
-        return userApi.listUsers(request).getData();
     }
 
     @Override

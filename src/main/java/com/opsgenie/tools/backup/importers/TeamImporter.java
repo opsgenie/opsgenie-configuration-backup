@@ -2,11 +2,11 @@ package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.client.ApiException;
 import com.opsgenie.client.api.TeamApi;
-import com.opsgenie.client.model.*;
+import com.opsgenie.client.model.CreateTeamPayload;
+import com.opsgenie.client.model.GetTeamRequest;
+import com.opsgenie.client.model.Team;
+import com.opsgenie.client.model.UpdateTeamPayload;
 import com.opsgenie.tools.backup.BackupUtils;
-
-import java.util.Collections;
-import java.util.List;
 
 public class TeamImporter extends BaseImporter<Team> {
 
@@ -17,17 +17,8 @@ public class TeamImporter extends BaseImporter<Team> {
     }
 
     @Override
-    protected BeanStatus checkEntities(Team oldEntity, Team currentEntity) {
-        if (oldEntity.getId().equals(currentEntity.getId())) {
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-
-        if (oldEntity.getName().equals(currentEntity.getName())) {
-            oldEntity.setId(currentEntity.getId());
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-
-        return BeanStatus.NOT_EXIST;
+    protected void getEntityWithId(Team team) throws ApiException {
+        api.getTeam(new GetTeamRequest().identifier(team.getId()));
     }
 
     @Override
@@ -63,11 +54,6 @@ public class TeamImporter extends BaseImporter<Team> {
         payload.setMembers(bean.getMembers());
 
         api.updateTeam(bean.getId(), payload);
-    }
-
-    @Override
-    protected List<Team> retrieveEntities() throws ApiException {
-        return api.listTeams(Collections.singletonList("member")).getData();
     }
 
     @Override

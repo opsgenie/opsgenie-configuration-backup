@@ -24,7 +24,7 @@ abstract class BaseImporter<T> implements Importer {
         this.importDirectory = new File(backupRootDirectory + "/" + getImportDirectoryName() + "/");
     }
 
-    public void restore() throws RestoreException {
+    public void restore() throws RestoreException, ApiException {
         logger.info("Restoring " + getImportDirectoryName() + " operation is started");
 
         if (!importDirectory.exists()) {
@@ -32,7 +32,7 @@ abstract class BaseImporter<T> implements Importer {
             return;
         }
 
-        if(!addEntityEnabled && !updateEntityEnabled){
+        if (!addEntityEnabled && !updateEntityEnabled) {
             logger.info("Skipping importing " + getImportDirectoryName() + " because both add and update is disabled");
             return;
         }
@@ -51,12 +51,9 @@ abstract class BaseImporter<T> implements Importer {
             }
         }
 
-        try {
-            importEntities(backups, retrieveEntities());
-        } catch (Exception e) {
-            logger.error("Error at listing " + getImportDirectoryName(), e);
+        for (T t : backups) {
+            importEntity(t);
         }
-
 
         logger.info("Restoring " + getImportDirectoryName() + " operation is finished");
     }
@@ -73,37 +70,36 @@ abstract class BaseImporter<T> implements Importer {
         }
     }
 
-    protected abstract BeanStatus checkEntities(T oldEntity, T currentEntity);
+    protected abstract void getEntityWithId(T entity) throws ApiException;
 
-    void importEntities(List<T> backupList, List<T> currentList) {
-        for (T backupBean : backupList) {
-            importEntity(currentList, backupBean);
+    protected BeanStatus checkEntity(T t) throws ApiException {
+        try {
+            getEntityWithId(t);
+        } catch (ApiException e) {
+            if (e.getCode() == 404) {
+                return BeanStatus.NOT_EXIST;
+            }
+
+            // TODO
         }
+        return BeanStatus.MODIFIED;
     }
 
-    private void importEntity(List<T> currentList, T backupBean) {
-        BeanStatus result = BeanStatus.NOT_EXIST;
+    protected void importEntity(T backupBean) throws ApiException {
+        BeanStatus result = checkEntity(backupBean);
 
-        for (T current : currentList) {
-
-            result = checkEntities(backupBean, current);
-            if (result == BeanStatus.NOT_CHANGED) {
-                return;
+        if (result == BeanStatus.MODIFIED && updateEntityEnabled) {
+            try {
+                updateBean(backupBean);
+                logger.info(getEntityIdentifierName(backupBean) + " updated");
+            } catch (Exception e) {
+                logger.error("Error at updating " + getEntityIdentifierName(backupBean), e);
             }
 
-            if (result == BeanStatus.MODIFIED && updateEntityEnabled) {
-                try {
-                    updateBean(backupBean);
-                    logger.info(getEntityIdentifierName(backupBean) + " updated");
-                } catch (Exception e) {
-                    logger.error("Error at updating " + getEntityIdentifierName(backupBean), e);
-                }
-
-                return;
-            }
+            return;
         }
 
-        if ( result == BeanStatus.NOT_EXIST && addEntityEnabled) {
+        if (result == BeanStatus.NOT_EXIST && addEntityEnabled) {
             try {
                 addBean(backupBean);
                 logger.info(getEntityIdentifierName(backupBean) + " added");
@@ -121,14 +117,8 @@ abstract class BaseImporter<T> implements Importer {
 
     protected abstract void updateBean(T bean) throws ParseException, IOException, ApiException;
 
-    protected abstract List<T> retrieveEntities() throws ParseException, IOException, ApiException;
-
     File getImportDirectory() {
         return importDirectory;
-    }
-
-    protected boolean isSame(T oldEntity, T currentEntity) {
-        return oldEntity.toString().equals(currentEntity.toString());
     }
 
     protected abstract String getEntityIdentifierName(T entitiy);

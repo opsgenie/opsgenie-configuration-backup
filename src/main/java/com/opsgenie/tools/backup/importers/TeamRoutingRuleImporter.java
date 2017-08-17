@@ -10,9 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
 
@@ -26,15 +23,6 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
     }
 
     @Override
-    protected BeanStatus checkEntities(TeamRoutingRule oldEntity, TeamRoutingRule currentEntity) {
-        if (oldEntity.getId().equals(currentEntity.getId())) {
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-
-        return BeanStatus.NOT_EXIST;
-    }
-
-    @Override
     protected TeamRoutingRule getBean() {
         return new TeamRoutingRule();
     }
@@ -44,7 +32,7 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
         return "teamRoutingRules";
     }
 
-    public void restore() throws RestoreException {
+    public void restore() throws RestoreException, ApiException {
         logger.info("Restoring " + getImportDirectoryName() + " operation is started");
 
         if (!getImportDirectory().exists()) {
@@ -58,10 +46,8 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
             return;
         }
 
-        List<Team> teamList = retrieveTeamList();
-
         for (File teamDirectory : fileList) {
-            Team team = findTeam(teamDirectory, teamList);
+            Team team = findTeam(teamDirectory);
             if (team != null) {
                 importRoutingRulesForTeam(team, teamDirectory);
             }
@@ -71,44 +57,30 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
         logger.info("Restoring " + getImportDirectoryName() + " operation is finished");
     }
 
-    private Team findTeam(File teamDirectory, List<Team> teamList) {
+    @Override
+    protected void getEntityWithId(TeamRoutingRule entity) throws ApiException {
+        teamRoutingRuleApi.getTeamRoutingRule(new GetTeamRoutingRuleRequest()
+                .teamIdentifierType(GetTeamRoutingRuleRequest.TeamIdentifierTypeEnum.NAME)
+                .identifier(teamName).id(entity.getId()));
+    }
+
+    private Team findTeam(File teamDirectory) throws ApiException {
         if (!teamDirectory.exists() || !teamDirectory.isDirectory()) {
             return null;
         }
-        for (Team team : teamList) {
-            if (team.getName().equals(teamDirectory.getName())) {
-                return team;
-            }
-        }
-        return null;
+        return teamApi.getTeam(new GetTeamRequest().identifierType(GetTeamRequest.IdentifierTypeEnum.NAME).identifier(teamDirectory.getName())).getData();
     }
 
-    private void importRoutingRulesForTeam(Team team, File teamDirectory) {
+    private void importRoutingRulesForTeam(Team team, File teamDirectory) throws ApiException {
         teamName = team.getName();
-        List<TeamRoutingRule> backups = new ArrayList<TeamRoutingRule>();
         String[] files = BackupUtils.getFileListOf(teamDirectory);
 
         for (String fileName : files) {
             TeamRoutingRule bean = readEntity(teamDirectory.getName() + "/" + fileName);
             if (bean != null) {
-                backups.add(bean);
+                importEntity(bean);
             }
         }
-
-        try {
-            importEntities(backups, retrieveEntities());
-        } catch (Exception e) {
-            logger.error("Error at restoring " + getImportDirectoryName() + " for team " + teamName, e);
-        }
-    }
-
-    private List<Team> retrieveTeamList() throws RestoreException {
-        try {
-           return teamApi.listTeams(Collections.singletonList("member")).getData();
-        } catch (Exception e) {
-            throw new RestoreException("Error at listing teams for team routing rules", e);
-        }
-
     }
 
     @Override
@@ -147,17 +119,6 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
 
         teamRoutingRuleApi.updateTeamRoutingRule(request);
     }
-
-
-    @Override
-    protected List<TeamRoutingRule> retrieveEntities() throws ApiException {
-        ListTeamRoutingRulesRequest request = new ListTeamRoutingRulesRequest();
-        request.setIdentifier(teamName);
-        request.setTeamIdentifierType(ListTeamRoutingRulesRequest.TeamIdentifierTypeEnum.NAME);
-
-        return teamRoutingRuleApi.listTeamRoutingRules(request).getData();
-    }
-
 
     @Override
     protected String getEntityIdentifierName(TeamRoutingRule bean) {

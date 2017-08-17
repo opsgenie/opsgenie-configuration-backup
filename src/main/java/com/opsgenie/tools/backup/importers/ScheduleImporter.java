@@ -18,17 +18,8 @@ public class ScheduleImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected BeanStatus checkEntities(Schedule oldEntity, Schedule currentEntity) {
-        if (oldEntity.getId().equals(currentEntity.getId())) {
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-
-        if (oldEntity.getName().equals(currentEntity.getName())) {
-            oldEntity.setId(currentEntity.getId());
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-
-        return BeanStatus.NOT_EXIST;
+    protected void getEntityWithId(Schedule schedule) throws ApiException {
+        api.getSchedule(new GetScheduleRequest().identifier(schedule.getId()));
     }
 
     @Override
@@ -109,24 +100,7 @@ public class ScheduleImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected List<Schedule> retrieveEntities() throws ApiException {
-        return api.listSchedules(Collections.singletonList("rotation")).getData();
-    }
-
-    @Override
     protected String getEntityIdentifierName(Schedule entitiy) {
         return "Schedule " + entitiy.getName();
-    }
-
-    @Override
-    protected boolean isSame(Schedule oldEntity, Schedule currentEntity) {
-        if (oldEntity.getRotations() != null && currentEntity.getRotations() != null
-                && oldEntity.getRotations().size() == currentEntity.getRotations().size()) {
-            for (int i = 0; i < oldEntity.getRotations().size(); i++) {
-                oldEntity.getRotations().get(i).setId(null);
-                currentEntity.getRotations().get(i).setId(null);
-            }
-        }
-        return super.isSame(oldEntity, currentEntity);
     }
 }

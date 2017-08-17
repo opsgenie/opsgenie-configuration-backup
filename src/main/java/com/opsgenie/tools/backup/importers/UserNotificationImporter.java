@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class UserNotificationImporter extends BaseImporter<NotificationRule> {
@@ -29,24 +28,6 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
     }
 
     @Override
-    protected BeanStatus checkEntities(NotificationRule oldEntity, NotificationRule currentEntity) {
-        if (oldEntity.getId().equals(currentEntity.getId())) {
-            oldEntity.setOrder(0);
-            currentEntity.setOrder(0);
-            sortNotifyBeforeList(oldEntity);
-            sortNotifyBeforeList(currentEntity);
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-        return BeanStatus.NOT_EXIST;
-    }
-
-    private void sortNotifyBeforeList(NotificationRule entity) {
-        if (entity.getNotificationTime() != null && entity.getNotificationTime().size() > 0) {
-            Collections.sort(entity.getNotificationTime());
-        }
-    }
-
-    @Override
     protected NotificationRule getBean() {
         return new NotificationRule();
     }
@@ -56,7 +37,7 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
         return "notifications";
     }
 
-    public void restore() throws RestoreException {
+    public void restore() throws RestoreException, ApiException {
         logger.info("Restoring " + getImportDirectoryName() + " operation is started");
 
         if (!getImportDirectory().exists()) {
@@ -70,10 +51,8 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
             return;
         }
 
-        List<User> userList = retrieveUserList();
-
         for (File notificationDirectory : fileList) {
-            User user = findUser(notificationDirectory, userList);
+            User user = findUser(notificationDirectory);
             if (user != null) {
                 importNotificationsForUser(user, notificationDirectory);
             }
@@ -82,43 +61,24 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
         logger.info("Restoring " + getImportDirectoryName() + " operation is finished");
     }
 
-    private User findUser(File notificationDirectory, List<User> userList) {
-        if (!notificationDirectory.exists() || !notificationDirectory.isDirectory()) {
-            return null;
-        }
-        for (User user : userList) {
-            if (user.getUsername().equals(notificationDirectory.getName())) {
-                return user;
-            }
-        }
-        return null;
+    @Override
+    protected void getEntityWithId(NotificationRule entity) throws ApiException {
+        notificationRuleApi.getNotificationRule(new GetNotificationRuleRequest().identifier(username).ruleId(entity.getId())).getData();
     }
 
-    private void importNotificationsForUser(User user, File notificationDirectory) {
+    private User findUser(File notificationDirectory) throws ApiException {
+        return userApi.getUser(new GetUserRequest().identifier(notificationDirectory.getName())).getData();
+    }
+
+    private void importNotificationsForUser(User user, File notificationDirectory) throws ApiException {
         username = user.getUsername();
-        List<NotificationRule> backups = new ArrayList<NotificationRule>();
         String[] files = BackupUtils.getFileListOf(notificationDirectory);
         for (String fileName : files) {
             NotificationRule bean = readEntity(notificationDirectory.getName() + "/" + fileName);
             if (bean != null) {
-                backups.add(bean);
+                importEntity(bean);
             }
         }
-        try {
-            importEntities(backups, retrieveEntities());
-        } catch (Exception e) {
-            logger.error("Error at restoring " + getImportDirectoryName() + " for user " + username, e);
-        }
-    }
-
-    private List<User> retrieveUserList() throws RestoreException {
-        try {
-            ListUsersRequest listUsersRequest = new ListUsersRequest();
-            return userApi.listUsers(listUsersRequest).getData();
-        } catch (Exception e) {
-            throw new RestoreException("Error at listing users for notification rules", e);
-        }
-
     }
 
     @Override
@@ -146,15 +106,15 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
         }
     }
 
-    private List<CreateNotificationRuleStepPayload> constructCreateNotificationRuleStepPayloadList(NotificationRule bean){
+    private List<CreateNotificationRuleStepPayload> constructCreateNotificationRuleStepPayloadList(NotificationRule bean) {
         List<CreateNotificationRuleStepPayload> createNotificationRuleStepPayloadList = new ArrayList<CreateNotificationRuleStepPayload>();
 
-        for (NotificationRuleStep notificationRuleStep: bean.getSteps()) {
+        for (NotificationRuleStep notificationRuleStep : bean.getSteps()) {
             createNotificationRuleStepPayloadList.add(
                     new CreateNotificationRuleStepPayload()
-                    .contact(notificationRuleStep.getContact())
-                    .enabled(notificationRuleStep.isEnabled())
-                    .sendAfter(notificationRuleStep.getSendAfter())
+                            .contact(notificationRuleStep.getContact())
+                            .enabled(notificationRuleStep.isEnabled())
+                            .sendAfter(notificationRuleStep.getSendAfter())
             );
         }
 
@@ -237,22 +197,6 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
         request.setIdentifier(username);
         notificationRuleStepApi.updateNotificationRuleStep(request);
     }
-
-
-    @Override
-    protected List<NotificationRule> retrieveEntities() throws ApiException {
-        List<NotificationRuleMeta> metaList = notificationRuleApi.listNotificationRules(username).getData();
-        List<NotificationRule> notificationRuleList = new ArrayList<NotificationRule>();
-
-        for (NotificationRuleMeta meta:metaList){
-            GetNotificationRuleRequest getRequest = new GetNotificationRuleRequest().identifier(username).ruleId(meta.getId());
-            GetNotificationRuleResponse getNotificationRuleResponse = notificationRuleApi.getNotificationRule(getRequest);
-            notificationRuleList.add(getNotificationRuleResponse.getData());
-        }
-
-        return notificationRuleList;
-    }
-
 
     @Override
     protected String getEntityIdentifierName(NotificationRule bean) {

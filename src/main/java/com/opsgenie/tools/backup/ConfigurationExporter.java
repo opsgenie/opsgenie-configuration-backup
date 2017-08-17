@@ -42,7 +42,7 @@ public class ConfigurationExporter extends BaseBackup {
     private void initializeExporters(String rootPath) {
         exporters = new ArrayList<com.opsgenie.tools.backup.exporters.Exporter>();
         exporters.add(new UserExporter(rootPath));
-        exporters.add(new UserNotificationExporter(rootPath));
+        exporters.add(new UserNotificationRuleExporter(rootPath));
         exporters.add(new TeamExporter(rootPath));
         exporters.add(new TeamRoutingRuleExporter(rootPath));
         exporters.add(new ScheduleExporter(rootPath));
