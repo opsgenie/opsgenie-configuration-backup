@@ -6,6 +6,7 @@ import com.opsgenie.client.api.UserApi;
 import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 public class UserImporter extends BaseImporter<User> {
@@ -88,29 +89,31 @@ public class UserImporter extends BaseImporter<User> {
         List<ContactWithApplyOrder> currentContactList = contactApi.listContacts(user.getUsername()).getData();
         List<UserContact> backupContactList = user.getUserContacts();
 
-        for (UserContact userContact : backupContactList) {
-            if (userContact.getContactMethod() != null && !userContact.getContactMethod().equals(UserContact.ContactMethodEnum.MOBILE)) {
-                boolean notExist = true;
-                for (ContactWithApplyOrder currentContact : currentContactList) {
-                    if (userContact.getTo().equals(currentContact.getTo())
-                            && userContact.getContactMethod().getValue().equals(currentContact.getMethod())) {
-                        notExist = false;
-                        break;
+        if(backupContactList != null){
+            for (UserContact userContact : backupContactList) {
+                if (userContact.getContactMethod() != null && !userContact.getContactMethod().equals(UserContact.ContactMethodEnum.MOBILE)) {
+                    boolean notExist = true;
+                    for (ContactWithApplyOrder currentContact : currentContactList) {
+                        if (userContact.getTo().equals(currentContact.getTo())
+                                && userContact.getContactMethod().getValue().equals(currentContact.getMethod())) {
+                            notExist = false;
+                            break;
+                        }
                     }
-                }
-                if (notExist) {
-                    CreateContactPayload payload = new CreateContactPayload();
-                    payload.setMethod(CreateContactPayload.MethodEnum.fromValue(userContact.getContactMethod().getValue()));
-                    payload.setTo(userContact.getTo());
-                    contactApi.createContact(createContactRequest);
-                }
+                    if (notExist) {
+                        CreateContactPayload payload = new CreateContactPayload();
+                        payload.setMethod(CreateContactPayload.MethodEnum.fromValue(userContact.getContactMethod().getValue()));
+                        payload.setTo(userContact.getTo());
+                        contactApi.createContact(createContactRequest);
+                    }
 
+                }
             }
         }
     }
 
     @Override
-    protected String getEntityIdentifierName(User entitiy) {
-        return "User " + entitiy.getUsername();
+    protected String getEntityIdentifierName(User entity) {
+        return "User " + entity.getUsername();
     }
 }

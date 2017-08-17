@@ -85,14 +85,14 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
     protected void addBean(NotificationRule bean) throws ApiException {
         CreateNotificationRulePayload payload = new CreateNotificationRulePayload();
         payload.setActionType(bean.getActionType());
-        payload.setCriteria(bean.getCriteria());
+        payload.setCriteria(bean.getCriteria().type(null));
         payload.setEnabled(bean.isEnabled());
         payload.setName(bean.getName());
         payload.setNotificationTime(bean.getNotificationTime());
         payload.setOrder(bean.getOrder());
         payload.setRepeat(bean.getRepeat());
         payload.setSchedules(bean.getSchedules());
-        payload.setTimeRestriction(bean.getTimeRestriction());
+        payload.setTimeRestriction(bean.getTimeRestriction().type(null));
         payload.setSteps(constructCreateNotificationRuleStepPayloadList(bean));
 
         CreateNotificationRuleRequest request = new CreateNotificationRuleRequest();
@@ -124,14 +124,14 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
     @Override
     protected void updateBean(NotificationRule bean) throws ApiException {
         UpdateNotificationRulePayload payload = new UpdateNotificationRulePayload();
-        payload.setCriteria(bean.getCriteria());
+        payload.setCriteria(bean.getCriteria().type(null));
         payload.setEnabled(bean.isEnabled());
         payload.setName(bean.getName());
         payload.setNotificationTime(bean.getNotificationTime());
         payload.setOrder(bean.getOrder());
         payload.setRepeat(bean.getRepeat());
         payload.setSchedules(bean.getSchedules());
-        payload.setTimeRestriction(bean.getTimeRestriction());
+        payload.setTimeRestriction(bean.getTimeRestriction().type(null));
         payload.setSteps(constructCreateNotificationRuleStepPayloadList(bean));
 
         UpdateNotificationRuleRequest request = new UpdateNotificationRuleRequest();
@@ -140,7 +140,7 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
         request.setBody(payload);
 
         notificationRuleApi.updateNotificationRule(request);
-        importNotificationRuleSteps(bean);
+        //importNotificationRuleSteps(bean);
 
     }
 
@@ -170,7 +170,7 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
         addNotificationRuleStep(notificationRuleId, backupStep);
     }
 
-    private void addNotificationRuleStep(String ruleId, NotificationRuleStep step) throws ApiException {
+   private void addNotificationRuleStep(String ruleId, NotificationRuleStep step) throws ApiException {
         CreateNotificationRuleStepPayload payload = new CreateNotificationRuleStepPayload();
         payload.setContact(step.getContact());
         payload.setEnabled(step.isEnabled());

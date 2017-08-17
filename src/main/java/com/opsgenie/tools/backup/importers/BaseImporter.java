@@ -39,7 +39,7 @@ abstract class BaseImporter<T> implements Importer {
 
         String[] files = BackupUtils.getFileListOf(importDirectory);
         if (files == null || files.length == 0) {
-            logger.error("Error : " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipped");
+            logger.warn("Warning: " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipped");
             return;
         }
 

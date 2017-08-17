@@ -65,6 +65,7 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     protected void addBean(AlertPolicy bean) throws ApiException {
         bean.getFilter().setType(null);
         bean.type(null);
+        bean.setId(null);
         bean.getTimeRestrictions().setType(null);
         api.createAlertPolicy(bean);
     }
@@ -73,6 +74,7 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     protected void updateBean(AlertPolicy bean) throws ApiException {
         UpdateAlertPolicyRequest request = new UpdateAlertPolicyRequest();
         bean.type(null);
+        bean.setId(null);
         bean.getFilter().setType(null);
         bean.getTimeRestrictions().setType(null);
         request.setBody(bean);
