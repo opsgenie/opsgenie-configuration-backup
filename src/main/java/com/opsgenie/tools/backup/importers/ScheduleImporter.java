@@ -89,6 +89,10 @@ public class ScheduleImporter extends BaseImporter<Schedule> {
                     rotation.setLength(1);
                 }
 
+                for (Recipient recipient : rotation.getParticipants()) {
+                    recipient.setType(null);
+                }
+
                 createScheduleRotationPayloadList.add(new CreateScheduleRotationPayload()
                         .name(rotation.getName())
                         .startDate(rotation.getStartDate())

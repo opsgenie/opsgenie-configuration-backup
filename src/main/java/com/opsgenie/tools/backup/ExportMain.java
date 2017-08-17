@@ -59,6 +59,7 @@ public class ExportMain {
         defaultApiClient.setApiKeyPrefix("GenieKey");
         defaultApiClient.setApiKey(apiKey);
         defaultApiClient.setBasePath(opsGenieHost);
+        defaultApiClient.setDebugging(true);
 
         AccountApi accountApi = new AccountApi();
         final GetAccountInfoResponse info = accountApi.getInfo();

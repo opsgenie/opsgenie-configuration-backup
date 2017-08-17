@@ -48,6 +48,11 @@ public class EscalationImporter extends BaseImporter<Escalation> {
             payload.setDescription(bean.getDescription());
 
         payload.setOwnerTeam(bean.getOwnerTeam());
+
+        for (EscalationRule escalationRule: bean.getRules()) {
+            escalationRule.getRecipient().setType(null);
+        }
+
         payload.setRules(bean.getRules());
 
         api.createEscalation(payload);
@@ -63,6 +68,12 @@ public class EscalationImporter extends BaseImporter<Escalation> {
             payload.setDescription(bean.getDescription());
 
         payload.setOwnerTeam(bean.getOwnerTeam());
+
+        for (EscalationRule escalationRule: bean.getRules()) {
+            escalationRule.getRecipient().setType(null);
+            escalationRule.getRecipient().setId(null);
+        }
+
         payload.setRules(bean.getRules());
 
         UpdateEscalationRequest request = new UpdateEscalationRequest();

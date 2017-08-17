@@ -115,9 +115,9 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
     protected void addBean(TeamRoutingRule bean) throws ApiException {
 
         CreateTeamRoutingRulePayload payload = new CreateTeamRoutingRulePayload();
-        payload.setCriteria(bean.getCriteria());
+        payload.setCriteria(bean.getCriteria().type(null));
         payload.setName(bean.getName());
-        payload.setNotify(bean.getNotify());
+        payload.setNotify(bean.getNotify().type(null).id(null));
         payload.setOrder(bean.getOrder());
         payload.setTimeRestriction(bean.getTimeRestriction());
         payload.setTimezone(bean.getTimezone());
@@ -133,9 +133,9 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
     @Override
     protected void updateBean(TeamRoutingRule bean) throws ApiException {
         UpdateTeamRoutingRulePayload payload = new UpdateTeamRoutingRulePayload();
-        payload.setCriteria(bean.getCriteria());
+        payload.setCriteria(bean.getCriteria().type(null));
         payload.setName(bean.getName());
-        payload.setNotify(bean.getNotify());
+        payload.setNotify(bean.getNotify().type(null));
         payload.setTimeRestriction(bean.getTimeRestriction());
         payload.setTimezone(bean.getTimezone());
 

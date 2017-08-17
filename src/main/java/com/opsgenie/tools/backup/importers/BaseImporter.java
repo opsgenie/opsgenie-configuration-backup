@@ -14,7 +14,7 @@ import java.util.List;
 
 abstract class BaseImporter<T> implements Importer {
     private final Logger logger = LogManager.getLogger(getClass());
-    private File importDirectory;
+    protected File importDirectory;
     private boolean addEntityEnabled;
     private boolean updateEntityEnabled;
 
@@ -82,9 +82,11 @@ abstract class BaseImporter<T> implements Importer {
     }
 
     private void importEntity(List<T> currentList, T backupBean) {
+        BeanStatus result = BeanStatus.NOT_EXIST;
+
         for (T current : currentList) {
 
-            BeanStatus result = checkEntities(backupBean, current);
+            result = checkEntities(backupBean, current);
             if (result == BeanStatus.NOT_CHANGED) {
                 return;
             }
@@ -101,7 +103,7 @@ abstract class BaseImporter<T> implements Importer {
             }
         }
 
-        if (addEntityEnabled) {
+        if ( result == BeanStatus.NOT_EXIST && addEntityEnabled) {
             try {
                 addBean(backupBean);
                 logger.info(getEntityIdentifierName(backupBean) + " added");
