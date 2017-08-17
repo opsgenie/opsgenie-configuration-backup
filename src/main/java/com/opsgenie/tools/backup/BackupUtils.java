@@ -3,6 +3,7 @@ package com.opsgenie.tools.backup;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,11 +71,13 @@ public class BackupUtils {
 
     public static String toJson(Object object) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JodaModule());
         return mapper.writeValueAsString(object);
     }
 
     public static void fromJson(Object object, String json) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JodaModule());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         mapper.readerForUpdating(object).readValue(json);
         mapper.setDateFormat(sdf);

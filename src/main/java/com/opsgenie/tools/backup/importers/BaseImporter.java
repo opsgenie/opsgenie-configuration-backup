@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 abstract class BaseImporter<T> implements Importer {
-    private final Logger logger = LogManager.getLogger(BaseImporter.class);
+    private final Logger logger = LogManager.getLogger(getClass());
     private File importDirectory;
     private boolean addEntityEnabled;
     private boolean updateEntityEnabled;

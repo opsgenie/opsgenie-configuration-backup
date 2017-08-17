@@ -7,12 +7,10 @@ import com.opsgenie.client.api.AccountApi;
 import com.opsgenie.client.model.GetAccountInfoResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jgit.api.errors.GitAPIException;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Properties;
 
 public class ImportMain {
@@ -61,6 +59,7 @@ public class ImportMain {
         defaultApiClient.setApiKeyPrefix("GenieKey");
         defaultApiClient.setApiKey(apiKey);
         defaultApiClient.setBasePath(opsGenieHost);
+        defaultApiClient.setDebugging(true);
 
         AccountApi accountApi = new AccountApi();
         final GetAccountInfoResponse info = accountApi.getInfo();
