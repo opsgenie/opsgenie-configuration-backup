@@ -1,10 +1,15 @@
 package com.opsgenie.tools.backup;
 
 import com.beust.jcommander.JCommander;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opsgenie.client.ApiClient;
 import com.opsgenie.client.Configuration;
 import com.opsgenie.client.api.AccountApi;
+import com.opsgenie.client.model.Filter;
 import com.opsgenie.client.model.GetAccountInfoResponse;
+import com.opsgenie.client.model.Recipient;
+import com.opsgenie.client.model.TimeRestrictionInterval;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,7 +64,10 @@ public class ImportMain {
         defaultApiClient.setApiKeyPrefix("GenieKey");
         defaultApiClient.setApiKey(apiKey);
         defaultApiClient.setBasePath(opsGenieHost);
-        defaultApiClient.setDebugging(true);
+        ObjectMapper mapper = defaultApiClient.getJSON().getContext(Object.class);
+        mapper.addMixIn(Filter.TypeEnum.class, Ignored.class);
+        mapper.addMixIn(TimeRestrictionInterval.TypeEnum.class, Ignored.class);
+        mapper.addMixIn(Recipient.TypeEnum.class, Ignored.class);
 
         AccountApi accountApi = new AccountApi();
         final GetAccountInfoResponse info = accountApi.getInfo();
@@ -227,5 +235,9 @@ public class ImportMain {
         }
         logger.warn("Default Import configs will be used.");
         return null;
+    }
+
+    @JsonIgnoreType
+    abstract class Ignored {
     }
 }

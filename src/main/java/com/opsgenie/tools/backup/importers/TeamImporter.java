@@ -2,10 +2,7 @@ package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.client.ApiException;
 import com.opsgenie.client.api.TeamApi;
-import com.opsgenie.client.model.CreateTeamPayload;
-import com.opsgenie.client.model.GetTeamRequest;
-import com.opsgenie.client.model.Team;
-import com.opsgenie.client.model.UpdateTeamPayload;
+import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
 
 public class TeamImporter extends BaseImporter<Team> {
@@ -18,7 +15,7 @@ public class TeamImporter extends BaseImporter<Team> {
 
     @Override
     protected void getEntityWithId(Team team) throws ApiException {
-        api.getTeam(new GetTeamRequest().identifier(team.getId()));
+        GetTeamResponse team1 = api.getTeam(new GetTeamRequest().identifierType(GetTeamRequest.IdentifierTypeEnum.NAME).identifier(team.getName()));
     }
 
     @Override
@@ -27,6 +24,7 @@ public class TeamImporter extends BaseImporter<Team> {
     }
 
     @Override
+
     protected String getImportDirectoryName() {
         return "teams";
     }
@@ -57,7 +55,7 @@ public class TeamImporter extends BaseImporter<Team> {
     }
 
     @Override
-    protected String getEntityIdentifierName(Team entitiy) {
-        return "Team " + entitiy.getName();
+    protected String getEntityIdentifierName(Team entity) {
+        return "Team " + entity.getName();
     }
 }

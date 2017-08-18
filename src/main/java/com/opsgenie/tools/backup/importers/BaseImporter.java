@@ -93,7 +93,7 @@ abstract class BaseImporter<T> implements Importer {
                 updateBean(backupBean);
                 logger.info(getEntityIdentifierName(backupBean) + " updated");
             } catch (Exception e) {
-                logger.error("Error at updating " + getEntityIdentifierName(backupBean), e);
+                logger.error("Error at updating " + getEntityIdentifierName(backupBean)+ "." + e.getMessage());
             }
 
             return;
@@ -104,7 +104,7 @@ abstract class BaseImporter<T> implements Importer {
                 addBean(backupBean);
                 logger.info(getEntityIdentifierName(backupBean) + " added");
             } catch (Exception e) {
-                logger.error("Error at adding " + getEntityIdentifierName(backupBean), e);
+                logger.error("Error at adding " + getEntityIdentifierName(backupBean) +". "+e.getMessage());
             }
         }
     }

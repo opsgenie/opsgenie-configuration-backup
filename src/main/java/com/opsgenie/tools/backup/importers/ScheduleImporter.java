@@ -81,7 +81,6 @@ public class ScheduleImporter extends BaseImporter<Schedule> {
                 }
 
                 for (Recipient recipient : rotation.getParticipants()) {
-                    recipient.setType(null);
                     recipient.setId(null);
                 }
 

@@ -31,20 +31,20 @@ public class EscalationImporter extends BaseImporter<Escalation> {
     }
 
     @Override
-    protected void addBean(Escalation bean) throws ApiException {
+    protected void addBean(Escalation escalation) throws ApiException {
         CreateEscalationPayload payload = new CreateEscalationPayload();
-        payload.setName(bean.getName());
+        payload.setName(escalation.getName());
 
-        if (BackupUtils.checkValidString(bean.getDescription()))
-            payload.setDescription(bean.getDescription());
-
-        payload.setOwnerTeam(bean.getOwnerTeam());
-
-        for (EscalationRule escalationRule: bean.getRules()) {
-            escalationRule.getRecipient().setType(null);
+        if (BackupUtils.checkValidString(escalation.getDescription())){
+            payload.setDescription(escalation.getDescription());
         }
 
-        payload.setRules(bean.getRules());
+        for (EscalationRule rule : escalation.getRules()) {
+            rule.getRecipient().setId(null);
+        }
+
+        payload.setOwnerTeam(escalation.getOwnerTeam());
+        payload.setRules(escalation.getRules());
 
         api.createEscalation(payload);
     }
@@ -61,7 +61,6 @@ public class EscalationImporter extends BaseImporter<Escalation> {
         payload.setOwnerTeam(bean.getOwnerTeam());
 
         for (EscalationRule escalationRule: bean.getRules()) {
-            escalationRule.getRecipient().setType(null);
             escalationRule.getRecipient().setId(null);
         }
 
