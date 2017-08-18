@@ -16,7 +16,6 @@ import java.util.List;
 
 
 public class TeamRoutingRuleExporter extends BaseExporter<TeamRoutingRule> {
-    private final Logger logger = LogManager.getLogger(TeamRoutingRuleExporter.class);
     private static TeamApi teamApi = new TeamApi();
     private static TeamRoutingRuleApi teamRoutingRuleApi = new TeamRoutingRuleApi();
     private static String teamId;

@@ -12,7 +12,7 @@ import java.text.ParseException;
 import java.util.List;
 
 abstract class BaseExporter<T> implements Exporter {
-    private final Logger logger = LogManager.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
     private File exportDirectory;
 
     public BaseExporter(String backupRootDirectory, String exportDirectoryName) {

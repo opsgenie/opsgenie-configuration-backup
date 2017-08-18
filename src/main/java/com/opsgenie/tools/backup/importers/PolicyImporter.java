@@ -18,7 +18,6 @@ import java.util.List;
 public class PolicyImporter extends BaseImporter<AlertPolicy> {
 
     private static PolicyApi api = new PolicyApi();
-    private final Logger logger = LogManager.getLogger(PolicyImporter.class);
 
     public PolicyImporter(String backupRootDirectory, boolean addEntity, boolean updateEntity) {
         super(backupRootDirectory, addEntity, updateEntity);

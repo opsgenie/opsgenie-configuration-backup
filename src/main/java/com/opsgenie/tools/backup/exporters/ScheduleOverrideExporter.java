@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class ScheduleOverrideExporter extends BaseExporter<ScheduleOverride> {
-    private final Logger logger = LogManager.getLogger(ScheduleOverrideExporter.class);
 
     private static ScheduleApi scheduleApi = new ScheduleApi();
     private static ScheduleOverrideApi overrideApi = new ScheduleOverrideApi();

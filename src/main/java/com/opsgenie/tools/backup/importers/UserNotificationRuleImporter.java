@@ -20,7 +20,6 @@ public class UserNotificationRuleImporter extends BaseImporter<NotificationRule>
     private static NotificationRuleApi notificationRuleApi = new NotificationRuleApi();
     private static NotificationRuleStepApi notificationRuleStepApi = new NotificationRuleStepApi();
 
-    private final Logger logger = LogManager.getLogger(UserNotificationRuleImporter.class);
     private String username;
 
     public UserNotificationRuleImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {

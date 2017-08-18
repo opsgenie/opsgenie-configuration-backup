@@ -15,7 +15,6 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
 
     private static TeamApi teamApi = new TeamApi();
     private static TeamRoutingRuleApi teamRoutingRuleApi = new TeamRoutingRuleApi();
-    private final Logger logger = LogManager.getLogger(TeamRoutingRuleImporter.class);
     private String teamName;
 
     public TeamRoutingRuleImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {

@@ -14,7 +14,6 @@ import java.text.ParseException;
 public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
 
     private static ForwardingRuleApi forwardingRuleApi = new ForwardingRuleApi();
-    private final Logger logger = LogManager.getLogger(UserForwardingImporter.class);
 
     public UserForwardingImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(backupRootDirectory, addEntity, updateEntitiy);
