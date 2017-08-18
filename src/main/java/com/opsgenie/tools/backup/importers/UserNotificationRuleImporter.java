@@ -14,16 +14,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserNotificationImporter extends BaseImporter<NotificationRule> {
+public class UserNotificationRuleImporter extends BaseImporter<NotificationRule> {
 
     private static UserApi userApi = new UserApi();
     private static NotificationRuleApi notificationRuleApi = new NotificationRuleApi();
     private static NotificationRuleStepApi notificationRuleStepApi = new NotificationRuleStepApi();
 
-    private final Logger logger = LogManager.getLogger(UserNotificationImporter.class);
+    private final Logger logger = LogManager.getLogger(UserNotificationRuleImporter.class);
     private String username;
 
-    public UserNotificationImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
+    public UserNotificationRuleImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
@@ -99,11 +99,7 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
         request.setBody(payload);
         request.setIdentifier(username);
 
-        String id = notificationRuleApi.createNotificationRule(request).getData().getId();
-
-        for (NotificationRuleStep step : bean.getSteps()) {
-            addNotificationRuleStep(id, step);
-        }
+        notificationRuleApi.createNotificationRule(request).getData().getId();
     }
 
     private List<CreateNotificationRuleStepPayload> constructCreateNotificationRuleStepPayloadList(NotificationRule bean) {
@@ -140,62 +136,6 @@ public class UserNotificationImporter extends BaseImporter<NotificationRule> {
         request.setBody(payload);
 
         notificationRuleApi.updateNotificationRule(request);
-        //importNotificationRuleSteps(bean);
-
-    }
-
-    private void importNotificationRuleSteps(NotificationRule notificationRule) throws ApiException {
-        List<NotificationRuleStep> stepList = notificationRule.getSteps();
-        if (stepList == null || stepList.size() == 0) {
-            return;
-        }
-        GetNotificationRuleRequest getNotificationRuleRequest = new GetNotificationRuleRequest();
-        getNotificationRuleRequest.setIdentifier(username);
-        getNotificationRuleRequest.setRuleId(notificationRule.getId());
-        NotificationRule current = notificationRuleApi.getNotificationRule(getNotificationRuleRequest).getData();
-        for (NotificationRuleStep backupStep : stepList) {
-            importSingleNotificationRuleStep(notificationRule.getId(), current, backupStep);
-        }
-
-    }
-
-    private void importSingleNotificationRuleStep(String notificationRuleId, NotificationRule current, NotificationRuleStep backupStep) throws ApiException {
-        for (NotificationRuleStep currentStep : current.getSteps()) {
-            if (backupStep.getId().equals(currentStep.getId())) {
-                if (!backupStep.toString().equals(currentStep.toString()))
-                    updateNotificationRuleStep(notificationRuleId, backupStep);
-                return;
-            }
-        }
-        addNotificationRuleStep(notificationRuleId, backupStep);
-    }
-
-   private void addNotificationRuleStep(String ruleId, NotificationRuleStep step) throws ApiException {
-        CreateNotificationRuleStepPayload payload = new CreateNotificationRuleStepPayload();
-        payload.setContact(step.getContact());
-        payload.setEnabled(step.isEnabled());
-        payload.setSendAfter(step.getSendAfter());
-
-        CreateNotificationRuleStepRequest request = new CreateNotificationRuleStepRequest();
-        request.setRuleId(ruleId);
-        request.setIdentifier(step.getId());
-        request.setBody(payload);
-
-        notificationRuleStepApi.createNotificationRuleStep(request);
-    }
-
-    private void updateNotificationRuleStep(String ruleId, NotificationRuleStep step) throws ApiException {
-        UpdateNotificationRuleStepPayload payload = new UpdateNotificationRuleStepPayload();
-        payload.setContact(step.getContact());
-        payload.setEnabled(step.isEnabled());
-        payload.setSendAfter(step.getSendAfter());
-
-        UpdateNotificationRuleStepRequest request = new UpdateNotificationRuleStepRequest();
-        request.setBody(payload);
-        request.setId(step.getId());
-        request.setRuleId(ruleId);
-        request.setIdentifier(username);
-        notificationRuleStepApi.updateNotificationRuleStep(request);
     }
 
     @Override

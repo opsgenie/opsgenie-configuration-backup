@@ -61,7 +61,7 @@ public class ConfigurationImporter extends BaseBackup {
 
         importers.add(new ScheduleImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
 
-        importers.add(new UserNotificationImporter(rootPath, config.isAddNewNotifications(), config.isUpdateExistingNotifications()));
+        importers.add(new UserNotificationRuleImporter(rootPath, config.isAddNewNotifications(), config.isUpdateExistingNotifications()));
 
         importers.add(new TeamRoutingRuleImporter(rootPath, config.isAddNewTeamRoutingRules(), config.isUpdateExistingTeamRoutingRules()));
 
