@@ -6,6 +6,8 @@ import com.opsgenie.client.ApiException;
 import com.opsgenie.client.api.PolicyApi;
 import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -16,6 +18,7 @@ import java.util.List;
 public class PolicyImporter extends BaseImporter<AlertPolicy> {
 
     private static PolicyApi api = new PolicyApi();
+    private final Logger logger = LogManager.getLogger(PolicyImporter.class);
 
     public PolicyImporter(String backupRootDirectory, boolean addEntity, boolean updateEntity) {
         super(backupRootDirectory, addEntity, updateEntity);
@@ -24,11 +27,6 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     @Override
     protected void getEntityWithId(AlertPolicy entity) throws ApiException {
         api.getAlertPolicy(entity.getId());
-    }
-
-    @Override
-    protected BeanStatus checkEntity(AlertPolicy oldEntity) throws ApiException {
-        return null;
     }
 
     @Override
@@ -43,7 +41,7 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
             AlertPolicy alertPolicy = readJson(beanJson);
             return alertPolicy;
         } catch (Exception e) {
-
+            logger.error("Could not read policy from file:"+ fileName);
             return null;
         }
     }
