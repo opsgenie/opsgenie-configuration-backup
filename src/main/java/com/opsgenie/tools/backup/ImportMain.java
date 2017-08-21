@@ -38,6 +38,8 @@ public class ImportMain {
         final String sshKeyPath = commandLineArgs.getSshKeyPath();
         final String sshPassphrase = commandLineArgs.getSshPassphrase();
         final String opsGenieHost = commandLineArgs.getOpsGenieHost();
+        final boolean debug = commandLineArgs.isDebug();
+
         BackupProperties properties = new BackupProperties();
 
         logger.info("Import directory path: " + backupPath);
@@ -64,6 +66,8 @@ public class ImportMain {
         defaultApiClient.setApiKeyPrefix("GenieKey");
         defaultApiClient.setApiKey(apiKey);
         defaultApiClient.setBasePath(opsGenieHost);
+        defaultApiClient.setDebugging(debug);
+
         ObjectMapper mapper = defaultApiClient.getJSON().getContext(Object.class);
         mapper.addMixIn(Filter.TypeEnum.class, Ignored.class);
         mapper.addMixIn(TimeRestrictionInterval.TypeEnum.class, Ignored.class);

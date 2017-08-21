@@ -28,6 +28,8 @@ public class ExportMain {
         final String sshKeyPath = commandLineArgs.getSshKeyPath();
         final String sshPassphrase = commandLineArgs.getSshPassphrase();
         final String opsGenieHost = commandLineArgs.getOpsGenieHost();
+        final boolean debug = commandLineArgs.isDebug();
+
         BackupProperties properties = new BackupProperties();
 
         logger.info("Export directory path: " + backupPath);
@@ -59,7 +61,7 @@ public class ExportMain {
         defaultApiClient.setApiKeyPrefix("GenieKey");
         defaultApiClient.setApiKey(apiKey);
         defaultApiClient.setBasePath(opsGenieHost);
-        defaultApiClient.setDebugging(true);
+        defaultApiClient.setDebugging(debug);
 
         AccountApi accountApi = new AccountApi();
         final GetAccountInfoResponse info = accountApi.getInfo();

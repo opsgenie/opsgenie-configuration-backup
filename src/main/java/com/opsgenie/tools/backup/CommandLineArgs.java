@@ -22,6 +22,9 @@ public class CommandLineArgs {
     @Parameter(names = {"--sshUrl"}, description = "Git ssh url")
     private String gitSshUrl;
 
+    @Parameter(names = {"--debug", "-d"}, description = "Debug mode")
+    private boolean debug = false;
+
     public String getApiKey() {
         return apiKey;
     }
@@ -68,5 +71,9 @@ public class CommandLineArgs {
 
     public void setGitSshUrl(String gitSshUrl) {
         this.gitSshUrl = gitSshUrl;
+    }
+
+    public boolean isDebug() {
+        return debug;
     }
 }
