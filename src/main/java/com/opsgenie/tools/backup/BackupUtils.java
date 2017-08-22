@@ -16,6 +16,13 @@ public class BackupUtils {
 
     private static final Logger logger = LogManager.getLogger(BackupUtils.class);
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    static {
+        mapper.registerModule(new JodaModule());
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm"));
+    }
+
     public static String readFile(String fileName) throws IOException {
         InputStream is = new FileInputStream(fileName);
         BufferedReader buf = new BufferedReader(new InputStreamReader(is));
@@ -69,17 +76,11 @@ public class BackupUtils {
     }
 
     public static String toJson(Object object) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JodaModule());
         return mapper.writeValueAsString(object);
     }
 
     public static void fromJson(Object object, String json) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JodaModule());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         mapper.readerForUpdating(object).readValue(json);
-        mapper.setDateFormat(sdf);
     }
 
     public static List<String> findIntegrationDirectories(String path) {
