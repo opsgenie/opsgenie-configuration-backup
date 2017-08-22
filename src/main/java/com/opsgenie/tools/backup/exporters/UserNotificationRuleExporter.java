@@ -4,8 +4,6 @@ import com.opsgenie.client.ApiException;
 import com.opsgenie.client.api.NotificationRuleApi;
 import com.opsgenie.client.api.UserApi;
 import com.opsgenie.client.model.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,8 +21,8 @@ public class UserNotificationRuleExporter extends BaseExporter<NotificationRule>
     }
 
     @Override
-    protected String getBeanFileName(NotificationRule bean) {
-        return bean.getName() + "-" + bean.getId();
+    protected String getEntityFileName(NotificationRule notificationRule) {
+        return notificationRule.getName() + "-" + notificationRule.getId();
     }
 
     @Override
@@ -38,8 +36,8 @@ public class UserNotificationRuleExporter extends BaseExporter<NotificationRule>
                     if (notificationRuleList != null) {
                         File userNotificationFile = new File(getExportDirectory().getAbsolutePath() + "/" + user.getUsername());
                         userNotificationFile.mkdirs();
-                        for (NotificationRule bean : notificationRuleList) {
-                            exportFile(getExportDirectory().getAbsolutePath() + "/" + user.getUsername() + "/" + getBeanFileName(bean) + ".json", bean);
+                        for (NotificationRule rule : notificationRuleList) {
+                            exportFile(getExportDirectory().getAbsolutePath() + "/" + user.getUsername() + "/" + getEntityFileName(rule) + ".json", rule);
                         }
                     }
                 } catch (Exception e) {

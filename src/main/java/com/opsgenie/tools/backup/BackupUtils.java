@@ -8,9 +8,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class BackupUtils {
 
@@ -64,8 +61,8 @@ public class BackupUtils {
             return dir.delete();
         }
         String[] files = dir.list();
-        for (int i = 0, len = files.length; i < len; i++) {
-            File f = new File(dir, files[i]);
+        for (String file : files) {
+            File f = new File(dir, file);
             if (f.isDirectory()) {
                 deleteDirectory(f);
             } else {
@@ -81,21 +78,5 @@ public class BackupUtils {
 
     public static void fromJson(Object object, String json) throws IOException {
         mapper.readerForUpdating(object).readValue(json);
-    }
-
-    public static List<String> findIntegrationDirectories(String path) {
-        List<String> files = new ArrayList<String>();
-        File[] list = new File(path).listFiles();
-        if (list == null) return Collections.emptyList();
-        for (File integrationType : list) {
-            if (integrationType.isDirectory()) {
-                for (File integrationFolder : integrationType.listFiles()) {
-                    files.add(integrationFolder.getAbsolutePath());
-                }
-            } else {
-                logger.warn(integrationType.getAbsolutePath() + " is invalid. There should be folders only in this path.");
-            }
-        }
-        return files;
     }
 }

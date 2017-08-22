@@ -6,9 +6,6 @@ import com.opsgenie.client.model.CreateSchedulePayload;
 import com.opsgenie.client.model.GetScheduleRequest;
 import com.opsgenie.client.model.Schedule;
 
-import java.util.Collections;
-import java.util.List;
-
 public class ScheduleTemplateImporter extends BaseImporter<Schedule> {
 
     private static ScheduleApi api = new ScheduleApi();
@@ -18,12 +15,21 @@ public class ScheduleTemplateImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected void getEntityWithId(Schedule schedule) throws ApiException {
-        api.getSchedule(new GetScheduleRequest().identifier(schedule.getId()));
+    protected Schedule checkEntityWithName(Schedule schedule) throws ApiException {
+        final GetScheduleRequest identifier = new GetScheduleRequest()
+                .identifierType(GetScheduleRequest.IdentifierTypeEnum.NAME)
+                .identifier(schedule.getName());
+        return api.getSchedule(identifier).getData();
     }
 
     @Override
-    protected Schedule getBean() {
+    protected Schedule checkEntityWithId(Schedule schedule) throws ApiException {
+        final GetScheduleRequest identifier = new GetScheduleRequest().identifier(schedule.getId());
+        return api.getSchedule(identifier).getData();
+    }
+
+    @Override
+    protected Schedule getNewInstance() {
         return new Schedule();
     }
 
@@ -33,14 +39,14 @@ public class ScheduleTemplateImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected void addBean(Schedule bean) throws ApiException {
+    protected void createEntity(Schedule entity) throws ApiException {
         CreateSchedulePayload payload = new CreateSchedulePayload();
-        payload.setName(bean.getName());
+        payload.setName(entity.getName());
         api.createSchedule(payload);
     }
 
     @Override
-    protected void updateBean(Schedule bean) {
+    protected void updateEntity(Schedule entity, EntityStatus entityStatus) {
 
     }
 

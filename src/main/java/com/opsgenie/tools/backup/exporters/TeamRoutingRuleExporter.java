@@ -7,8 +7,6 @@ import com.opsgenie.client.api.TeamRoutingRuleApi;
 import com.opsgenie.client.model.ListTeamRoutingRulesRequest;
 import com.opsgenie.client.model.Team;
 import com.opsgenie.client.model.TeamRoutingRule;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Collections;
@@ -25,8 +23,8 @@ public class TeamRoutingRuleExporter extends BaseExporter<TeamRoutingRule> {
     }
 
     @Override
-    protected String getBeanFileName(TeamRoutingRule bean) {
-        return bean.getName() + "-" + bean.getId();
+    protected String getEntityFileName(TeamRoutingRule teamRoutingRule) {
+        return teamRoutingRule.getName() + "-" + teamRoutingRule.getId();
     }
 
     @Override
@@ -40,8 +38,8 @@ public class TeamRoutingRuleExporter extends BaseExporter<TeamRoutingRule> {
                     if (teamRoutingRules != null && teamRoutingRules.size() > 0) {
                         File teamFile = new File(getExportDirectory().getAbsolutePath() + "/" + team.getName());
                         teamFile.mkdirs();
-                        for (TeamRoutingRule bean : teamRoutingRules) {
-                            exportFile(getExportDirectory().getAbsolutePath() + "/" + team.getName() + "/" + getBeanFileName(bean) + ".json", bean);
+                        for (TeamRoutingRule teamRoutingRule : teamRoutingRules) {
+                            exportFile(getExportDirectory().getAbsolutePath() + "/" + team.getName() + "/" + getEntityFileName(teamRoutingRule) + ".json", teamRoutingRule);
                         }
                     }
                 } catch (Exception e) {

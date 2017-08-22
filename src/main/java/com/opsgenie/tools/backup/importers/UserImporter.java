@@ -6,7 +6,6 @@ import com.opsgenie.client.api.UserApi;
 import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
 
-import java.util.Collections;
 import java.util.List;
 
 public class UserImporter extends BaseImporter<User> {
@@ -19,12 +18,17 @@ public class UserImporter extends BaseImporter<User> {
     }
 
     @Override
-    protected void getEntityWithId(User user) throws ApiException {
-        userApi.getUser(new GetUserRequest().identifier(user.getId()));
+    protected User checkEntityWithName(User user) throws ApiException {
+        return userApi.getUser(new GetUserRequest().identifier(user.getUsername())).getData();
     }
 
     @Override
-    protected User getBean() {
+    protected User checkEntityWithId(User user) throws ApiException {
+        return userApi.getUser(new GetUserRequest().identifier(user.getId())).getData();
+    }
+
+    @Override
+    protected User getNewInstance() {
         return new User();
     }
 
@@ -34,52 +38,52 @@ public class UserImporter extends BaseImporter<User> {
     }
 
     @Override
-    protected void addBean(User bean) throws ApiException {
+    protected void createEntity(User entity) throws ApiException {
         CreateUserPayload payload = new CreateUserPayload();
-        payload.setUsername(bean.getUsername());
-        payload.setFullName(bean.getFullName());
-        payload.setLocale(bean.getLocale());
-        payload.setRole(bean.getRole());
-        payload.setDetails(bean.getDetails());
-        payload.setUserAddress(bean.getUserAddress());
-        payload.setSkypeUsername(bean.getSkypeUsername());
-        payload.setTags(bean.getTags());
-        payload.setTimeZone(bean.getTimeZone());
+        payload.setUsername(entity.getUsername());
+        payload.setFullName(entity.getFullName());
+        payload.setLocale(entity.getLocale());
+        payload.setRole(entity.getRole());
+        payload.setDetails(entity.getDetails());
+        payload.setUserAddress(entity.getUserAddress());
+        payload.setSkypeUsername(entity.getSkypeUsername());
+        payload.setTags(entity.getTags());
+        payload.setTimeZone(entity.getTimeZone());
         payload.setInvitationDisabled(false);
 
-        if (BackupUtils.checkValidString(bean.getSkypeUsername()))
-            payload.setSkypeUsername(bean.getSkypeUsername());
+        if (BackupUtils.checkValidString(entity.getSkypeUsername()))
+            payload.setSkypeUsername(entity.getSkypeUsername());
 
-        payload.setTimeZone(bean.getTimeZone());
+        payload.setTimeZone(entity.getTimeZone());
 
         userApi.createUser(payload);
-        addContacts(bean);
+        addContacts(entity);
     }
 
     @Override
-    protected void updateBean(User bean) throws ApiException {
+    protected void updateEntity(User entity, EntityStatus entityStatus) throws ApiException {
         UpdateUserPayload payload = new UpdateUserPayload();
-        payload.setUsername(bean.getUsername());
-        payload.setFullName(bean.getFullName());
-        payload.setLocale(bean.getLocale());
-        payload.setRole(bean.getRole());
-        payload.setDetails(bean.getDetails());
-        payload.setUserAddress(bean.getUserAddress());
-        payload.setSkypeUsername(bean.getSkypeUsername());
-        payload.setTags(bean.getTags());
-        payload.setTimeZone(bean.getTimeZone());
+        payload.setUsername(entity.getUsername());
+        payload.setFullName(entity.getFullName());
+        payload.setLocale(entity.getLocale());
+        payload.setRole(entity.getRole());
+        payload.setDetails(entity.getDetails());
+        payload.setUserAddress(entity.getUserAddress());
+        payload.setSkypeUsername(entity.getSkypeUsername());
+        payload.setTags(entity.getTags());
+        payload.setTimeZone(entity.getTimeZone());
 
-        if (BackupUtils.checkValidString(bean.getSkypeUsername()))
-            payload.setSkypeUsername(bean.getSkypeUsername());
+        if (BackupUtils.checkValidString(entity.getSkypeUsername()))
+            payload.setSkypeUsername(entity.getSkypeUsername());
 
-        payload.setTimeZone(bean.getTimeZone());
+        payload.setTimeZone(entity.getTimeZone());
 
         UpdateUserRequest request = new UpdateUserRequest();
-        request.setIdentifier(bean.getId());
+        request.setIdentifier(entity.getId());
         request.setBody(payload);
 
         userApi.updateUser(request);
-        addContacts(bean);
+        addContacts(entity);
     }
 
     private void addContacts(User user) throws ApiException {
@@ -89,7 +93,7 @@ public class UserImporter extends BaseImporter<User> {
         List<ContactWithApplyOrder> currentContactList = contactApi.listContacts(user.getUsername()).getData();
         List<UserContact> backupContactList = user.getUserContacts();
 
-        if(backupContactList != null){
+        if (backupContactList != null) {
             for (UserContact userContact : backupContactList) {
                 if (userContact.getContactMethod() != null && !userContact.getContactMethod().equals(UserContact.ContactMethodEnum.MOBILE)) {
                     boolean notExist = true;

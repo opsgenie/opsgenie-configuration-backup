@@ -51,7 +51,6 @@ public class ConfigurationExporter extends BaseBackup {
         exporters.add(new ScheduleOverrideExporter(rootPath));
         exporters.add(new PolicyExporter(rootPath));
         exporters.add(new IntegrationExporter(rootPath));
-        exporters.add(new IntegrationActionExporter(rootPath));
     }
 
     /**

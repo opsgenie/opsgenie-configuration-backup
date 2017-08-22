@@ -16,8 +16,8 @@ public class TeamExporter extends BaseExporter<Team> {
     }
 
     @Override
-    protected String getBeanFileName(Team bean) {
-        return bean.getName() + "-" + bean.getId();
+    protected String getEntityFileName(Team team) {
+        return team.getName() + "-" + team.getId();
     }
 
 

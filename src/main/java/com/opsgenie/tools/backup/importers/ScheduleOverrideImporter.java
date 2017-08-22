@@ -13,12 +13,24 @@ public class ScheduleOverrideImporter extends BaseImporter<ScheduleOverride> {
     }
 
     @Override
-    protected void getEntityWithId(ScheduleOverride entity) throws ApiException {
-        scheduleOverrideApi.getScheduleOverride(new GetScheduleOverrideRequest().alias(entity.getAlias()).identifier(entity.getParent().getId()));
+    protected ScheduleOverride checkEntityWithName(ScheduleOverride entity) throws ApiException {
+        final GetScheduleOverrideRequest getScheduleOverrideRequest = new GetScheduleOverrideRequest()
+                .scheduleIdentifierType(GetScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME)
+                .alias(entity.getAlias())
+                .identifier(entity.getParent().getName());
+        return scheduleOverrideApi.getScheduleOverride(getScheduleOverrideRequest).getData();
     }
 
     @Override
-    protected ScheduleOverride getBean() {
+    protected ScheduleOverride checkEntityWithId(ScheduleOverride entity) throws ApiException {
+        final GetScheduleOverrideRequest getScheduleOverrideRequest = new GetScheduleOverrideRequest()
+                .alias(entity.getAlias())
+                .identifier(entity.getParent().getId());
+        return scheduleOverrideApi.getScheduleOverride(getScheduleOverrideRequest).getData();
+    }
+
+    @Override
+    protected ScheduleOverride getNewInstance() {
         return new ScheduleOverride();
     }
 
@@ -28,16 +40,16 @@ public class ScheduleOverrideImporter extends BaseImporter<ScheduleOverride> {
     }
 
     @Override
-    protected void addBean(ScheduleOverride scheduleOverride) throws ApiException {
+    protected void createEntity(ScheduleOverride entity) throws ApiException {
         CreateScheduleOverridePayload payload = new CreateScheduleOverridePayload();
-        payload.setUser(scheduleOverride.getUser());
-        payload.setAlias(scheduleOverride.getAlias());
-        payload.setEndDate(scheduleOverride.getEndDate());
-        payload.setStartDate(scheduleOverride.getStartDate());
-        payload.setRotations(scheduleOverride.getRotations());
+        payload.setUser(entity.getUser());
+        payload.setAlias(entity.getAlias());
+        payload.setEndDate(entity.getEndDate());
+        payload.setStartDate(entity.getStartDate());
+        payload.setRotations(entity.getRotations());
 
         CreateScheduleOverrideRequest request = new CreateScheduleOverrideRequest();
-        request.setIdentifier(scheduleOverride.getParent().getId());
+        request.setIdentifier(entity.getParent().getId());
         request.setScheduleIdentifierType(CreateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
         request.setBody(payload);
 
@@ -45,24 +57,24 @@ public class ScheduleOverrideImporter extends BaseImporter<ScheduleOverride> {
     }
 
     @Override
-    protected void updateBean(ScheduleOverride scheduleOverride) throws ApiException {
+    protected void updateEntity(ScheduleOverride entity, EntityStatus entityStatus) throws ApiException {
         UpdateScheduleOverridePayload payload = new UpdateScheduleOverridePayload();
-        payload.setUser(scheduleOverride.getUser());
-        payload.setEndDate(scheduleOverride.getEndDate());
-        payload.setStartDate(scheduleOverride.getStartDate());
-        payload.setRotations(scheduleOverride.getRotations());
+        payload.setUser(entity.getUser());
+        payload.setEndDate(entity.getEndDate());
+        payload.setStartDate(entity.getStartDate());
+        payload.setRotations(entity.getRotations());
 
         UpdateScheduleOverrideRequest request = new UpdateScheduleOverrideRequest();
-        request.setAlias(scheduleOverride.getAlias());
+        request.setAlias(entity.getAlias());
         request.setBody(payload);
-        request.setIdentifier(scheduleOverride.getParent().getId());
+        request.setIdentifier(entity.getParent().getId());
         request.setScheduleIdentifierType(UpdateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
 
         scheduleOverrideApi.updateScheduleOverride(request);
     }
 
     @Override
-    protected String getEntityIdentifierName(ScheduleOverride bean) {
-        return "Schedule Override for user  " + bean.getUser() + " for schedule " + bean.getParent().getName();
+    protected String getEntityIdentifierName(ScheduleOverride scheduleOverride) {
+        return "Schedule Override for user  " + scheduleOverride.getUser() + " for schedule " + scheduleOverride.getParent().getName();
     }
 }

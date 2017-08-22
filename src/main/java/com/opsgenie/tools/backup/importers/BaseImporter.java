@@ -2,15 +2,12 @@ package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.client.ApiException;
 import com.opsgenie.tools.backup.BackupUtils;
-import com.opsgenie.tools.backup.RestoreException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
 
 abstract class BaseImporter<T> implements Importer {
     protected final Logger logger = LogManager.getLogger(getClass());
@@ -24,16 +21,17 @@ abstract class BaseImporter<T> implements Importer {
         this.importDirectory = new File(backupRootDirectory + "/" + getImportDirectoryName() + "/");
     }
 
-    public void restore() throws RestoreException, ApiException {
+    public void restore() {
+
+        if (!addEntityEnabled && !updateEntityEnabled) {
+            logger.info("Skipping importing " + getImportDirectoryName() + " because both add and update is disabled");
+            return;
+        }
+
         logger.info("Restoring " + getImportDirectoryName() + " operation is started");
 
         if (!importDirectory.exists()) {
             logger.warn("Warning: " + getImportDirectoryName() + " does not exist. Restoring " + getImportDirectoryName() + " skipped");
-            return;
-        }
-
-        if (!addEntityEnabled && !updateEntityEnabled) {
-            logger.info("Skipping importing " + getImportDirectoryName() + " because both add and update is disabled");
             return;
         }
 
@@ -43,16 +41,11 @@ abstract class BaseImporter<T> implements Importer {
             return;
         }
 
-        List<T> backups = new ArrayList<T>();
         for (String fileName : files) {
-            T bean = readEntity(fileName);
-            if (bean != null) {
-                backups.add(bean);
+            T entity = readEntity(fileName);
+            if (entity != null) {
+                importEntity(entity);
             }
-        }
-
-        for (T t : backups) {
-            importEntity(t);
         }
 
         logger.info("Restoring " + getImportDirectoryName() + " operation is finished");
@@ -60,67 +53,71 @@ abstract class BaseImporter<T> implements Importer {
 
     protected T readEntity(String fileName) {
         try {
-            String beanJson = BackupUtils.readFile(importDirectory.getAbsolutePath() + "/" + fileName);
-            T bean = getBean();
-            BackupUtils.fromJson(bean, beanJson);
-            return bean;
+            String entityJson = BackupUtils.readFile(importDirectory.getAbsolutePath() + "/" + fileName);
+            T entity = getNewInstance();
+            BackupUtils.fromJson(entity, entityJson);
+            return entity;
         } catch (Exception e) {
             logger.error("Error at reading " + getImportDirectoryName() + " file " + fileName, e);
             return null;
         }
     }
 
-    protected abstract void getEntityWithId(T entity) throws ApiException;
+    void importEntity(T backupEntity) {
+        EntityStatus entityStatus = checkEntity(backupEntity);
 
-    protected BeanStatus checkEntity(T t) throws ApiException {
+        if (updateEntityEnabled && (entityStatus.equals(EntityStatus.EXISTS_WITH_ID) || entityStatus.equals(EntityStatus.EXISTS_WITH_NAME))) {
+            try {
+                updateEntity(backupEntity, entityStatus);
+                logger.info(getEntityIdentifierName(backupEntity) + " updated");
+            } catch (Exception e) {
+                logger.error("Error at updating " + getEntityIdentifierName(backupEntity) + "." + e.getMessage());
+            }
+        } else if (entityStatus == EntityStatus.NOT_EXIST && addEntityEnabled) {
+            try {
+                createEntity(backupEntity);
+                logger.info(getEntityIdentifierName(backupEntity) + " added");
+            } catch (Exception e) {
+                logger.error("Error at adding " + getEntityIdentifierName(backupEntity) + ". " + e.getMessage());
+            }
+        }
+    }
+
+    private EntityStatus checkEntity(T entity) {
         try {
-            getEntityWithId(t);
+            if (checkEntityWithId(entity) != null) {
+                return EntityStatus.EXISTS_WITH_ID;
+            }
+            if (checkEntityWithName(entity) != null) {
+                return EntityStatus.EXISTS_WITH_NAME;
+            }
         } catch (ApiException e) {
-            if (e.getCode() == 404) {
-                return BeanStatus.NOT_EXIST;
+            logger.error(e.getMessage());
+            if (e.getCode() != 404) {
+                return EntityStatus.COULD_NOT_CHECK;
             }
-
-            // TODO
         }
-        return BeanStatus.MODIFIED;
+        return EntityStatus.NOT_EXIST;
     }
 
-    protected void importEntity(T backupBean) throws ApiException {
-        BeanStatus result = checkEntity(backupBean);
+    protected abstract T checkEntityWithName(T entity) throws ApiException;
 
-        if (result == BeanStatus.MODIFIED && updateEntityEnabled) {
-            try {
-                updateBean(backupBean);
-                logger.info(getEntityIdentifierName(backupBean) + " updated");
-            } catch (Exception e) {
-                logger.error("Error at updating " + getEntityIdentifierName(backupBean)+ "." + e.getMessage());
-            }
+    protected abstract T checkEntityWithId(T entity) throws ApiException;
 
-            return;
-        }
+    protected abstract void createEntity(T entity) throws ParseException, IOException, ApiException;
 
-        if (result == BeanStatus.NOT_EXIST && addEntityEnabled) {
-            try {
-                addBean(backupBean);
-                logger.info(getEntityIdentifierName(backupBean) + " added");
-            } catch (Exception e) {
-                logger.error("Error at adding " + getEntityIdentifierName(backupBean) +". "+e.getMessage());
-            }
-        }
-    }
+    protected abstract void updateEntity(T entity, EntityStatus entityStatus) throws ParseException, IOException, ApiException;
 
-    protected abstract T getBean() throws IOException, ParseException;
-
-    protected abstract String getImportDirectoryName();
-
-    protected abstract void addBean(T bean) throws ParseException, IOException, ApiException;
-
-    protected abstract void updateBean(T bean) throws ParseException, IOException, ApiException;
-
-    File getImportDirectory() {
+    protected File getImportDirectory() {
         return importDirectory;
     }
 
-    protected abstract String getEntityIdentifierName(T entitiy);
+    protected T getNewInstance() {
+        throw new UnsupportedOperationException();
+    }
+
+    protected abstract String getEntityIdentifierName(T entity);
+
+    protected abstract String getImportDirectoryName();
 
 }

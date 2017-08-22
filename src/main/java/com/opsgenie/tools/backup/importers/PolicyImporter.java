@@ -4,16 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.opsgenie.client.ApiException;
 import com.opsgenie.client.api.PolicyApi;
-import com.opsgenie.client.model.*;
+import com.opsgenie.client.model.AlertPolicy;
+import com.opsgenie.client.model.UpdateAlertPolicyRequest;
 import com.opsgenie.tools.backup.BackupUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PolicyImporter extends BaseImporter<AlertPolicy> {
 
@@ -24,57 +20,56 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     }
 
     @Override
-    protected void getEntityWithId(AlertPolicy entity) throws ApiException {
-        api.getAlertPolicy(entity.getId());
+    protected AlertPolicy checkEntityWithId(AlertPolicy entity) throws ApiException {
+        return api.getAlertPolicy(entity.getId()).getData();
     }
 
     @Override
-    protected AlertPolicy getBean() throws IOException, ParseException {
-        throw new UnsupportedOperationException();
+    protected AlertPolicy checkEntityWithName(AlertPolicy entity) throws ApiException {
+        return null;
     }
 
     @Override
     protected AlertPolicy readEntity(String fileName) {
         try {
-            String beanJson = BackupUtils.readFile(importDirectory.getAbsolutePath() + "/" + fileName);
-            AlertPolicy alertPolicy = readJson(beanJson);
-            return alertPolicy;
+            String alertPolicyJson = BackupUtils.readFile(importDirectory.getAbsolutePath() + "/" + fileName);
+            return readJson(alertPolicyJson);
         } catch (Exception e) {
-            logger.error("Could not read policy from file:"+ fileName);
+            logger.error("Could not read policy from file:" + fileName);
             return null;
         }
     }
 
-    private AlertPolicy readJson(String beanJson) throws IOException {
+    private AlertPolicy readJson(String alertPolicyJson) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JodaModule());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         mapper.setDateFormat(sdf);
-        return mapper.readValue(beanJson, AlertPolicy.class);
+        return mapper.readValue(alertPolicyJson, AlertPolicy.class);
     }
 
     @Override
-    protected String getImportDirectoryName(){
+    protected String getImportDirectoryName() {
         return "policies";
     }
 
     @Override
-    protected void addBean(AlertPolicy bean) throws ApiException {
-        bean.setId(null);
-        api.createAlertPolicy(bean);
+    protected void createEntity(AlertPolicy entity) throws ApiException {
+        entity.setId(null);
+        api.createAlertPolicy(entity);
     }
 
     @Override
-    protected void updateBean(AlertPolicy bean) throws ApiException {
+    protected void updateEntity(AlertPolicy entity, EntityStatus entityStatus) throws ApiException {
         UpdateAlertPolicyRequest request = new UpdateAlertPolicyRequest();
-        bean.setId(null);
-        request.setBody(bean);
-        request.setPolicyId(bean.getId());
+        entity.setId(null);
+        request.setBody(entity);
+        request.setPolicyId(entity.getId());
         api.updateAlertPolicy(request);
     }
 
     @Override
-    protected String getEntityIdentifierName(AlertPolicy bean) {
-        return "Policy " + bean.getName();
+    protected String getEntityIdentifierName(AlertPolicy alertPolicy) {
+        return "Policy " + alertPolicy.getName();
     }
 }

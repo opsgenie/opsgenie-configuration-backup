@@ -17,8 +17,8 @@ public class UserForwardingExporter extends BaseExporter<ForwardingRule> {
     }
 
     @Override
-    protected String getBeanFileName(ForwardingRule bean) {
-        return bean.getFromUser() + "-" + bean.getId();
+    protected String getEntityFileName(ForwardingRule forwardingRule) {
+        return forwardingRule.getFromUser() + "-" + forwardingRule.getId();
     }
 
 

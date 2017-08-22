@@ -20,12 +20,12 @@ abstract class BaseExporter<T> implements Exporter {
         this.exportDirectory.mkdirs();
     }
 
-    protected void exportFile(String fileName, T bean) {
+    protected void exportFile(String fileName, T entity) {
         try {
             PrintWriter writer = new PrintWriter(fileName, "UTF-8");
-            writer.print(BackupUtils.toJson(bean));
+            writer.print(BackupUtils.toJson(entity));
             writer.close();
-            logger.info(getBeanFileName(bean) + " file written.");
+            logger.info(getEntityFileName(entity) + " file written.");
         } catch (Exception e) {
             logger.error("Error at writing entity, fileName=" + fileName, e);
         }
@@ -42,11 +42,11 @@ abstract class BaseExporter<T> implements Exporter {
         }
 
         for (T bean : currentBeanList) {
-            exportFile(getExportDirectory().getAbsolutePath() + "/" + getBeanFileName(bean) + ".json", bean);
-        }
+            exportFile(getExportDirectory().getAbsolutePath() + "/" + getEntityFileName(bean) + ".json", bean);
+            }
     }
 
-    protected abstract String getBeanFileName(T bean);
+    protected abstract String getEntityFileName(T entity);
 
     protected abstract List<T> retrieveEntities() throws ParseException, IOException, ApiException;
 

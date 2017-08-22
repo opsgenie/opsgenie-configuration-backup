@@ -17,8 +17,8 @@ public class PolicyExporter extends BaseExporter<AlertPolicy> {
     }
 
     @Override
-    protected String getBeanFileName(AlertPolicy bean) {
-        return bean.getId();
+    protected String getEntityFileName(AlertPolicy alertPolicy) {
+        return alertPolicy.getId();
     }
 
     @Override

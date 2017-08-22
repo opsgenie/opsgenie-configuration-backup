@@ -17,7 +17,7 @@ public class EscalationExporter extends BaseExporter<Escalation> {
     }
 
     @Override
-    protected String getBeanFileName(Escalation escalation) {
+    protected String getEntityFileName(Escalation escalation) {
         return escalation.getName() + "-" + escalation.getId();
     }
 

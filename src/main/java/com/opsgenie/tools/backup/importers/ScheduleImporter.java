@@ -6,7 +6,6 @@ import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ScheduleImporter extends BaseImporter<Schedule> {
@@ -18,12 +17,19 @@ public class ScheduleImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected void getEntityWithId(Schedule schedule) throws ApiException {
-        api.getSchedule(new GetScheduleRequest().identifier(schedule.getId()));
+    protected Schedule checkEntityWithName(Schedule schedule) throws ApiException {
+        final GetScheduleRequest getScheduleRequest = new GetScheduleRequest().identifierType(GetScheduleRequest.IdentifierTypeEnum.NAME).identifier(schedule.getName());
+        return api.getSchedule(getScheduleRequest).getData();
     }
 
     @Override
-    protected Schedule getBean() {
+    protected Schedule checkEntityWithId(Schedule schedule) throws ApiException {
+        final GetScheduleRequest getScheduleRequest = new GetScheduleRequest().identifier(schedule.getId());
+        return api.getSchedule(getScheduleRequest).getData();
+    }
+
+    @Override
+    protected Schedule getNewInstance() {
         return new Schedule();
     }
 
@@ -33,49 +39,49 @@ public class ScheduleImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected void addBean(Schedule bean) throws ApiException {
+    protected void createEntity(Schedule entity) throws ApiException {
         CreateSchedulePayload payload = new CreateSchedulePayload();
-        payload.setName(bean.getName());
+        payload.setName(entity.getName());
 
-        if (BackupUtils.checkValidString(bean.getDescription()))
-            payload.setDescription(bean.getDescription());
+        if (BackupUtils.checkValidString(entity.getDescription()))
+            payload.setDescription(entity.getDescription());
 
-        payload.setTimezone(bean.getTimezone());
-        payload.setEnabled(bean.isEnabled());
-        payload.setOwnerTeam(bean.getOwnerTeam());
-        payload.setRotations(constructCreateScheduleRotationPayloads(bean));
+        payload.setTimezone(entity.getTimezone());
+        payload.setEnabled(entity.isEnabled());
+        payload.setOwnerTeam(entity.getOwnerTeam());
+        payload.setRotations(constructCreateScheduleRotationPayloads(entity));
 
         api.createSchedule(payload);
     }
 
     @Override
-    protected void updateBean(Schedule bean) throws ApiException {
+    protected void updateEntity(Schedule entity, EntityStatus entityStatus) throws ApiException {
         UpdateSchedulePayload payload = new UpdateSchedulePayload();
-        payload.setName(bean.getName());
+        payload.setName(entity.getName());
 
-        if (BackupUtils.checkValidString(bean.getDescription()))
-            payload.setDescription(bean.getDescription());
+        if (BackupUtils.checkValidString(entity.getDescription()))
+            payload.setDescription(entity.getDescription());
 
-        payload.setTimezone(bean.getTimezone());
-        payload.setEnabled(bean.isEnabled());
-        payload.setOwnerTeam(bean.getOwnerTeam());
-        payload.setRotations(constructCreateScheduleRotationPayloads(bean));
+        payload.setTimezone(entity.getTimezone());
+        payload.setEnabled(entity.isEnabled());
+        payload.setOwnerTeam(entity.getOwnerTeam());
+        payload.setRotations(constructCreateScheduleRotationPayloads(entity));
 
         UpdateScheduleRequest request = new UpdateScheduleRequest();
-        request.setIdentifier(bean.getId());
+        request.setIdentifier(entity.getId());
         request.setIdentifierType(UpdateScheduleRequest.IdentifierTypeEnum.ID);
         request.setBody(payload);
 
         api.updateSchedule(request);
     }
 
-    private List<CreateScheduleRotationPayload> constructCreateScheduleRotationPayloads(Schedule bean) {
+    private List<CreateScheduleRotationPayload> constructCreateScheduleRotationPayloads(Schedule schedule) {
 
         List<CreateScheduleRotationPayload> createScheduleRotationPayloadList = new ArrayList<CreateScheduleRotationPayload>();
 
-        if (bean.getRotations() != null && bean.getRotations().size() > 0) {
+        if (schedule.getRotations() != null && schedule.getRotations().size() > 0) {
 
-            for (ScheduleRotation rotation : bean.getRotations()) {
+            for (ScheduleRotation rotation : schedule.getRotations()) {
                 if (rotation.getLength() == null || rotation.getLength() < 1) {
                     rotation.setLength(1);
                 }

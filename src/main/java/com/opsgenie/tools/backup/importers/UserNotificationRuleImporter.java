@@ -25,7 +25,7 @@ public class UserNotificationRuleImporter extends BaseImporter<NotificationRule>
     }
 
     @Override
-    protected NotificationRule getBean() {
+    protected NotificationRule getNewInstance() {
         return new NotificationRule();
     }
 
@@ -34,7 +34,7 @@ public class UserNotificationRuleImporter extends BaseImporter<NotificationRule>
         return "notifications";
     }
 
-    public void restore() throws RestoreException, ApiException {
+    public void restore() {
         logger.info("Restoring " + getImportDirectoryName() + " operation is started");
 
         if (!getImportDirectory().exists()) {
@@ -59,8 +59,8 @@ public class UserNotificationRuleImporter extends BaseImporter<NotificationRule>
     }
 
     @Override
-    protected void getEntityWithId(NotificationRule entity) throws ApiException {
-        notificationRuleApi.getNotificationRule(new GetNotificationRuleRequest().identifier(username).ruleId(entity.getId())).getData();
+    protected NotificationRule checkEntityWithId(NotificationRule entity) throws ApiException {
+        return notificationRuleApi.getNotificationRule(new GetNotificationRuleRequest().identifier(username).ruleId(entity.getId())).getData();
     }
 
     private User findUser(File notificationDirectory) throws ApiException {
@@ -70,64 +70,27 @@ public class UserNotificationRuleImporter extends BaseImporter<NotificationRule>
     private void importNotificationsForUser(User user, File notificationDirectory) throws ApiException {
         username = user.getUsername();
         String[] files = BackupUtils.getFileListOf(notificationDirectory);
-
-        List<NotificationRule> notificationRules = this.listNotificationRulesWithoutId();
-
         for (String fileName : files) {
-            NotificationRule entity = readEntity(notificationDirectory.getName() + "/" + fileName);
-            NotificationRule cloneEntity = readEntity(notificationDirectory.getName() + "/" + fileName);
-            unsetIds(cloneEntity);
-
-            if (entity != null && !notificationRules.contains(cloneEntity)) {
-                importEntity(entity);
+            NotificationRule rule = readEntity(notificationDirectory.getName() + "/" + fileName);
+            if (rule != null) {
+                importEntity(rule);
             }
         }
     }
 
-    private List<NotificationRule> listNotificationRulesWithoutId() throws ApiException {
-        ListNotificationRulesResponse listResponse = notificationRuleApi.listNotificationRules(username);
-        List<NotificationRuleMeta> ruleMetaList = listResponse.getData();
-
-        List<NotificationRule> result = new ArrayList<NotificationRule>();
-
-        for (NotificationRuleMeta meta : ruleMetaList) {
-            GetNotificationRuleRequest request = new GetNotificationRuleRequest()
-                    .identifier(username)
-                    .ruleId(meta.getId());
-
-            GetNotificationRuleResponse response = notificationRuleApi.getNotificationRule(request);
-
-            NotificationRule notificationRule = response.getData();
-            unsetIds(notificationRule);
-
-            result.add(notificationRule);
-        }
-
-        return result;
-    }
-
-    private void unsetIds(NotificationRule notificationRule) {
-        notificationRule.setId(null);
-
-        for (NotificationRuleStep step : notificationRule.getSteps()) {
-            step.setId(null);
-            step.getParent().setId(null);
-        }
-    }
-
     @Override
-    protected void addBean(NotificationRule bean) throws ApiException {
+    protected void createEntity(NotificationRule entity) throws ApiException {
         CreateNotificationRulePayload payload = new CreateNotificationRulePayload();
-        payload.setActionType(bean.getActionType());
-        payload.setCriteria(bean.getCriteria());
-        payload.setEnabled(bean.isEnabled());
-        payload.setName(bean.getName());
-        payload.setNotificationTime(bean.getNotificationTime());
-        payload.setOrder(bean.getOrder());
-        payload.setRepeat(bean.getRepeat());
-        payload.setSchedules(bean.getSchedules());
-        payload.setTimeRestriction(bean.getTimeRestriction());
-        payload.setSteps(constructCreateNotificationRuleStepPayloadList(bean));
+        payload.setActionType(entity.getActionType());
+        payload.setCriteria(entity.getCriteria());
+        payload.setEnabled(entity.isEnabled());
+        payload.setName(entity.getName());
+        payload.setNotificationTime(entity.getNotificationTime());
+        payload.setOrder(entity.getOrder());
+        payload.setRepeat(entity.getRepeat());
+        payload.setSchedules(entity.getSchedules());
+        payload.setTimeRestriction(entity.getTimeRestriction());
+        payload.setSteps(constructCreateNotificationRuleStepPayloadList(entity));
 
         CreateNotificationRuleRequest request = new CreateNotificationRuleRequest();
         request.setBody(payload);
@@ -136,10 +99,10 @@ public class UserNotificationRuleImporter extends BaseImporter<NotificationRule>
         notificationRuleApi.createNotificationRule(request).getData().getId();
     }
 
-    private List<CreateNotificationRuleStepPayload> constructCreateNotificationRuleStepPayloadList(NotificationRule bean) {
+    private List<CreateNotificationRuleStepPayload> constructCreateNotificationRuleStepPayloadList(NotificationRule notificationRule) {
         List<CreateNotificationRuleStepPayload> createNotificationRuleStepPayloadList = new ArrayList<CreateNotificationRuleStepPayload>();
 
-        for (NotificationRuleStep notificationRuleStep : bean.getSteps()) {
+        for (NotificationRuleStep notificationRuleStep : notificationRule.getSteps()) {
             createNotificationRuleStepPayloadList.add(
                     new CreateNotificationRuleStepPayload()
                             .contact(notificationRuleStep.getContact())
@@ -152,20 +115,20 @@ public class UserNotificationRuleImporter extends BaseImporter<NotificationRule>
     }
 
     @Override
-    protected void updateBean(NotificationRule bean) throws ApiException {
+    protected void updateEntity(NotificationRule entity, EntityStatus entityStatus) throws ApiException {
         UpdateNotificationRulePayload payload = new UpdateNotificationRulePayload();
-        payload.setCriteria(bean.getCriteria());
-        payload.setEnabled(bean.isEnabled());
-        payload.setName(bean.getName());
-        payload.setNotificationTime(bean.getNotificationTime());
-        payload.setOrder(bean.getOrder());
-        payload.setRepeat(bean.getRepeat());
-        payload.setSchedules(bean.getSchedules());
-        payload.setTimeRestriction(bean.getTimeRestriction());
-        payload.setSteps(constructCreateNotificationRuleStepPayloadList(bean));
+        payload.setCriteria(entity.getCriteria());
+        payload.setEnabled(entity.isEnabled());
+        payload.setName(entity.getName());
+        payload.setNotificationTime(entity.getNotificationTime());
+        payload.setOrder(entity.getOrder());
+        payload.setRepeat(entity.getRepeat());
+        payload.setSchedules(entity.getSchedules());
+        payload.setTimeRestriction(entity.getTimeRestriction());
+        payload.setSteps(constructCreateNotificationRuleStepPayloadList(entity));
 
         UpdateNotificationRuleRequest request = new UpdateNotificationRuleRequest();
-        request.setRuleId(bean.getId());
+        request.setRuleId(entity.getId());
         request.setIdentifier(username);
         request.setBody(payload);
 
@@ -173,7 +136,7 @@ public class UserNotificationRuleImporter extends BaseImporter<NotificationRule>
     }
 
     @Override
-    protected String getEntityIdentifierName(NotificationRule bean) {
-        return "Notification " + bean.getName() + " for user " + username;
+    protected String getEntityIdentifierName(NotificationRule notificationRule) {
+        return "Notification " + notificationRule.getName() + " for user " + username;
     }
 }

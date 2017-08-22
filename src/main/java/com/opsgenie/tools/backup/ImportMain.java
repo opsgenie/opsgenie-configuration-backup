@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opsgenie.client.ApiClient;
 import com.opsgenie.client.Configuration;
 import com.opsgenie.client.api.AccountApi;
-import com.opsgenie.client.model.Filter;
-import com.opsgenie.client.model.GetAccountInfoResponse;
-import com.opsgenie.client.model.Recipient;
-import com.opsgenie.client.model.TimeRestrictionInterval;
+import com.opsgenie.client.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,6 +67,7 @@ public class ImportMain {
         mapper.addMixIn(Filter.class, Ignored.class);
         mapper.addMixIn(TimeRestrictionInterval.class, Ignored.class);
         mapper.addMixIn(Recipient.class, Ignored.class);
+        mapper.addMixIn(AlertPolicy.class, Ignored.class);
 
         AccountApi accountApi = new AccountApi();
         final GetAccountInfoResponse info = accountApi.getInfo();

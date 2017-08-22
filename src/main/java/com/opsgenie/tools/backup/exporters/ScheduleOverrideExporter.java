@@ -6,8 +6,6 @@ import com.opsgenie.client.api.ScheduleOverrideApi;
 import com.opsgenie.client.model.ListScheduleOverridesRequest;
 import com.opsgenie.client.model.Schedule;
 import com.opsgenie.client.model.ScheduleOverride;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class ScheduleOverrideExporter extends BaseExporter<ScheduleOverride> {
-
     private static ScheduleApi scheduleApi = new ScheduleApi();
     private static ScheduleOverrideApi overrideApi = new ScheduleOverrideApi();
 
@@ -27,8 +24,8 @@ public class ScheduleOverrideExporter extends BaseExporter<ScheduleOverride> {
     }
 
     @Override
-    protected String getBeanFileName(ScheduleOverride bean) {
-        return bean.getUser() + "-" + bean.getAlias();
+    protected String getEntityFileName(ScheduleOverride scheduleOverride) {
+        return scheduleOverride.getUser() + "-" + scheduleOverride.getAlias();
     }
 
     @Override
@@ -43,7 +40,7 @@ public class ScheduleOverrideExporter extends BaseExporter<ScheduleOverride> {
                         File scheduleDirectory = new File(getExportDirectory().getAbsolutePath() + "/" + schedule.getName());
                         scheduleDirectory.mkdirs();
                         for (ScheduleOverride override : overrides) {
-                            exportFile(getExportDirectory().getAbsolutePath() + "/" + schedule.getName() + "/" + getBeanFileName(override) + ".json", override);
+                            exportFile(getExportDirectory().getAbsolutePath() + "/" + schedule.getName() + "/" + getEntityFileName(override) + ".json", override);
                         }
                     }
                 } catch (Exception e) {

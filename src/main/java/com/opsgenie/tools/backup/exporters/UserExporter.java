@@ -19,8 +19,8 @@ public class UserExporter extends BaseExporter<User> {
     }
 
     @Override
-    protected String getBeanFileName(User bean) {
-        return bean.getUsername() + "-" + bean.getId();
+    protected String getEntityFileName(User user) {
+        return user.getUsername() + "-" + user.getId();
     }
 
 

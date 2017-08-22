@@ -3,11 +3,6 @@ package com.opsgenie.tools.backup.importers;
 import com.opsgenie.client.ApiException;
 import com.opsgenie.client.api.ForwardingRuleApi;
 import com.opsgenie.client.model.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.io.IOException;
-import java.text.ParseException;
 
 ;
 
@@ -20,12 +15,19 @@ public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
     }
 
     @Override
-    protected void getEntityWithId(ForwardingRule forwardingRule) throws ApiException {
-        forwardingRuleApi.getForwardingRule(new GetForwardingRuleRequest().identifier(forwardingRule.getId()));
+    protected ForwardingRule checkEntityWithName(ForwardingRule forwardingRule) throws ApiException {
+        final GetForwardingRuleRequest getForwardingRuleRequest = new GetForwardingRuleRequest().identifierType(GetForwardingRuleRequest.IdentifierTypeEnum.ALIAS).identifier(forwardingRule.getAlias());
+        return forwardingRuleApi.getForwardingRule(getForwardingRuleRequest).getData();
     }
 
     @Override
-    protected ForwardingRule getBean() throws IOException, ParseException {
+    protected ForwardingRule checkEntityWithId(ForwardingRule forwardingRule) throws ApiException {
+        final GetForwardingRuleRequest getForwardingRuleRequest = new GetForwardingRuleRequest().identifier(forwardingRule.getId());
+        return forwardingRuleApi.getForwardingRule(getForwardingRuleRequest).getData();
+    }
+
+    @Override
+    protected ForwardingRule getNewInstance() {
         return new ForwardingRule();
     }
 
@@ -35,37 +37,37 @@ public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
     }
 
     @Override
-    protected void addBean(ForwardingRule bean) throws ApiException {
-        if (bean.getEndDate() != null && bean.getEndDate().getMillis() < System.currentTimeMillis()) {
-            logger.warn(getEntityIdentifierName(bean) + " end date is in the past.");
+    protected void createEntity(ForwardingRule entity) throws ApiException {
+        if (entity.getEndDate() != null && entity.getEndDate().getMillis() < System.currentTimeMillis()) {
+            logger.warn(getEntityIdentifierName(entity) + " end date is in the past.");
             return;
         }
 
         CreateForwardingRulePayload payload = new CreateForwardingRulePayload();
-        payload.setFromUser(bean.getFromUser());
-        payload.setToUser(bean.getToUser());
-        payload.setStartDate(bean.getStartDate());
-        payload.setEndDate(bean.getEndDate());
-        payload.setAlias(bean.getAlias());
+        payload.setFromUser(entity.getFromUser());
+        payload.setToUser(entity.getToUser());
+        payload.setStartDate(entity.getStartDate());
+        payload.setEndDate(entity.getEndDate());
+        payload.setAlias(entity.getAlias());
 
         forwardingRuleApi.createForwardingRule(payload);
     }
 
     @Override
-    protected void updateBean(ForwardingRule bean) throws ApiException {
-        if (bean.getEndDate() != null && bean.getEndDate().getMillis() < System.currentTimeMillis()) {
-            logger.warn(getEntityIdentifierName(bean) + " end date is in the past.");
+    protected void updateEntity(ForwardingRule entity, EntityStatus entityStatus) throws ApiException {
+        if (entity.getEndDate() != null && entity.getEndDate().getMillis() < System.currentTimeMillis()) {
+            logger.warn(getEntityIdentifierName(entity) + " end date is in the past.");
             return;
         }
 
         UpdateForwardingRulePayload payload = new UpdateForwardingRulePayload();
-        payload.setFromUser(bean.getFromUser());
-        payload.setToUser(bean.getToUser());
-        payload.setStartDate(bean.getStartDate());
-        payload.setEndDate(bean.getEndDate());
+        payload.setFromUser(entity.getFromUser());
+        payload.setToUser(entity.getToUser());
+        payload.setStartDate(entity.getStartDate());
+        payload.setEndDate(entity.getEndDate());
 
         UpdateForwardingRuleRequest request = new UpdateForwardingRuleRequest();
-        request.setIdentifier(bean.getId());
+        request.setIdentifier(entity.getId());
         request.setIdentifierType(UpdateForwardingRuleRequest.IdentifierTypeEnum.ID);
         request.setBody(payload);
 

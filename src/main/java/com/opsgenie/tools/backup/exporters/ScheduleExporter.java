@@ -18,8 +18,8 @@ public class ScheduleExporter extends BaseExporter<Schedule> {
     }
 
     @Override
-    protected String getBeanFileName(Schedule bean) {
-        return bean.getName() + "-" + bean.getId();
+    protected String getEntityFileName(Schedule schedule) {
+        return schedule.getName() + "-" + schedule.getId();
     }
 
 
