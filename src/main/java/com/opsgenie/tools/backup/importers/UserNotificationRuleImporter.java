@@ -7,8 +7,6 @@ import com.opsgenie.client.api.UserApi;
 import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
 import com.opsgenie.tools.backup.RestoreException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -72,11 +70,48 @@ public class UserNotificationRuleImporter extends BaseImporter<NotificationRule>
     private void importNotificationsForUser(User user, File notificationDirectory) throws ApiException {
         username = user.getUsername();
         String[] files = BackupUtils.getFileListOf(notificationDirectory);
+
+        List<NotificationRule> notificationRules = this.listNotificationRulesWithoutId();
+
         for (String fileName : files) {
-            NotificationRule bean = readEntity(notificationDirectory.getName() + "/" + fileName);
-            if (bean != null) {
-                importEntity(bean);
+            NotificationRule entity = readEntity(notificationDirectory.getName() + "/" + fileName);
+            NotificationRule cloneEntity = readEntity(notificationDirectory.getName() + "/" + fileName);
+            unsetIds(cloneEntity);
+
+            if (entity != null && !notificationRules.contains(cloneEntity)) {
+                importEntity(entity);
             }
+        }
+    }
+
+    private List<NotificationRule> listNotificationRulesWithoutId() throws ApiException {
+        ListNotificationRulesResponse listResponse = notificationRuleApi.listNotificationRules(username);
+        List<NotificationRuleMeta> ruleMetaList = listResponse.getData();
+
+        List<NotificationRule> result = new ArrayList<NotificationRule>();
+
+        for (NotificationRuleMeta meta : ruleMetaList) {
+            GetNotificationRuleRequest request = new GetNotificationRuleRequest()
+                    .identifier(username)
+                    .ruleId(meta.getId());
+
+            GetNotificationRuleResponse response = notificationRuleApi.getNotificationRule(request);
+
+            NotificationRule notificationRule = response.getData();
+            unsetIds(notificationRule);
+
+            result.add(notificationRule);
+        }
+
+        return result;
+    }
+
+    private void unsetIds(NotificationRule notificationRule) {
+        notificationRule.setId(null);
+
+        for (NotificationRuleStep step : notificationRule.getSteps()) {
+            step.setId(null);
+            step.getParent().setId(null);
         }
     }
 
