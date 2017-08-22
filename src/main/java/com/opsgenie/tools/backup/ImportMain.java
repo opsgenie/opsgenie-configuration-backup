@@ -45,7 +45,6 @@ public class ImportMain {
         logger.info("Import directory path: " + backupPath);
         properties.setPath(backupPath);
 
-        logger.info("Api Key: " + apiKey);
         properties.setApiKey(apiKey);
 
         logger.info("Opsgenie host: " + opsGenieHost);
@@ -59,7 +58,6 @@ public class ImportMain {
             logger.info("Restore from git is enabled.");
             logger.info("Git ssh url:" + sshUrl);
             logger.info("Ssh key path: " + sshKeyPath);
-            logSecretKey("Ssh key passphrase: ", sshPassphrase);
         }
 
         final ApiClient defaultApiClient = Configuration.getDefaultApiClient();
@@ -88,16 +86,6 @@ public class ImportMain {
 
         logger.info("Finished");
 
-    }
-
-    private static void logSecretKey(String propName, String secretKey) {
-        if (secretKey != null) {
-            String criptedKey = secretKey.substring(0, secretKey.length() / 2);
-            for (int i = criptedKey.length(); i < secretKey.length(); i++) {
-                criptedKey += "*";
-            }
-            logger.info("The " + propName + " is = " + criptedKey);
-        }
     }
 
     public static ImportConfig extractRestoreConfig() throws IOException {

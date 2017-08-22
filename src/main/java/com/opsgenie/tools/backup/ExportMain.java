@@ -35,7 +35,6 @@ public class ExportMain {
         logger.info("Export directory path: " + backupPath);
         properties.setPath(backupPath);
 
-        logger.info("The api key:" + apiKey);
         properties.setApiKey(apiKey);
 
         logger.info("Opsgenie host: " + opsGenieHost);
@@ -52,7 +51,6 @@ public class ExportMain {
             logger.info("The SSH key path: " + sshKeyPath);
             properties.setSshKeyPath(sshKeyPath);
 
-            logSecretKey("SSH key passphrase", sshPassphrase);
             properties.setPassphrase(sshPassphrase);
         }
 
@@ -71,16 +69,5 @@ public class ExportMain {
         exporter.export();
 
         logger.info("Finished");
-
-    }
-
-    private static void logSecretKey(String propName, String secretKey) {
-        if (secretKey != null) {
-            String criptedKey = secretKey.substring(0, secretKey.length() / 2);
-            for (int i = criptedKey.length(); i < secretKey.length(); i++) {
-                criptedKey += "*";
-            }
-            logger.info("The " + propName + " is = " + criptedKey);
-        }
     }
 }
