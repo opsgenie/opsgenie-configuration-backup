@@ -1,7 +1,7 @@
 package com.opsgenie.tools.backup;
 
 import com.beust.jcommander.JCommander;
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opsgenie.client.ApiClient;
 import com.opsgenie.client.Configuration;
@@ -69,9 +69,9 @@ public class ImportMain {
         defaultApiClient.setDebugging(debug);
 
         ObjectMapper mapper = defaultApiClient.getJSON().getContext(Object.class);
-        mapper.addMixIn(Filter.TypeEnum.class, Ignored.class);
-        mapper.addMixIn(TimeRestrictionInterval.TypeEnum.class, Ignored.class);
-        mapper.addMixIn(Recipient.TypeEnum.class, Ignored.class);
+        mapper.addMixIn(Filter.class, Ignored.class);
+        mapper.addMixIn(TimeRestrictionInterval.class, Ignored.class);
+        mapper.addMixIn(Recipient.class, Ignored.class);
 
         AccountApi accountApi = new AccountApi();
         final GetAccountInfoResponse info = accountApi.getInfo();
@@ -241,7 +241,8 @@ public class ImportMain {
         return null;
     }
 
-    @JsonIgnoreType
     abstract class Ignored {
+        @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+        String type;
     }
 }

@@ -6,10 +6,9 @@ import com.opsgenie.client.api.TeamRoutingRuleApi;
 import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
 import com.opsgenie.tools.backup.RestoreException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.List;
 
 public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
 
@@ -74,12 +73,36 @@ public class TeamRoutingRuleImporter extends BaseImporter<TeamRoutingRule> {
         teamName = team.getName();
         String[] files = BackupUtils.getFileListOf(teamDirectory);
 
+        List<TeamRoutingRule> teamRoutingRules = this.listRoutingRulesWithoutId();
+
         for (String fileName : files) {
-            TeamRoutingRule bean = readEntity(teamDirectory.getName() + "/" + fileName);
-            if (bean != null) {
-                importEntity(bean);
+            TeamRoutingRule entity = readEntity(teamDirectory.getName() + "/" + fileName);
+            TeamRoutingRule cloneEntity = readEntity(teamDirectory.getName() + "/" + fileName);
+            unsetIds(cloneEntity);
+
+            if (entity != null && !teamRoutingRules.contains(cloneEntity)) {
+                importEntity(entity);
             }
         }
+    }
+
+    private List<TeamRoutingRule> listRoutingRulesWithoutId() throws ApiException {
+        ListTeamRoutingRulesRequest request = new ListTeamRoutingRulesRequest()
+                .identifier(teamName)
+                .teamIdentifierType(ListTeamRoutingRulesRequest.TeamIdentifierTypeEnum.NAME);
+        ListTeamRoutingRulesResponse response = teamRoutingRuleApi.listTeamRoutingRules(request);
+
+        for (TeamRoutingRule routingRule : response.getData()) {
+            unsetIds(routingRule);
+        }
+
+        return response.getData();
+    }
+
+    private void unsetIds(TeamRoutingRule routingRule) {
+        routingRule.setId(null);
+        routingRule.getNotify().setId(null);
+        routingRule.setIsDefault(false);
     }
 
     @Override
