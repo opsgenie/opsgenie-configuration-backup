@@ -1,30 +1,24 @@
 package com.opsgenie.tools.backup.exporters;
 
 import com.opsgenie.client.ApiException;
-import com.opsgenie.client.api.ScheduleApi;
-import com.opsgenie.client.model.Schedule;
+import com.opsgenie.tools.backup.EntityListService;
+import com.opsgenie.tools.backup.ScheduleConfig;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.Collections;
 import java.util.List;
 
-public class ScheduleExporter extends BaseExporter<Schedule> {
-
-    private static ScheduleApi scheduleApi = new ScheduleApi();
+public class ScheduleExporter extends BaseExporter<ScheduleConfig> {
 
     public ScheduleExporter(String backupRootDirectory) {
         super(backupRootDirectory, "schedules");
     }
 
     @Override
-    protected String getEntityFileName(Schedule schedule) {
-        return schedule.getName() + "-" + schedule.getId();
+    protected String getEntityFileName(ScheduleConfig scheduleConfig) {
+        return scheduleConfig.getSchedule().getName() + "-" + scheduleConfig.getSchedule().getId();
     }
 
-
     @Override
-    protected List<Schedule> retrieveEntities() throws ParseException, IOException, ApiException {
-        return scheduleApi.listSchedules(Collections.singletonList("rotation")).getData();
+    protected List<ScheduleConfig> retrieveEntities() throws ApiException {
+        return EntityListService.listSchedules();
     }
 }

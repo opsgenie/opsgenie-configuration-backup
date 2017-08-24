@@ -1,28 +1,24 @@
 package com.opsgenie.tools.backup.exporters;
 
 import com.opsgenie.client.ApiException;
-import com.opsgenie.client.api.TeamApi;
-import com.opsgenie.client.model.Team;
+import com.opsgenie.tools.backup.EntityListService;
+import com.opsgenie.tools.backup.TeamConfig;
 
-import java.util.Collections;
 import java.util.List;
 
-public class TeamExporter extends BaseExporter<Team> {
-
-    private static TeamApi teamApi = new TeamApi();
+public class TeamExporter extends BaseExporter<TeamConfig> {
 
     public TeamExporter(String backupRootDirectory) {
         super(backupRootDirectory, "teams");
     }
 
     @Override
-    protected String getEntityFileName(Team team) {
-        return team.getName() + "-" + team.getId();
+    protected String getEntityFileName(TeamConfig team) {
+        return team.getTeam().getName() + "-" + team.getTeam().getId();
     }
 
-
     @Override
-    protected List<Team> retrieveEntities() throws ApiException {
-        return teamApi.listTeams(Collections.singletonList("member")).getData();
+    protected List<TeamConfig> retrieveEntities() throws ApiException {
+        return EntityListService.listTeams();
     }
 }

@@ -4,25 +4,35 @@ import com.opsgenie.client.ApiException;
 import com.opsgenie.client.api.EscalationApi;
 import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
+import com.opsgenie.tools.backup.EntityListService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EscalationImporter extends BaseImporter<Escalation> {
 
     private static EscalationApi api = new EscalationApi();
+    private List<Escalation> currentEscalations = new ArrayList<Escalation>();
 
     public EscalationImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
-    protected Escalation checkEntityWithName(Escalation escalation) throws ApiException {
-        final GetEscalationRequest getEscalationRequest = new GetEscalationRequest().identifierType(GetEscalationRequest.IdentifierTypeEnum.NAME).identifier(escalation.getName());
-        return api.getEscalation(getEscalationRequest).getData();
+    protected EntityStatus checkEntity(Escalation entity) throws ApiException {
+        for (Escalation escalation : currentEscalations) {
+            if (escalation.getId().equals(entity.getId())) {
+                return EntityStatus.EXISTS_WITH_ID;
+            } else if (escalation.getName().equals(entity.getName())) {
+                return EntityStatus.EXISTS_WITH_NAME;
+            }
+        }
+        return EntityStatus.NOT_EXIST;
     }
 
     @Override
-    protected Escalation checkEntityWithId(Escalation escalation) throws ApiException {
-        final GetEscalationRequest getEscalationRequest = new GetEscalationRequest().identifier(escalation.getId());
-        return api.getEscalation(getEscalationRequest).getData();
+    protected void populateCurrentEntityList() throws ApiException {
+        currentEscalations = EntityListService.listEscalations();
     }
 
     @Override

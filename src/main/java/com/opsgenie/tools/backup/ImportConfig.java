@@ -1,10 +1,5 @@
 package com.opsgenie.tools.backup;
 
-/**
- * Config parameters for import procedure.
- *
- * @author Mehmet Mustafa Demir
- */
 public class ImportConfig {
 
     private boolean addNewUsers = true, updateExistingUsers = true;
@@ -15,40 +10,13 @@ public class ImportConfig {
 
     private boolean addNewEscalations = true, updateExistingEscalations = true;
 
-    private boolean addNewNotifications = true, updateExistingNotifications = true;
-
-    private boolean addNewTeamRoutingRules = true, updateExistingTeamRoutingRules = true;
-
     private boolean addNewUserForwarding = true, updateExistingUserForwarding = true;
 
     private boolean addNewScheduleOverrides = true, updateExistingScheduleOverrides = true;
 
-    private boolean addNewIntegrations = true, updateExistingIntegrations = true;
-
     private boolean addNewPolicies = true, updateExistingPolicies = true;
 
-    public void setAllFalse() {
-        addNewUsers = false;
-        updateExistingUsers = false;
-        addNewTeams = false;
-        updateExistingTeams = false;
-        addNewSchedules = false;
-        updateExistingSchedules = false;
-        addNewEscalations = false;
-        updateExistingEscalations = false;
-        addNewNotifications = false;
-        updateExistingNotifications = false;
-        addNewTeamRoutingRules = false;
-        updateExistingTeamRoutingRules = false;
-        addNewUserForwarding = false;
-        updateExistingUserForwarding = false;
-        addNewScheduleOverrides = false;
-        updateExistingScheduleOverrides = false;
-        addNewIntegrations = false;
-        updateExistingIntegrations = false;
-        addNewPolicies = false;
-        updateExistingPolicies = false;
-    }
+    private boolean addNewIntegrations = true, updateExistingIntegrations = true;
 
     public boolean isAddNewUsers() {
         return addNewUsers;
@@ -119,42 +87,6 @@ public class ImportConfig {
 
     public ImportConfig setUpdateExistingEscalations(boolean updateExistingEscalations) {
         this.updateExistingEscalations = updateExistingEscalations;
-        return this;
-    }
-
-    public boolean isAddNewNotifications() {
-        return addNewNotifications;
-    }
-
-    public ImportConfig setAddNewNotifications(boolean addNewNotifications) {
-        this.addNewNotifications = addNewNotifications;
-        return this;
-    }
-
-    public boolean isUpdateExistingNotifications() {
-        return updateExistingNotifications;
-    }
-
-    public ImportConfig setUpdateExistingNotifications(boolean updateExistingNotifications) {
-        this.updateExistingNotifications = updateExistingNotifications;
-        return this;
-    }
-
-    public boolean isAddNewTeamRoutingRules() {
-        return addNewTeamRoutingRules;
-    }
-
-    public ImportConfig setAddNewTeamRoutingRules(boolean addNewTeamRoutingRules) {
-        this.addNewTeamRoutingRules = addNewTeamRoutingRules;
-        return this;
-    }
-
-    public boolean isUpdateExistingTeamRoutingRules() {
-        return updateExistingTeamRoutingRules;
-    }
-
-    public ImportConfig setUpdateExistingTeamRoutingRules(boolean updateExistingTeamRoutingRules) {
-        this.updateExistingTeamRoutingRules = updateExistingTeamRoutingRules;
         return this;
     }
 

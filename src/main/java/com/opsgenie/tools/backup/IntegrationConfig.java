@@ -3,7 +3,7 @@ package com.opsgenie.tools.backup;
 import com.opsgenie.client.model.ActionCategorizedList;
 import com.opsgenie.client.model.Integration;
 
-public class IntegrationWrapper {
+public class IntegrationConfig {
 
     private Integration integration;
     private ActionCategorizedList integrationActions;

@@ -37,13 +37,13 @@ abstract class BaseExporter<T> implements Exporter {
         try {
             currentBeanList = retrieveEntities();
         } catch (Exception e) {
-            logger.error("Error at Listing " + exportDirectory.getName(), e);
+            logger.error("Could not list " + exportDirectory.getName(), e);
             return;
         }
 
         for (T bean : currentBeanList) {
             exportFile(getExportDirectory().getAbsolutePath() + "/" + getEntityFileName(bean) + ".json", bean);
-            }
+        }
     }
 
     protected abstract String getEntityFileName(T entity);

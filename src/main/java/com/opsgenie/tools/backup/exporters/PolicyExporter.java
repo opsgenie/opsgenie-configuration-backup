@@ -1,16 +1,14 @@
 package com.opsgenie.tools.backup.exporters;
 
 import com.opsgenie.client.ApiException;
-import com.opsgenie.client.api.PolicyApi;
 import com.opsgenie.client.model.AlertPolicy;
-import com.opsgenie.client.model.AlertPolicyMeta;
+import com.opsgenie.client.model.ModifyAlertPolicy;
+import com.opsgenie.client.model.Recipient;
+import com.opsgenie.tools.backup.EntityListService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class PolicyExporter extends BaseExporter<AlertPolicy> {
-
-    private static PolicyApi policyApi = new PolicyApi();
 
     public PolicyExporter(String backupRootDirectory) {
         super(backupRootDirectory, "policies");
@@ -23,10 +21,14 @@ public class PolicyExporter extends BaseExporter<AlertPolicy> {
 
     @Override
     protected List<AlertPolicy> retrieveEntities() throws ApiException {
-        final List<AlertPolicyMeta> policyMetaList = policyApi.listAlertPolicies().getData();
-        List<AlertPolicy> policies = new ArrayList<AlertPolicy>();
-        for (AlertPolicyMeta meta : policyMetaList) {
-            policies.add(policyApi.getAlertPolicy(meta.getId()).getData());
+        final List<AlertPolicy> policies = EntityListService.listPolicies();
+        for (AlertPolicy policy : policies) {
+            if (policy instanceof ModifyAlertPolicy) {
+                ModifyAlertPolicy modifyAlertPolicy = (ModifyAlertPolicy) policy;
+                for (Recipient recipient : modifyAlertPolicy.getRecipients()) {
+                    recipient.setId(null);
+                }
+            }
         }
         return policies;
     }

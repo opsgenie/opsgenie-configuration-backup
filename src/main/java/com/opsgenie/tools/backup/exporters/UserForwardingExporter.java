@@ -1,16 +1,12 @@
 package com.opsgenie.tools.backup.exporters;
 
 import com.opsgenie.client.ApiException;
-import com.opsgenie.client.api.ForwardingRuleApi;
 import com.opsgenie.client.model.ForwardingRule;
+import com.opsgenie.tools.backup.EntityListService;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.List;
 
 public class UserForwardingExporter extends BaseExporter<ForwardingRule> {
-
-    private static ForwardingRuleApi forwardingRuleApi = new ForwardingRuleApi();
 
     public UserForwardingExporter(String backupRootDirectory) {
         super(backupRootDirectory, "forwardings");
@@ -18,12 +14,11 @@ public class UserForwardingExporter extends BaseExporter<ForwardingRule> {
 
     @Override
     protected String getEntityFileName(ForwardingRule forwardingRule) {
-        return forwardingRule.getFromUser() + "-" + forwardingRule.getId();
+        return forwardingRule.getId();
     }
 
-
     @Override
-    protected List<ForwardingRule> retrieveEntities() throws ParseException, IOException, ApiException {
-        return forwardingRuleApi.listForwardingRules().getData();
+    protected List<ForwardingRule> retrieveEntities() throws ApiException {
+        return EntityListService.listForwardingRules();
     }
 }

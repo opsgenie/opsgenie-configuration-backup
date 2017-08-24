@@ -22,7 +22,6 @@ abstract class BaseImporter<T> implements Importer {
     }
 
     public void restore() {
-
         if (!addEntityEnabled && !updateEntityEnabled) {
             logger.info("Skipping importing " + getImportDirectoryName() + " because both add and update is disabled");
             return;
@@ -40,7 +39,11 @@ abstract class BaseImporter<T> implements Importer {
             logger.warn("Warning: " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipped");
             return;
         }
-
+        try {
+            populateCurrentEntityList();
+        } catch (ApiException e) {
+            logger.error("Could not get current configuration" + e.getMessage());
+        }
         for (String fileName : files) {
             T entity = readEntity(fileName);
             if (entity != null) {
@@ -63,17 +66,23 @@ abstract class BaseImporter<T> implements Importer {
         }
     }
 
-    void importEntity(T backupEntity) {
-        EntityStatus entityStatus = checkEntity(backupEntity);
+    private void importEntity(T backupEntity) {
+        EntityStatus entityStatus;
+        try {
+            entityStatus = checkEntity(backupEntity);
+        } catch (ApiException e) {
+            logger.error(e.getMessage());
+            return;
+        }
 
-        if (updateEntityEnabled && (entityStatus.equals(EntityStatus.EXISTS_WITH_ID) || entityStatus.equals(EntityStatus.EXISTS_WITH_NAME))) {
+        if (updateEntityEnabled && (EntityStatus.EXISTS_WITH_ID.equals(entityStatus) || EntityStatus.EXISTS_WITH_NAME.equals(entityStatus))) {
             try {
                 updateEntity(backupEntity, entityStatus);
                 logger.info(getEntityIdentifierName(backupEntity) + " updated");
             } catch (Exception e) {
                 logger.error("Error at updating " + getEntityIdentifierName(backupEntity) + "." + e.getMessage());
             }
-        } else if (entityStatus == EntityStatus.NOT_EXIST && addEntityEnabled) {
+        } else if (EntityStatus.NOT_EXIST.equals(entityStatus) && addEntityEnabled) {
             try {
                 createEntity(backupEntity);
                 logger.info(getEntityIdentifierName(backupEntity) + " added");
@@ -83,34 +92,13 @@ abstract class BaseImporter<T> implements Importer {
         }
     }
 
-    private EntityStatus checkEntity(T entity) {
-        try {
-            if (checkEntityWithId(entity) != null) {
-                return EntityStatus.EXISTS_WITH_ID;
-            }
-            if (checkEntityWithName(entity) != null) {
-                return EntityStatus.EXISTS_WITH_NAME;
-            }
-        } catch (ApiException e) {
-            logger.error(e.getMessage());
-            if (e.getCode() != 404) {
-                return EntityStatus.COULD_NOT_CHECK;
-            }
-        }
-        return EntityStatus.NOT_EXIST;
-    }
+    protected abstract EntityStatus checkEntity(T entity) throws ApiException;
 
-    protected abstract T checkEntityWithName(T entity) throws ApiException;
-
-    protected abstract T checkEntityWithId(T entity) throws ApiException;
+    protected abstract void populateCurrentEntityList() throws ApiException;
 
     protected abstract void createEntity(T entity) throws ParseException, IOException, ApiException;
 
     protected abstract void updateEntity(T entity, EntityStatus entityStatus) throws ParseException, IOException, ApiException;
-
-    protected File getImportDirectory() {
-        return importDirectory;
-    }
 
     protected T getNewInstance() {
         throw new UnsupportedOperationException();

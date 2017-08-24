@@ -57,17 +57,9 @@ public class ImportMain {
             logger.info("Ssh key path: " + sshKeyPath);
         }
 
-        final ApiClient defaultApiClient = Configuration.getDefaultApiClient();
-        defaultApiClient.setApiKeyPrefix("GenieKey");
-        defaultApiClient.setApiKey(apiKey);
-        defaultApiClient.setBasePath(opsGenieHost);
-        defaultApiClient.setDebugging(debug);
+        final ApiClient defaultApiClient = configureDefaultApiClient(apiKey, opsGenieHost, debug);
 
-        ObjectMapper mapper = defaultApiClient.getJSON().getContext(Object.class);
-        mapper.addMixIn(Filter.class, Ignored.class);
-        mapper.addMixIn(TimeRestrictionInterval.class, Ignored.class);
-        mapper.addMixIn(Recipient.class, Ignored.class);
-        mapper.addMixIn(AlertPolicy.class, Ignored.class);
+        configureClientObjectMapper(defaultApiClient);
 
         AccountApi accountApi = new AccountApi();
         final GetAccountInfoResponse info = accountApi.getInfo();
@@ -86,9 +78,27 @@ public class ImportMain {
 
     }
 
-    public static ImportConfig extractRestoreConfig() throws IOException {
+    private static void configureClientObjectMapper(ApiClient defaultApiClient) {
+        ObjectMapper mapper = defaultApiClient.getJSON().getContext(Object.class);
+        mapper.addMixIn(Filter.class, Ignored.class);
+        mapper.addMixIn(TimeRestrictionInterval.class, Ignored.class);
+        mapper.addMixIn(Recipient.class, Ignored.class);
+        mapper.addMixIn(AlertPolicy.class, Ignored.class);
+        mapper.addMixIn(Integration.class, Ignored.class);
+        mapper.addMixIn(BaseIntegrationAction.class, Ignored.class);
+    }
+
+    private static ApiClient configureDefaultApiClient(String apiKey, String opsGenieHost, boolean debug) {
+        final ApiClient defaultApiClient = Configuration.getDefaultApiClient();
+        defaultApiClient.setApiKeyPrefix("GenieKey");
+        defaultApiClient.setApiKey(apiKey);
+        defaultApiClient.setBasePath(opsGenieHost);
+        defaultApiClient.setDebugging(debug);
+        return defaultApiClient;
+    }
+
+    private static ImportConfig extractRestoreConfig() throws IOException {
         File configFile = new File("restoreConfig.properties");
-        Properties props = null;
         if (!configFile.exists()) {
             logger.warn("restoreConfig.properties file cannot be found.");
             logger.warn("Default Import configs will be used.");
@@ -97,7 +107,7 @@ public class ImportMain {
             FileReader reader = null;
             try {
                 ImportConfig config = new ImportConfig();
-                props = new Properties();
+                Properties props = new Properties();
                 reader = new FileReader(configFile);
                 props.load(reader);
 
@@ -143,28 +153,6 @@ public class ImportMain {
                 if (str != null && str.contains("false")) {
                     config.setUpdateExistingEscalations(false);
                     logger.warn("Updating existing escalations disabled.");
-                }
-
-                str = props.getProperty("addNewNotifications");
-                if (str != null && str.contains("false")) {
-                    config.setAddNewNotifications(false);
-                    logger.warn("Adding new notifications disabled.");
-                }
-                str = props.getProperty("updateExistingNotifications");
-                if (str != null && str.contains("false")) {
-                    config.setUpdateExistingNotifications(false);
-                    logger.warn("Updating existing notifications disabled.");
-                }
-
-                str = props.getProperty("addNewTeamRoutingRules");
-                if (str != null && str.contains("false")) {
-                    config.setAddNewTeamRoutingRules(false);
-                    logger.warn("Adding new team routing rules disabled.");
-                }
-                str = props.getProperty("updateExistingTeamRoutingRules");
-                if (str != null && str.contains("false")) {
-                    config.setUpdateExistingTeamRoutingRules(false);
-                    logger.warn("Updating existing team routing rules  disabled.");
                 }
 
                 str = props.getProperty("addNewUserForwarding");

@@ -16,7 +16,7 @@ public class ConfigurationImporter extends BaseBackup {
     private final Logger logger = LogManager.getLogger(ConfigurationImporter.class);
     private ImportConfig config;
 
-    public ConfigurationImporter(BackupProperties backupProperties, ImportConfig config) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
+    ConfigurationImporter(BackupProperties backupProperties, ImportConfig config) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
         super(backupProperties);
         if (config == null) {
             logger.warn("Config object is null.");
@@ -27,7 +27,7 @@ public class ConfigurationImporter extends BaseBackup {
         }
     }
 
-    public ConfigurationImporter(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
+    ConfigurationImporter(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
         super(backupProperties);
         logger.warn("Default Import configs will be used.");
         config = new ImportConfig();
@@ -55,10 +55,7 @@ public class ConfigurationImporter extends BaseBackup {
         importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
         importers.add(new EscalationImporter(rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
         importers.add(new ScheduleImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
-        importers.add(new UserNotificationRuleImporter(rootPath, config.isAddNewNotifications(), config.isUpdateExistingNotifications()));
-        importers.add(new TeamRoutingRuleImporter(rootPath, config.isAddNewTeamRoutingRules(), config.isUpdateExistingTeamRoutingRules()));
         importers.add(new UserForwardingImporter(rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
-        importers.add(new ScheduleOverrideImporter(rootPath, config.isAddNewScheduleOverrides(), config.isUpdateExistingScheduleOverrides()));
         importers.add(new PolicyImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
         importers.add(new IntegrationImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
 
@@ -69,8 +66,7 @@ public class ConfigurationImporter extends BaseBackup {
      * folder or remote git. If git is enabled from BackupProperties parameters it will import those
      * configurations from remote git.
      */
-
-    public void restore() throws GitAPIException {
+    void restore() throws GitAPIException {
         if (getBackupProperties().isGitEnabled()) {
             cloneGit(getBackupProperties());
         }

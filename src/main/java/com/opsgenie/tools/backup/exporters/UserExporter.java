@@ -1,36 +1,23 @@
 package com.opsgenie.tools.backup.exporters;
 
 import com.opsgenie.client.ApiException;
-import com.opsgenie.client.api.UserApi;
-import com.opsgenie.client.model.GetUserRequest;
-import com.opsgenie.client.model.ListUsersRequest;
-import com.opsgenie.client.model.User;
+import com.opsgenie.tools.backup.EntityListService;
+import com.opsgenie.tools.backup.UserConfig;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-public class UserExporter extends BaseExporter<User> {
-
-    private static UserApi userApi = new UserApi();
-
+public class UserExporter extends BaseExporter<UserConfig> {
     public UserExporter(String backupRootDirectory) {
         super(backupRootDirectory, "users");
     }
 
     @Override
-    protected String getEntityFileName(User user) {
-        return user.getUsername() + "-" + user.getId();
+    protected String getEntityFileName(UserConfig userConfig) {
+        return userConfig.getUser().getUsername() + "-" + userConfig.getUser().getId();
     }
 
-
     @Override
-    protected List<User> retrieveEntities() throws ApiException {
-        List<User> userList = userApi.listUsers(new ListUsersRequest()).getData();
-        List<User> usersWithContact = new ArrayList<User>();
-        for(User user:userList){
-            usersWithContact.add(userApi.getUser(new GetUserRequest().identifier(user.getId()).expand(Collections.singletonList("contact"))).getData());
-        }
-        return usersWithContact;
+    protected List<UserConfig> retrieveEntities() throws ApiException {
+        return EntityListService.listUserConfigs();
     }
 }

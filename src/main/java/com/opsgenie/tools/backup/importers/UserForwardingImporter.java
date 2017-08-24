@@ -2,28 +2,41 @@ package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.client.ApiException;
 import com.opsgenie.client.api.ForwardingRuleApi;
-import com.opsgenie.client.model.*;
+import com.opsgenie.client.model.CreateForwardingRulePayload;
+import com.opsgenie.client.model.ForwardingRule;
+import com.opsgenie.client.model.UpdateForwardingRulePayload;
+import com.opsgenie.client.model.UpdateForwardingRuleRequest;
+import com.opsgenie.tools.backup.EntityListService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 ;
 
 public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
 
     private static ForwardingRuleApi forwardingRuleApi = new ForwardingRuleApi();
+    private List<ForwardingRule> currentForwardingRules = new ArrayList<ForwardingRule>();
 
     public UserForwardingImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
-    protected ForwardingRule checkEntityWithName(ForwardingRule forwardingRule) throws ApiException {
-        final GetForwardingRuleRequest getForwardingRuleRequest = new GetForwardingRuleRequest().identifierType(GetForwardingRuleRequest.IdentifierTypeEnum.ALIAS).identifier(forwardingRule.getAlias());
-        return forwardingRuleApi.getForwardingRule(getForwardingRuleRequest).getData();
+    protected EntityStatus checkEntity(ForwardingRule entity) {
+        for (ForwardingRule forwardingRule : currentForwardingRules) {
+            if (forwardingRule.getId().equals(entity.getId())) {
+                return EntityStatus.EXISTS_WITH_ID;
+            } else if (forwardingRule.getToUser().equals(entity.getToUser())) {
+                return EntityStatus.EXISTS_WITH_NAME;
+            }
+        }
+        return EntityStatus.NOT_EXIST;
     }
 
     @Override
-    protected ForwardingRule checkEntityWithId(ForwardingRule forwardingRule) throws ApiException {
-        final GetForwardingRuleRequest getForwardingRuleRequest = new GetForwardingRuleRequest().identifier(forwardingRule.getId());
-        return forwardingRuleApi.getForwardingRule(getForwardingRuleRequest).getData();
+    protected void populateCurrentEntityList() throws ApiException {
+        currentForwardingRules = EntityListService.listForwardingRules();
     }
 
     @Override
@@ -67,15 +80,27 @@ public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
         payload.setEndDate(entity.getEndDate());
 
         UpdateForwardingRuleRequest request = new UpdateForwardingRuleRequest();
-        request.setIdentifier(entity.getId());
-        request.setIdentifierType(UpdateForwardingRuleRequest.IdentifierTypeEnum.ID);
+        if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
+            request.setIdentifier(entity.getId());
+        } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
+            request.setIdentifier(findForwardingRuleId(entity));
+        }
         request.setBody(payload);
 
         forwardingRuleApi.updateForwardingRule(request);
     }
 
+    private String findForwardingRuleId(ForwardingRule forwardingRuleToImport) {
+        for (ForwardingRule forwardingRule : currentForwardingRules) {
+            if (forwardingRule.getToUser().equals(forwardingRuleToImport.getToUser())) {
+                return forwardingRule.getId();
+            }
+        }
+        return null;
+    }
+
     @Override
-    protected String getEntityIdentifierName(ForwardingRule entitiy) {
-        return "Forwarding from user " + entitiy.getFromUser();
+    protected String getEntityIdentifierName(ForwardingRule forwardingRule) {
+        return "Forwarding from user " + forwardingRule.getFromUser().getUsername();
     }
 }

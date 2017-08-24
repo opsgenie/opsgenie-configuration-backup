@@ -29,13 +29,13 @@ abstract class BaseBackup {
     private Git git;
     private TransportConfigCallback callBack;
 
-    public BaseBackup(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
+    BaseBackup(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
         backupProperties.validate();
         this.backupProperties = backupProperties;
 
     }
 
-    protected void cloneGit(final BackupProperties properties) throws GitAPIException {
+    void cloneGit(final BackupProperties properties) throws GitAPIException {
         properties.setPath(properties.getPath() + "/OpsGenieBackupGitRepository");
         String rootPath = properties.getPath();
         File backupGitDirectory = new File(rootPath);
@@ -103,7 +103,7 @@ abstract class BaseBackup {
 
     protected abstract void init() throws FileNotFoundException, UnsupportedEncodingException;
 
-    public BackupProperties getBackupProperties() {
+    BackupProperties getBackupProperties() {
         return backupProperties;
     }
 
@@ -112,11 +112,11 @@ abstract class BaseBackup {
         return this;
     }
 
-    protected Git getGit() {
+    Git getGit() {
         return git;
     }
 
-    protected TransportConfigCallback getCallBack() {
+    TransportConfigCallback getCallBack() {
         return callBack;
     }
 }

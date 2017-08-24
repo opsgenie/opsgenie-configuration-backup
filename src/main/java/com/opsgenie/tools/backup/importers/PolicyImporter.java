@@ -7,26 +7,20 @@ import com.opsgenie.client.api.PolicyApi;
 import com.opsgenie.client.model.AlertPolicy;
 import com.opsgenie.client.model.UpdateAlertPolicyRequest;
 import com.opsgenie.tools.backup.BackupUtils;
+import com.opsgenie.tools.backup.EntityListService;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PolicyImporter extends BaseImporter<AlertPolicy> {
 
     private static PolicyApi api = new PolicyApi();
+    private List<AlertPolicy> currentPolicies = new ArrayList<AlertPolicy>();
 
     public PolicyImporter(String backupRootDirectory, boolean addEntity, boolean updateEntity) {
         super(backupRootDirectory, addEntity, updateEntity);
-    }
-
-    @Override
-    protected AlertPolicy checkEntityWithId(AlertPolicy entity) throws ApiException {
-        return api.getAlertPolicy(entity.getId()).getData();
-    }
-
-    @Override
-    protected AlertPolicy checkEntityWithName(AlertPolicy entity) throws ApiException {
-        return null;
     }
 
     @Override
@@ -38,6 +32,23 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
             logger.error("Could not read policy from file:" + fileName);
             return null;
         }
+    }
+
+    @Override
+    protected EntityStatus checkEntity(AlertPolicy entity) {
+        for (AlertPolicy policy : currentPolicies) {
+            if (policy.getId().equals(entity.getId())) {
+                return EntityStatus.EXISTS_WITH_ID;
+            } else if (policy.getName().equals(entity.getName())) {
+                return EntityStatus.EXISTS_WITH_NAME;
+            }
+        }
+        return EntityStatus.NOT_EXIST;
+    }
+
+    @Override
+    protected void populateCurrentEntityList() throws ApiException {
+        currentPolicies = EntityListService.listPolicies();
     }
 
     private AlertPolicy readJson(String alertPolicyJson) throws IOException {
@@ -60,12 +71,26 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     }
 
     @Override
-    protected void updateEntity(AlertPolicy entity, EntityStatus entityStatus) throws ApiException {
+    protected void updateEntity(AlertPolicy alertPolicy, EntityStatus entityStatus) throws ApiException {
         UpdateAlertPolicyRequest request = new UpdateAlertPolicyRequest();
-        entity.setId(null);
-        request.setBody(entity);
-        request.setPolicyId(entity.getId());
+        request.setBody(alertPolicy);
+        final String id = alertPolicy.getId();
+        alertPolicy.setId(null);
+        if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
+            request.setPolicyId(id);
+        } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
+            request.setPolicyId(findPolicyIdInCurrentConf(alertPolicy));
+        }
         api.updateAlertPolicy(request);
+    }
+
+    private String findPolicyIdInCurrentConf(AlertPolicy alertPolicy) {
+        for (AlertPolicy currentPolicy : currentPolicies) {
+            if (currentPolicy.getName().equals(alertPolicy.getName())) {
+                return currentPolicy.getId();
+            }
+        }
+        return null;
     }
 
     @Override

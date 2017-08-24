@@ -2,35 +2,46 @@ package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.client.ApiException;
 import com.opsgenie.client.api.ScheduleApi;
+import com.opsgenie.client.api.ScheduleOverrideApi;
 import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
+import com.opsgenie.tools.backup.EntityListService;
+import com.opsgenie.tools.backup.ScheduleConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScheduleImporter extends BaseImporter<Schedule> {
+public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
 
-    private static ScheduleApi api = new ScheduleApi();
+    private static ScheduleApi scheduleApi = new ScheduleApi();
+    private static ScheduleOverrideApi scheduleOverrideApi = new ScheduleOverrideApi();
+    private List<ScheduleConfig> currentSchedules = new ArrayList<ScheduleConfig>();
 
     public ScheduleImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
-    protected Schedule checkEntityWithName(Schedule schedule) throws ApiException {
-        final GetScheduleRequest getScheduleRequest = new GetScheduleRequest().identifierType(GetScheduleRequest.IdentifierTypeEnum.NAME).identifier(schedule.getName());
-        return api.getSchedule(getScheduleRequest).getData();
+    protected EntityStatus checkEntity(ScheduleConfig entity) {
+        for (ScheduleConfig scheduleConfig : currentSchedules) {
+            final Schedule currentSchedule = scheduleConfig.getSchedule();
+            if (currentSchedule.getId().equals(entity.getSchedule().getId())) {
+                return EntityStatus.EXISTS_WITH_ID;
+            } else if (currentSchedule.getName().equals(entity.getSchedule().getName())) {
+                return EntityStatus.EXISTS_WITH_NAME;
+            }
+        }
+        return EntityStatus.NOT_EXIST;
     }
 
     @Override
-    protected Schedule checkEntityWithId(Schedule schedule) throws ApiException {
-        final GetScheduleRequest getScheduleRequest = new GetScheduleRequest().identifier(schedule.getId());
-        return api.getSchedule(getScheduleRequest).getData();
+    protected void populateCurrentEntityList() throws ApiException {
+        currentSchedules = EntityListService.listSchedules();
     }
 
     @Override
-    protected Schedule getNewInstance() {
-        return new Schedule();
+    protected ScheduleConfig getNewInstance() {
+        return new ScheduleConfig();
     }
 
     @Override
@@ -39,40 +50,86 @@ public class ScheduleImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected void createEntity(Schedule entity) throws ApiException {
+    protected void createEntity(ScheduleConfig scheduleConfig) throws ApiException {
         CreateSchedulePayload payload = new CreateSchedulePayload();
-        payload.setName(entity.getName());
+        final Schedule schedule = scheduleConfig.getSchedule();
+        payload.setName(schedule.getName());
 
-        if (BackupUtils.checkValidString(entity.getDescription()))
-            payload.setDescription(entity.getDescription());
+        if (BackupUtils.checkValidString(schedule.getDescription()))
+            payload.setDescription(schedule.getDescription());
 
-        payload.setTimezone(entity.getTimezone());
-        payload.setEnabled(entity.isEnabled());
-        payload.setOwnerTeam(entity.getOwnerTeam());
-        payload.setRotations(constructCreateScheduleRotationPayloads(entity));
+        payload.setTimezone(schedule.getTimezone());
+        payload.setEnabled(schedule.isEnabled());
+        payload.setOwnerTeam(schedule.getOwnerTeam());
+        payload.setRotations(constructCreateScheduleRotationPayloads(schedule));
 
-        api.createSchedule(payload);
+        scheduleApi.createSchedule(payload);
+        for (ScheduleOverride override : scheduleConfig.getScheduleOverrideList()) {
+            createScheduleOverride(override);
+        }
+    }
+
+    private void createScheduleOverride(ScheduleOverride scheduleOverride) throws ApiException {
+        CreateScheduleOverridePayload payload = new CreateScheduleOverridePayload();
+        payload.setUser(scheduleOverride.getUser());
+        payload.setAlias(scheduleOverride.getAlias());
+        payload.setEndDate(scheduleOverride.getEndDate());
+        payload.setStartDate(scheduleOverride.getStartDate());
+        payload.setRotations(scheduleOverride.getRotations());
+
+        CreateScheduleOverrideRequest request = new CreateScheduleOverrideRequest();
+        request.setIdentifier(scheduleOverride.getParent().getId());
+        request.setScheduleIdentifierType(CreateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
+        request.setBody(payload);
+
+        scheduleOverrideApi.createScheduleOverride(request);
     }
 
     @Override
-    protected void updateEntity(Schedule entity, EntityStatus entityStatus) throws ApiException {
+    protected void updateEntity(ScheduleConfig scheduleConfig, EntityStatus entityStatus) throws ApiException {
         UpdateSchedulePayload payload = new UpdateSchedulePayload();
-        payload.setName(entity.getName());
+        final Schedule schedule = scheduleConfig.getSchedule();
+        payload.setName(schedule.getName());
 
-        if (BackupUtils.checkValidString(entity.getDescription()))
-            payload.setDescription(entity.getDescription());
+        if (BackupUtils.checkValidString(schedule.getDescription())) {
+            payload.setDescription(schedule.getDescription());
+        }
 
-        payload.setTimezone(entity.getTimezone());
-        payload.setEnabled(entity.isEnabled());
-        payload.setOwnerTeam(entity.getOwnerTeam());
-        payload.setRotations(constructCreateScheduleRotationPayloads(entity));
+        payload.setTimezone(schedule.getTimezone());
+        payload.setEnabled(schedule.isEnabled());
+        payload.setOwnerTeam(schedule.getOwnerTeam());
+        payload.setRotations(constructCreateScheduleRotationPayloads(schedule));
 
         UpdateScheduleRequest request = new UpdateScheduleRequest();
-        request.setIdentifier(entity.getId());
-        request.setIdentifierType(UpdateScheduleRequest.IdentifierTypeEnum.ID);
+        if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
+            request.setIdentifier(schedule.getId());
+        } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
+            request.setIdentifierType(UpdateScheduleRequest.IdentifierTypeEnum.NAME);
+            request.setIdentifier(schedule.getName());
+        }
         request.setBody(payload);
 
-        api.updateSchedule(request);
+        scheduleApi.updateSchedule(request);
+
+        for (ScheduleOverride override : scheduleConfig.getScheduleOverrideList()) {
+            updateScheduleOverride(override);
+        }
+    }
+
+    private void updateScheduleOverride(ScheduleOverride scheduleOverride) throws ApiException {
+        UpdateScheduleOverridePayload payload = new UpdateScheduleOverridePayload();
+        payload.setUser(scheduleOverride.getUser());
+        payload.setEndDate(scheduleOverride.getEndDate());
+        payload.setStartDate(scheduleOverride.getStartDate());
+        payload.setRotations(scheduleOverride.getRotations());
+
+        UpdateScheduleOverrideRequest request = new UpdateScheduleOverrideRequest();
+        request.setAlias(scheduleOverride.getAlias());
+        request.setBody(payload);
+        request.setIdentifier(scheduleOverride.getParent().getId());
+        request.setScheduleIdentifierType(UpdateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
+
+        scheduleOverrideApi.updateScheduleOverride(request);
     }
 
     private List<CreateScheduleRotationPayload> constructCreateScheduleRotationPayloads(Schedule schedule) {
@@ -106,7 +163,7 @@ public class ScheduleImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected String getEntityIdentifierName(Schedule entitiy) {
-        return "Schedule " + entitiy.getName();
+    protected String getEntityIdentifierName(ScheduleConfig entity) {
+        return "Schedule " + entity.getSchedule().getName();
     }
 }

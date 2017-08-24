@@ -50,15 +50,16 @@ public class BackupUtils {
         return (s != null && s.trim().length() > 0);
     }
 
-    public static boolean isEmptyString(String s) {
+    static boolean isEmptyString(String s) {
         return (s == null || s.trim().length() == 0);
     }
 
-    public static boolean deleteDirectory(File dir) {
+    static void deleteDirectory(File dir) {
         if (!dir.exists()) {
-            return false;
+            return;
         } else if (!dir.isDirectory()) {
-            return dir.delete();
+            dir.delete();
+            return;
         }
         String[] files = dir.list();
         for (String file : files) {
@@ -69,7 +70,7 @@ public class BackupUtils {
                 f.delete();
             }
         }
-        return dir.delete();
+        dir.delete();
     }
 
     public static String toJson(Object object) throws JsonProcessingException {

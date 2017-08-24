@@ -22,7 +22,7 @@ public class ConfigurationExporter extends BaseBackup {
     private static List<Exporter> exporters;
     private final Logger logger = LogManager.getLogger(ConfigurationExporter.class);
 
-    public ConfigurationExporter(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
+    ConfigurationExporter(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
         super(backupProperties);
     }
 
@@ -42,13 +42,10 @@ public class ConfigurationExporter extends BaseBackup {
     private void initializeExporters(String rootPath) {
         exporters = new ArrayList<com.opsgenie.tools.backup.exporters.Exporter>();
         exporters.add(new UserExporter(rootPath));
-        exporters.add(new UserNotificationRuleExporter(rootPath));
         exporters.add(new TeamExporter(rootPath));
-        exporters.add(new TeamRoutingRuleExporter(rootPath));
         exporters.add(new ScheduleExporter(rootPath));
         exporters.add(new EscalationExporter(rootPath));
         exporters.add(new UserForwardingExporter(rootPath));
-        exporters.add(new ScheduleOverrideExporter(rootPath));
         exporters.add(new PolicyExporter(rootPath));
         exporters.add(new IntegrationExporter(rootPath));
     }
@@ -59,7 +56,7 @@ public class ConfigurationExporter extends BaseBackup {
      * git.
      */
 
-    public void export() throws GitAPIException {
+    void export() throws GitAPIException {
         if (getBackupProperties().isGitEnabled()) {
             cloneGit(getBackupProperties());
         }

@@ -55,11 +55,7 @@ public class ExportMain {
         }
 
 
-        final ApiClient defaultApiClient = Configuration.getDefaultApiClient();
-        defaultApiClient.setApiKeyPrefix("GenieKey");
-        defaultApiClient.setApiKey(apiKey);
-        defaultApiClient.setBasePath(opsGenieHost);
-        defaultApiClient.setDebugging(debug);
+        configureDefaultApiClient(apiKey, opsGenieHost, debug);
 
         AccountApi accountApi = new AccountApi();
         final GetAccountInfoResponse info = accountApi.getInfo();
@@ -69,5 +65,13 @@ public class ExportMain {
         exporter.export();
 
         logger.info("Finished");
+    }
+
+    private static void configureDefaultApiClient(String apiKey, String opsGenieHost, boolean debug) {
+        final ApiClient defaultApiClient = Configuration.getDefaultApiClient();
+        defaultApiClient.setApiKeyPrefix("GenieKey");
+        defaultApiClient.setApiKey(apiKey);
+        defaultApiClient.setBasePath(opsGenieHost);
+        defaultApiClient.setDebugging(debug);
     }
 }
