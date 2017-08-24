@@ -19,46 +19,11 @@ public class ConfigurationImporter extends BaseBackup {
     ConfigurationImporter(BackupProperties backupProperties, ImportConfig config) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
         super(backupProperties);
         if (config == null) {
-            logger.warn("Config object is null.");
-            logger.warn("Default Import configs will be used.");
+            logger.warn("Config object is null. Default Import configs will be used.");
             this.config = new ImportConfig();
         } else {
             this.config = config;
         }
-    }
-
-    ConfigurationImporter(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
-        super(backupProperties);
-        logger.warn("Default Import configs will be used.");
-        config = new ImportConfig();
-    }
-
-    protected void init() {
-        String rootPath = getBackupProperties().getPath() + "/OpsGenieBackups";
-        File backupRootFile = new File(rootPath);
-        if (!backupRootFile.exists()) {
-            RuntimeException e = new RuntimeException(rootPath + " directory is not exist");
-            logger.error(rootPath + " directory is not exist", e);
-            throw e;
-        } else if (!backupRootFile.isDirectory()) {
-            RuntimeException e = new RuntimeException(rootPath + " is not a directory!");
-            logger.error(rootPath + " is not a directory!", e);
-            throw e;
-        }
-        initializeImporters(rootPath);
-    }
-
-    private void initializeImporters(String rootPath) {
-        importers = new ArrayList<com.opsgenie.tools.backup.importers.Importer>();
-        importers.add(new UserImporter(rootPath, config.isAddNewUsers(), config.isUpdateExistingUsers()));
-        importers.add(new TeamImporter(rootPath, config.isAddNewTeams(), config.isUpdateExistingTeams()));
-        importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
-        importers.add(new EscalationImporter(rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
-        importers.add(new ScheduleImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
-        importers.add(new UserForwardingImporter(rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
-        importers.add(new PolicyImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
-        importers.add(new IntegrationImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
-
     }
 
     /**
@@ -78,5 +43,33 @@ public class ConfigurationImporter extends BaseBackup {
             importer.restore();
         }
         logger.info("Finished!");
+    }
+
+    protected void init() {
+        String rootPath = getBackupProperties().getPath() + "/OpsGenieBackups";
+        File backupRootFile = new File(rootPath);
+        if (!backupRootFile.exists()) {
+            RuntimeException e = new RuntimeException(rootPath + " directory is not exist");
+            logger.error(rootPath + " directory is not exist", e);
+            throw e;
+        } else if (!backupRootFile.isDirectory()) {
+            RuntimeException e = new RuntimeException(rootPath + " is not a directory!");
+            logger.error(rootPath + " is not a directory!", e);
+            throw e;
+        }
+        initializeImporters(rootPath);
+    }
+
+    private void initializeImporters(String rootPath) {
+        importers = new ArrayList<Importer>();
+        importers.add(new UserImporter(rootPath, config.isAddNewUsers(), config.isUpdateExistingUsers()));
+        importers.add(new TeamImporter(rootPath, config.isAddNewTeams(), config.isUpdateExistingTeams()));
+        importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
+        importers.add(new EscalationImporter(rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
+        importers.add(new ScheduleImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
+        importers.add(new UserForwardingImporter(rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
+        importers.add(new PolicyImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
+        importers.add(new IntegrationImporter(rootPath, config.isAddNewIntegrations(), config.isUpdateExistingIntegrations()));
+
     }
 }

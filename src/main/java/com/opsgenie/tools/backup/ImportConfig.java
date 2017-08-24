@@ -12,8 +12,6 @@ public class ImportConfig {
 
     private boolean addNewUserForwarding = true, updateExistingUserForwarding = true;
 
-    private boolean addNewScheduleOverrides = true, updateExistingScheduleOverrides = true;
-
     private boolean addNewPolicies = true, updateExistingPolicies = true;
 
     private boolean addNewIntegrations = true, updateExistingIntegrations = true;
@@ -105,24 +103,6 @@ public class ImportConfig {
 
     public ImportConfig setUpdateExistingUserForwarding(boolean updateExistingUserForwarding) {
         this.updateExistingUserForwarding = updateExistingUserForwarding;
-        return this;
-    }
-
-    public boolean isAddNewScheduleOverrides() {
-        return addNewScheduleOverrides;
-    }
-
-    public ImportConfig setAddNewScheduleOverrides(boolean addNewScheduleOverrides) {
-        this.addNewScheduleOverrides = addNewScheduleOverrides;
-        return this;
-    }
-
-    public boolean isUpdateExistingScheduleOverrides() {
-        return updateExistingScheduleOverrides;
-    }
-
-    public ImportConfig setUpdateExistingScheduleOverrides(boolean updateExistingScheduleOverrides) {
-        this.updateExistingScheduleOverrides = updateExistingScheduleOverrides;
         return this;
     }
 

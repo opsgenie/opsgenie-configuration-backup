@@ -109,7 +109,7 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
                 for (ScheduleOverride scheduleOverride : currentScheduleConfig.getScheduleOverrideList()) {
                     if (scheduleOverride.getAlias().equals(scheduleOverrideToImport.getAlias())) {
                         updateScheduleOverride(entityStatus, scheduleOverrideToImport, scheduleConfig.getSchedule());
-                        return;
+                        break;
                     }
                 }
             }

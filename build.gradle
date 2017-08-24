@@ -3,7 +3,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 group 'com.opsgenie.tools'
-version '0.5.0'
+version '0.6.0'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -16,11 +16,6 @@ repositories {
 
 apply plugin: 'java'
 apply plugin: 'project-report'
-
-
-repositories {
-    mavenCentral()
-}
 
 dependencies {
     compile 'org.apache.logging.log4j:log4j:2.7'

@@ -66,14 +66,8 @@ public class ImportMain {
         logger.info("Account name is " + info.getData().getName() + "\n");
 
         ImportConfig config = extractRestoreConfig();
-        ConfigurationImporter importer = null;
-        if (config != null) {
-            importer = new ConfigurationImporter(properties, config);
-        } else {
-            importer = new ConfigurationImporter(properties);
-        }
+        ConfigurationImporter importer = new ConfigurationImporter(properties, config);
         importer.restore();
-
         logger.info("Finished");
 
     }
@@ -85,7 +79,7 @@ public class ImportMain {
         mapper.addMixIn(Recipient.class, Ignored.class);
         mapper.addMixIn(AlertPolicy.class, Ignored.class);
         mapper.addMixIn(Integration.class, Ignored.class);
-        mapper.addMixIn(BaseIntegrationAction.class, Ignored.class);
+        mapper.addMixIn(BaseIntegrationAction.class, IgnoredIntegration.class);
     }
 
     private static ApiClient configureDefaultApiClient(String apiKey, String opsGenieHost, boolean debug) {
@@ -166,17 +160,6 @@ public class ImportMain {
                     logger.warn("Updating existing user forwarding disabled.");
                 }
 
-                str = props.getProperty("addNewScheduleOverrides");
-                if (str != null && str.contains("false")) {
-                    config.setAddNewScheduleOverrides(false);
-                    logger.warn("Adding new schedule overrides disabled.");
-                }
-                str = props.getProperty("updateExistingScheduleOverrides");
-                if (str != null && str.contains("false")) {
-                    config.setUpdateExistingScheduleOverrides(false);
-                    logger.warn("Updating existing schedule overrides disabled.");
-                }
-
                 str = props.getProperty("updateExistingIntegrations");
                 if (str != null && str.contains("false")) {
                     config.setUpdateExistingIntegrations(false);
@@ -218,5 +201,13 @@ public class ImportMain {
     abstract class Ignored {
         @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
         String type;
+    }
+
+    abstract class IgnoredIntegration {
+        @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+        String type;
+
+        @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+        String id;
     }
 }
