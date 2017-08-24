@@ -1,141 +1,111 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Bean;
-import com.ifountain.opsgenie.client.util.JsonUtils;
+import com.opsgenie.client.ApiException;
 import com.opsgenie.tools.backup.BackupUtils;
-import com.opsgenie.tools.backup.RestoreException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * @author Mehmet Mustafa Demir
- */
-abstract class BaseImporter<T extends Bean> implements Importer {
-    private final Logger logger = LogManager.getLogger(BaseImporter.class);
-    private OpsGenieClient opsGenieClient;
-    private File importDirectory;
+abstract class BaseImporter<T> implements Importer {
+    protected final Logger logger = LogManager.getLogger(getClass());
+    protected File importDirectory;
     private boolean addEntityEnabled;
     private boolean updateEntityEnabled;
 
-    BaseImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntityEnabled, boolean updateEntityEnabled) {
+    BaseImporter(String backupRootDirectory, boolean addEntityEnabled, boolean updateEntityEnabled) {
         this.addEntityEnabled = addEntityEnabled;
         this.updateEntityEnabled = updateEntityEnabled;
-        this.opsGenieClient = opsGenieClient;
         this.importDirectory = new File(backupRootDirectory + "/" + getImportDirectoryName() + "/");
     }
 
-    public void restore() throws RestoreException {
-        logger.info("Restoring " + getImportDirectoryName() + " operation is started");
+    public void restore() {
+        if (!addEntityEnabled && !updateEntityEnabled) {
+            logger.info("Skipping importing " + getImportDirectoryName() + " because both add and update is disabled");
+            return;
+        }
+
+        logger.info("Restoring " + getImportDirectoryName());
 
         if (!importDirectory.exists()) {
-            logger.error("Error : " + getImportDirectoryName() + " does not exist. Restoring " + getImportDirectoryName() + " skipeed");
+            logger.warn("Warning: " + getImportDirectoryName() + " does not exist. Restoring " + getImportDirectoryName() + " skipped");
             return;
         }
 
         String[] files = BackupUtils.getFileListOf(importDirectory);
         if (files == null || files.length == 0) {
-            logger.error("Error : " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipped");
+            logger.warn("Warning: " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipped");
             return;
         }
-
-        List<T> backups = new ArrayList<T>();
+        try {
+            populateCurrentEntityList();
+        } catch (ApiException e) {
+            logger.error("Could not get current configuration" + e.getMessage());
+        }
         for (String fileName : files) {
-            T bean = readEntity(fileName);
-            if (bean != null) {
-                backups.add(bean);
+            T entity = readEntity(fileName);
+            if (entity != null) {
+                importEntity(entity);
             }
         }
 
-        try {
-            importEntities(backups, retrieveEntities());
-        } catch (Exception e) {
-            logger.error("Error at listing " + getImportDirectoryName(), e);
-        }
-
-
-        logger.info("Restoring " + getImportDirectoryName() + " operation is finished");
+        logger.info("Restoring " + getImportDirectoryName() + " finished");
     }
 
     protected T readEntity(String fileName) {
         try {
-            String beanJson = BackupUtils.readFile(importDirectory.getAbsolutePath() + "/" + fileName);
-            T bean = getBean();
-            JsonUtils.fromJson(bean, beanJson);
-            return bean;
+            String entityJson = BackupUtils.readFile(importDirectory.getAbsolutePath() + "/" + fileName);
+            T entity = getNewInstance();
+            BackupUtils.fromJson(entity, entityJson);
+            return entity;
         } catch (Exception e) {
             logger.error("Error at reading " + getImportDirectoryName() + " file " + fileName, e);
             return null;
         }
     }
 
-    protected abstract BeanStatus checkEntities(T oldEntity, T currentEntity);
-
-    void importEntities(List<T> backupList, List<T> currentList) {
-        for (T backupBean : backupList) {
-            importEntity(currentList, backupBean);
-        }
-    }
-
-    private void importEntity(List<T> currentList, T backupBean) {
-        for (T current : currentList) {
-
-            BeanStatus result = checkEntities(backupBean, current);
-            if (result == BeanStatus.NOT_CHANGED) {
-                return;
-            }
-
-            if (result == BeanStatus.MODIFIED && updateEntityEnabled) {
-                try {
-                    updateBean(backupBean);
-                    logger.info(getEntityIdentifierName(backupBean) + " updated");
-                } catch (Exception e) {
-                    logger.error("Error at updating " + getEntityIdentifierName(backupBean), e);
-                }
-
-                return;
-            }
+    private void importEntity(T backupEntity) {
+        EntityStatus entityStatus;
+        try {
+            entityStatus = checkEntity(backupEntity);
+        } catch (ApiException e) {
+            logger.error(e.getMessage());
+            return;
         }
 
-        if (addEntityEnabled) {
+        if (updateEntityEnabled && (EntityStatus.EXISTS_WITH_ID.equals(entityStatus) || EntityStatus.EXISTS_WITH_NAME.equals(entityStatus))) {
             try {
-                addBean(backupBean);
-                logger.info(getEntityIdentifierName(backupBean) + " added");
+                updateEntity(backupEntity, entityStatus);
+                logger.info(getEntityIdentifierName(backupEntity) + " updated");
             } catch (Exception e) {
-                logger.error("Error at adding " + getEntityIdentifierName(backupBean), e);
+                logger.error("Error at updating " + getEntityIdentifierName(backupEntity) + "." + e.getMessage());
+            }
+        } else if (EntityStatus.NOT_EXIST.equals(entityStatus) && addEntityEnabled) {
+            try {
+                createEntity(backupEntity);
+                logger.info(getEntityIdentifierName(backupEntity) + " added");
+            } catch (Exception e) {
+                logger.error("Error at adding " + getEntityIdentifierName(backupEntity) + ". " + e.getMessage());
             }
         }
     }
 
-    protected abstract T getBean() throws IOException, ParseException;
+    protected abstract EntityStatus checkEntity(T entity) throws ApiException;
+
+    protected abstract void populateCurrentEntityList() throws ApiException;
+
+    protected abstract void createEntity(T entity) throws ParseException, IOException, ApiException;
+
+    protected abstract void updateEntity(T entity, EntityStatus entityStatus) throws ParseException, IOException, ApiException;
+
+    protected T getNewInstance() {
+        throw new UnsupportedOperationException();
+    }
+
+    protected abstract String getEntityIdentifierName(T entity);
 
     protected abstract String getImportDirectoryName();
-
-    protected abstract void addBean(T bean) throws ParseException, OpsGenieClientException, IOException;
-
-    protected abstract void updateBean(T bean) throws ParseException, OpsGenieClientException, IOException;
-
-    protected abstract List<T> retrieveEntities() throws ParseException, OpsGenieClientException, IOException;
-
-    protected OpsGenieClient getOpsGenieClient() {
-        return opsGenieClient;
-    }
-
-    File getImportDirectory() {
-        return importDirectory;
-    }
-
-    protected boolean isSame(T oldEntity, T currentEntity) {
-        return oldEntity.toString().equals(currentEntity.toString());
-    }
-
-    protected abstract String getEntityIdentifierName(T entitiy);
 
 }

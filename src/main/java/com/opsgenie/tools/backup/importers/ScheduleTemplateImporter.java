@@ -1,39 +1,44 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Schedule;
-import com.ifountain.opsgenie.client.model.schedule.AddScheduleRequest;
-import com.ifountain.opsgenie.client.model.schedule.ListSchedulesRequest;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.ScheduleApi;
+import com.opsgenie.client.model.CreateSchedulePayload;
+import com.opsgenie.client.model.Schedule;
+import com.opsgenie.tools.backup.EntityListService;
+import com.opsgenie.tools.backup.ScheduleConfig;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.List;
 
-// Creates all schedules with just their names to prevent "schedule not found" errors while importing escalations
-// ScheduleImporter imports schedules after escalations
-public class ScheduleTemplateImporter extends BaseImporter<Schedule> {
-    public ScheduleTemplateImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
-        super(opsGenieClient, backupRootDirectory, addEntity, updateEntitiy);
+public class ScheduleTemplateImporter extends BaseImporter<ScheduleConfig> {
+
+    private static ScheduleApi api = new ScheduleApi();
+    private List<ScheduleConfig> currentScheduleList;
+
+    public ScheduleTemplateImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
+        super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
-    protected BeanStatus checkEntities(Schedule oldEntity, Schedule currentEntity) {
-        if (oldEntity.getId().equals(currentEntity.getId())) {
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
+    protected EntityStatus checkEntity(ScheduleConfig entity) {
+        for (ScheduleConfig scheduleConfig : currentScheduleList) {
+            final Schedule currentSchedule = scheduleConfig.getSchedule();
+            if (currentSchedule.getId().equals(entity.getSchedule().getId())) {
+                return EntityStatus.EXISTS_WITH_ID;
+            } else if (currentSchedule.getName().equals(entity.getSchedule().getName())) {
+                return EntityStatus.EXISTS_WITH_NAME;
+            }
         }
-
-        if (oldEntity.getName().equals(currentEntity.getName())) {
-            oldEntity.setId(currentEntity.getId());
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-
-        return BeanStatus.NOT_EXIST;
+        return EntityStatus.NOT_EXIST;
     }
 
     @Override
-    protected Schedule getBean() throws IOException, ParseException {
-        return new Schedule();
+    protected void populateCurrentEntityList() throws ApiException {
+        currentScheduleList = EntityListService.listSchedules();
+    }
+
+    @Override
+    protected ScheduleConfig getNewInstance() {
+        return new ScheduleConfig();
     }
 
     @Override
@@ -42,37 +47,19 @@ public class ScheduleTemplateImporter extends BaseImporter<Schedule> {
     }
 
     @Override
-    protected void addBean(Schedule bean) throws ParseException, OpsGenieClientException, IOException {
-        AddScheduleRequest request = new AddScheduleRequest();
-        request.setName(bean.getName());
-        getOpsGenieClient().schedule().addSchedule(request);
+    protected void createEntity(ScheduleConfig entity) throws ApiException {
+        CreateSchedulePayload payload = new CreateSchedulePayload();
+        payload.setName(entity.getSchedule().getName());
+        api.createSchedule(payload);
     }
 
     @Override
-    protected void updateBean(Schedule bean) throws ParseException, OpsGenieClientException, IOException {
+    protected void updateEntity(ScheduleConfig entity, EntityStatus entityStatus) {
 
     }
 
     @Override
-    protected List<Schedule> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        ListSchedulesRequest listSchedulesRequest = new ListSchedulesRequest();
-        return getOpsGenieClient().schedule().listSchedules(listSchedulesRequest).getSchedules();
-    }
-
-    @Override
-    protected String getEntityIdentifierName(Schedule entitiy) {
-        return "Schedule " + entitiy.getName();
-    }
-
-    @Override
-    protected boolean isSame(Schedule oldEntity, Schedule currentEntity) {
-        if (oldEntity.getRotations() != null && currentEntity.getRotations() != null
-                && oldEntity.getRotations().size() == currentEntity.getRotations().size()) {
-            for (int i = 0; i < oldEntity.getRotations().size(); i++) {
-                oldEntity.getRotations().get(i).setId(null);
-                currentEntity.getRotations().get(i).setId(null);
-            }
-        }
-        return super.isSame(oldEntity, currentEntity);
+    protected String getEntityIdentifierName(ScheduleConfig entity) {
+        return "Schedule " + entity.getSchedule().getName();
     }
 }
