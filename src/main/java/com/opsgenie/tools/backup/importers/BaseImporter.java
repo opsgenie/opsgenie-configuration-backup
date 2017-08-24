@@ -27,7 +27,7 @@ abstract class BaseImporter<T> implements Importer {
             return;
         }
 
-        logger.info("Restoring " + getImportDirectoryName() + " operation is started");
+        logger.info("Restoring " + getImportDirectoryName());
 
         if (!importDirectory.exists()) {
             logger.warn("Warning: " + getImportDirectoryName() + " does not exist. Restoring " + getImportDirectoryName() + " skipped");
@@ -51,7 +51,7 @@ abstract class BaseImporter<T> implements Importer {
             }
         }
 
-        logger.info("Restoring " + getImportDirectoryName() + " operation is finished");
+        logger.info("Restoring " + getImportDirectoryName() + " finished");
     }
 
     protected T readEntity(String fileName) {
