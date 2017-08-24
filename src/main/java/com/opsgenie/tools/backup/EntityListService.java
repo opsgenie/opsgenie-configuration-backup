@@ -30,7 +30,7 @@ public class EntityListService {
     }
 
     public static List<UserConfig> listUserConfigs() throws ApiException {
-        List<User> userList = userApi.listUsers(new ListUsersRequest()).getData();
+        List<User> userList = getAllUsers();
         List<User> usersWithContact = new ArrayList<User>();
         for (User user : userList) {
             usersWithContact.add(userApi.getUser(new GetUserRequest().identifier(user.getId()).expand(Collections.singletonList("contact"))).getData());
@@ -49,6 +49,16 @@ public class EntityListService {
             userConfigs.add(wrapper);
         }
         return userConfigs;
+    }
+
+    private static List<User> getAllUsers() throws ApiException {
+        final ListUsersResponse listUsersResponse = userApi.listUsers(new ListUsersRequest());
+        List<User> userList = listUsersResponse.getData();
+        final Long pageCount = listUsersResponse.getTotalCount() + 1;
+        for (int i = 1; i < (pageCount * 1.0) / 100; i++) {
+            userList.addAll(userApi.listUsers(new ListUsersRequest().offset(100 * i)).getData());
+        }
+        return userList;
     }
 
     public static List<TeamConfig> listTeams() throws ApiException {
