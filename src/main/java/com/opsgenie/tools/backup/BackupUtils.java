@@ -1,22 +1,26 @@
 package com.opsgenie.tools.backup;
 
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.text.SimpleDateFormat;
 
-/**
- * Common utils for export and import procedure.
- *
- * @author Mehmet Mustafa Demir
- */
 public class BackupUtils {
 
     private static final Logger logger = LogManager.getLogger(BackupUtils.class);
+
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    static {
+        mapper.registerModule(new JodaModule());
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm"));
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    }
 
     public static String readFile(String fileName) throws IOException {
         InputStream is = new FileInputStream(fileName);
@@ -48,41 +52,34 @@ public class BackupUtils {
         return (s != null && s.trim().length() > 0);
     }
 
-    public static boolean isEmptyString(String s) {
+    static boolean isEmptyString(String s) {
         return (s == null || s.trim().length() == 0);
     }
 
-    public static boolean deleteDirectory(File dir) {
+    static void deleteDirectory(File dir) {
         if (!dir.exists()) {
-            return false;
+            return;
         } else if (!dir.isDirectory()) {
-            return dir.delete();
+            dir.delete();
+            return;
         }
         String[] files = dir.list();
-        for (int i = 0, len = files.length; i < len; i++) {
-            File f = new File(dir, files[i]);
+        for (String file : files) {
+            File f = new File(dir, file);
             if (f.isDirectory()) {
                 deleteDirectory(f);
             } else {
                 f.delete();
             }
         }
-        return dir.delete();
+        dir.delete();
     }
 
-    public static List<String> findIntegrationDirectories(String path) {
-        List<String> files = new ArrayList<String>();
-        File[] list = new File(path).listFiles();
-        if (list == null) return Collections.emptyList();
-        for (File integrationType : list) {
-            if (integrationType.isDirectory()) {
-                for (File integrationFolder : integrationType.listFiles()) {
-                    files.add(integrationFolder.getAbsolutePath());
-                }
-            } else {
-                logger.warn(integrationType.getAbsolutePath() + " is invalid. There should be folders only in this path.");
-            }
-        }
-        return files;
+    public static String toJson(Object object) throws JsonProcessingException {
+        return mapper.writeValueAsString(object);
+    }
+
+    public static void fromJson(Object object, String json) throws IOException {
+        mapper.readerForUpdating(object).readValue(json);
     }
 }

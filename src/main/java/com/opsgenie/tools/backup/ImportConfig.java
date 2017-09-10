@@ -1,16 +1,8 @@
 package com.opsgenie.tools.backup;
 
-/**
- * Config parameters for import procedure.
- *
- * @author Mehmet Mustafa Demir
- */
 public class ImportConfig {
-    private boolean addNewHeartbeats = true, updateExistingHeartbeats = true;
 
     private boolean addNewUsers = true, updateExistingUsers = true;
-
-    private boolean addNewGroups = true, updateExistingGroups = true;
 
     private boolean addNewTeams = true, updateExistingTeams = true;
 
@@ -18,58 +10,11 @@ public class ImportConfig {
 
     private boolean addNewEscalations = true, updateExistingEscalations = true;
 
-    private boolean addNewNotifications = true, updateExistingNotifications = true;
-
-    private boolean addNewTeamRoutingRules = true, updateExistingTeamRoutingRules = true;
-
     private boolean addNewUserForwarding = true, updateExistingUserForwarding = true;
 
-    private boolean addNewScheduleOverrides = true, updateExistingScheduleOverrides = true;
+    private boolean addNewPolicies = true, updateExistingPolicies = true;
 
     private boolean addNewIntegrations = true, updateExistingIntegrations = true;
-
-    public void setAllFalse() {
-        addNewHeartbeats = false;
-        updateExistingHeartbeats = false;
-        addNewUsers = false;
-        updateExistingUsers = false;
-        addNewGroups = false;
-        updateExistingGroups = false;
-        addNewTeams = false;
-        updateExistingTeams = false;
-        addNewSchedules = false;
-        updateExistingSchedules = false;
-        addNewEscalations = false;
-        updateExistingEscalations = false;
-        addNewNotifications = false;
-        updateExistingNotifications = false;
-        addNewTeamRoutingRules = false;
-        updateExistingTeamRoutingRules = false;
-        addNewUserForwarding = false;
-        updateExistingUserForwarding = false;
-        addNewScheduleOverrides = false;
-        updateExistingScheduleOverrides = false;
-        addNewIntegrations = false;
-        updateExistingIntegrations = false;
-    }
-
-    public boolean isAddNewHeartbeats() {
-        return addNewHeartbeats;
-    }
-
-    public ImportConfig setAddNewHeartbeats(boolean addNewHeartbeats) {
-        this.addNewHeartbeats = addNewHeartbeats;
-        return this;
-    }
-
-    public boolean isUpdateExistingHeartbeats() {
-        return updateExistingHeartbeats;
-    }
-
-    public ImportConfig setUpdateExistingHeartbeats(boolean updateExistingHeartbeats) {
-        this.updateExistingHeartbeats = updateExistingHeartbeats;
-        return this;
-    }
 
     public boolean isAddNewUsers() {
         return addNewUsers;
@@ -86,24 +31,6 @@ public class ImportConfig {
 
     public ImportConfig setUpdateExistingUsers(boolean updateExistingUsers) {
         this.updateExistingUsers = updateExistingUsers;
-        return this;
-    }
-
-    public boolean isAddNewGroups() {
-        return addNewGroups;
-    }
-
-    public ImportConfig setAddNewGroups(boolean addNewGroups) {
-        this.addNewGroups = addNewGroups;
-        return this;
-    }
-
-    public boolean isUpdateExistingGroups() {
-        return updateExistingGroups;
-    }
-
-    public ImportConfig setUpdateExistingGroups(boolean updateExistingGroups) {
-        this.updateExistingGroups = updateExistingGroups;
         return this;
     }
 
@@ -161,42 +88,6 @@ public class ImportConfig {
         return this;
     }
 
-    public boolean isAddNewNotifications() {
-        return addNewNotifications;
-    }
-
-    public ImportConfig setAddNewNotifications(boolean addNewNotifications) {
-        this.addNewNotifications = addNewNotifications;
-        return this;
-    }
-
-    public boolean isUpdateExistingNotifications() {
-        return updateExistingNotifications;
-    }
-
-    public ImportConfig setUpdateExistingNotifications(boolean updateExistingNotifications) {
-        this.updateExistingNotifications = updateExistingNotifications;
-        return this;
-    }
-
-    public boolean isAddNewTeamRoutingRules() {
-        return addNewTeamRoutingRules;
-    }
-
-    public ImportConfig setAddNewTeamRoutingRules(boolean addNewTeamRoutingRules) {
-        this.addNewTeamRoutingRules = addNewTeamRoutingRules;
-        return this;
-    }
-
-    public boolean isUpdateExistingTeamRoutingRules() {
-        return updateExistingTeamRoutingRules;
-    }
-
-    public ImportConfig setUpdateExistingTeamRoutingRules(boolean updateExistingTeamRoutingRules) {
-        this.updateExistingTeamRoutingRules = updateExistingTeamRoutingRules;
-        return this;
-    }
-
     public boolean isAddNewUserForwarding() {
         return addNewUserForwarding;
     }
@@ -212,24 +103,6 @@ public class ImportConfig {
 
     public ImportConfig setUpdateExistingUserForwarding(boolean updateExistingUserForwarding) {
         this.updateExistingUserForwarding = updateExistingUserForwarding;
-        return this;
-    }
-
-    public boolean isAddNewScheduleOverrides() {
-        return addNewScheduleOverrides;
-    }
-
-    public ImportConfig setAddNewScheduleOverrides(boolean addNewScheduleOverrides) {
-        this.addNewScheduleOverrides = addNewScheduleOverrides;
-        return this;
-    }
-
-    public boolean isUpdateExistingScheduleOverrides() {
-        return updateExistingScheduleOverrides;
-    }
-
-    public ImportConfig setUpdateExistingScheduleOverrides(boolean updateExistingScheduleOverrides) {
-        this.updateExistingScheduleOverrides = updateExistingScheduleOverrides;
         return this;
     }
 
@@ -249,5 +122,21 @@ public class ImportConfig {
     public ImportConfig setUpdateExistingIntegrations(boolean updateExistingIntegrations) {
         this.updateExistingIntegrations = updateExistingIntegrations;
         return this;
+    }
+
+    public boolean isAddNewPolicies() {
+        return addNewPolicies;
+    }
+
+    public void setAddNewPolicies(boolean addNewPolicies) {
+        this.addNewPolicies = addNewPolicies;
+    }
+
+    public boolean isUpdateExistingPolicies() {
+        return updateExistingPolicies;
+    }
+
+    public void setUpdateExistingPolicies(boolean updateExistingPolicies) {
+        this.updateExistingPolicies = updateExistingPolicies;
     }
 }

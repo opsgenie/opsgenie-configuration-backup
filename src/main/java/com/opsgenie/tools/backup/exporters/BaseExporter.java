@@ -1,9 +1,7 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Bean;
-import com.ifountain.opsgenie.client.util.JsonUtils;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.tools.backup.BackupUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,26 +11,21 @@ import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.List;
 
-/**
- * @author Mehmet Mustafa Demir
- */
-abstract class BaseExporter<T extends Bean> implements Exporter {
-    private final Logger logger = LogManager.getLogger(BaseExporter.class);
-    private OpsGenieClient opsGenieClient;
+abstract class BaseExporter<T> implements Exporter {
+    protected final Logger logger = LogManager.getLogger(getClass());
     private File exportDirectory;
 
-    public BaseExporter(OpsGenieClient opsGenieClient, String backupRootDirectory, String exportDirectoryName) {
-        this.opsGenieClient = opsGenieClient;
+    public BaseExporter(String backupRootDirectory, String exportDirectoryName) {
         this.exportDirectory = new File(backupRootDirectory + "/" + exportDirectoryName + "/");
         this.exportDirectory.mkdirs();
     }
 
-    protected void exportFile(String fileName, T bean) {
+    protected void exportFile(String fileName, T entity) {
         try {
             PrintWriter writer = new PrintWriter(fileName, "UTF-8");
-            writer.print(JsonUtils.toJson(bean));
+            writer.print(BackupUtils.toJson(entity));
             writer.close();
-            logger.info(getBeanFileName(bean) + " file written.");
+            logger.info(getEntityFileName(entity) + " file written.");
         } catch (Exception e) {
             logger.error("Error at writing entity, fileName=" + fileName, e);
         }
@@ -40,25 +33,22 @@ abstract class BaseExporter<T extends Bean> implements Exporter {
 
     @Override
     public void export() {
-        List<T> currentBeanList = null;
+        List<T> currentBeanList;
         try {
             currentBeanList = retrieveEntities();
         } catch (Exception e) {
-            logger.error("Error at Listing " + exportDirectory.getName(), e);
+            logger.error("Could not list " + exportDirectory.getName(), e);
+            return;
         }
-        if (currentBeanList != null)
-            for (T bean : currentBeanList) {
-                exportFile(getExportDirectory().getAbsolutePath() + "/" + getBeanFileName(bean) + ".json", bean);
-            }
+
+        for (T bean : currentBeanList) {
+            exportFile(getExportDirectory().getAbsolutePath() + "/" + getEntityFileName(bean) + ".json", bean);
+        }
     }
 
-    protected abstract String getBeanFileName(T bean);
+    protected abstract String getEntityFileName(T entity);
 
-    protected abstract List<T> retrieveEntities() throws ParseException, OpsGenieClientException, IOException;
-
-    protected OpsGenieClient getOpsGenieClient() {
-        return opsGenieClient;
-    }
+    protected abstract List<T> retrieveEntities() throws ParseException, IOException, ApiException;
 
     protected File getExportDirectory() {
         return exportDirectory;

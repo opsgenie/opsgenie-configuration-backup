@@ -1,43 +1,42 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.Escalation;
-import com.ifountain.opsgenie.client.model.escalation.AddEscalationRequest;
-import com.ifountain.opsgenie.client.model.escalation.ListEscalationsRequest;
-import com.ifountain.opsgenie.client.model.escalation.UpdateEscalationRequest;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.EscalationApi;
+import com.opsgenie.client.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
+import com.opsgenie.tools.backup.EntityListService;
 
-import java.io.IOException;
-import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This class imports Escalations from local directory called escalations to Opsgenie account.
- *
- * @author Mehmet Mustafa Demir
- */
 public class EscalationImporter extends BaseImporter<Escalation> {
-    public EscalationImporter(OpsGenieClient opsGenieClient, String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
-        super(opsGenieClient, backupRootDirectory, addEntity, updateEntitiy);
+
+    private static EscalationApi api = new EscalationApi();
+    private List<Escalation> currentEscalations = new ArrayList<Escalation>();
+
+    public EscalationImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
+        super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
-    protected BeanStatus checkEntities(Escalation oldEntity, Escalation currentEntity) {
-        if (oldEntity.getId().equals(currentEntity.getId())) {
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
+    protected EntityStatus checkEntity(Escalation entity) throws ApiException {
+        for (Escalation escalation : currentEscalations) {
+            if (escalation.getId().equals(entity.getId())) {
+                return EntityStatus.EXISTS_WITH_ID;
+            } else if (escalation.getName().equals(entity.getName())) {
+                return EntityStatus.EXISTS_WITH_NAME;
+            }
         }
-
-        if (oldEntity.getName().equals(currentEntity.getName())) {
-            oldEntity.setId(currentEntity.getId());
-            return isSame(oldEntity, currentEntity) ? BeanStatus.NOT_CHANGED : BeanStatus.MODIFIED;
-        }
-
-        return BeanStatus.NOT_EXIST;
+        return EntityStatus.NOT_EXIST;
     }
 
     @Override
-    protected Escalation getBean() throws IOException, ParseException {
+    protected void populateCurrentEntityList() throws ApiException {
+        currentEscalations = EntityListService.listEscalations();
+    }
+
+    @Override
+    protected Escalation getNewInstance() {
         return new Escalation();
     }
 
@@ -47,39 +46,58 @@ public class EscalationImporter extends BaseImporter<Escalation> {
     }
 
     @Override
-    protected void addBean(Escalation bean) throws ParseException, OpsGenieClientException, IOException {
-        AddEscalationRequest request = new AddEscalationRequest();
-        request.setName(bean.getName());
-        if (BackupUtils.checkValidString(bean.getDescription()))
-            request.setDescription(bean.getDescription());
-        request.setTeam(bean.getTeam());
-        request.setRepeatInterval(bean.getRepeatInterval());
-        request.setRules(bean.getRules());
-        getOpsGenieClient().escalation().addEscalation(request);
+    protected void createEntity(Escalation entity) throws ApiException {
+        CreateEscalationPayload payload = new CreateEscalationPayload();
+        payload.setName(entity.getName());
+
+        if (BackupUtils.checkValidString(entity.getDescription())) {
+            payload.setDescription(entity.getDescription());
+        }
+
+        for (EscalationRule escalationRule : entity.getRules()) {
+            escalationRule.getRecipient().setId(null);
+        }
+
+        payload.setOwnerTeam(entity.getOwnerTeam());
+        payload.setRules(entity.getRules());
+
+        api.createEscalation(payload);
     }
 
     @Override
-    protected void updateBean(Escalation bean) throws ParseException, OpsGenieClientException, IOException {
+    protected void updateEntity(Escalation entity, EntityStatus entityStatus) throws ApiException {
+
+        UpdateEscalationPayload payload = new UpdateEscalationPayload();
+        payload.setName(entity.getName());
+
+        if (BackupUtils.checkValidString(entity.getDescription())) {
+            payload.setDescription(entity.getDescription());
+        }
+
+        payload.setOwnerTeam(entity.getOwnerTeam());
+
+        for (EscalationRule escalationRule : entity.getRules()) {
+            escalationRule.getRecipient().setId(null);
+        }
+
+        payload.setRules(entity.getRules());
+
         UpdateEscalationRequest request = new UpdateEscalationRequest();
-        request.setId(bean.getId());
-        request.setName(bean.getName());
-        if (BackupUtils.checkValidString(bean.getDescription()))
-            request.setDescription(bean.getDescription());
-        request.setTeam(bean.getTeam());
-        request.setRepeatInterval(bean.getRepeatInterval());
-        request.setRules(bean.getRules());
-        getOpsGenieClient().escalation().updateEscalation(request);
+        if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
+            request.setIdentifier(entity.getId());
+            request.setIdentifierType(UpdateEscalationRequest.IdentifierTypeEnum.ID);
+        } else {
+            request.setIdentifier(entity.getName());
+            request.setIdentifierType(UpdateEscalationRequest.IdentifierTypeEnum.NAME);
+        }
+        request.setBody(payload);
+
+        api.updateEscalation(request);
     }
 
     @Override
-    protected List<Escalation> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        ListEscalationsRequest listEscalationsRequest = new ListEscalationsRequest();
-        return getOpsGenieClient().escalation().listEscalations(listEscalationsRequest).getEscalations();
-    }
-
-    @Override
-    protected String getEntityIdentifierName(Escalation entitiy) {
-        return "Escalation " + entitiy.getName();
+    protected String getEntityIdentifierName(Escalation entity) {
+        return "Escalation " + entity.getName();
     }
 
 }

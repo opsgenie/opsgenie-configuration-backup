@@ -1,33 +1,23 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.ifountain.opsgenie.client.OpsGenieClientException;
-import com.ifountain.opsgenie.client.model.beans.User;
-import com.ifountain.opsgenie.client.model.user.ListUsersRequest;
+import com.opsgenie.client.ApiException;
+import com.opsgenie.tools.backup.EntityListService;
+import com.opsgenie.tools.backup.UserConfig;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.List;
 
-/**
- * This class exports Users from Opsgenie account to local directory called users
- *
- * @author Mehmet Mustafa Demir
- */
-public class UserExporter extends BaseExporter<User> {
-    public UserExporter(OpsGenieClient opsGenieClient, String backupRootDirectory) {
-        super(opsGenieClient, backupRootDirectory, "users");
+public class UserExporter extends BaseExporter<UserConfig> {
+    public UserExporter(String backupRootDirectory) {
+        super(backupRootDirectory, "users");
     }
 
     @Override
-    protected String getBeanFileName(User bean) {
-        return bean.getUsername() + "-" + bean.getId();
+    protected String getEntityFileName(UserConfig userConfig) {
+        return userConfig.getUser().getUsername() + "-" + userConfig.getUser().getId();
     }
 
-
     @Override
-    protected List<User> retrieveEntities() throws ParseException, OpsGenieClientException, IOException {
-        ListUsersRequest request = new ListUsersRequest();
-        return getOpsGenieClient().user().listUsers(request).getUsers();
+    protected List<UserConfig> retrieveEntities() throws ApiException {
+        return EntityListService.listUserConfigs();
     }
 }

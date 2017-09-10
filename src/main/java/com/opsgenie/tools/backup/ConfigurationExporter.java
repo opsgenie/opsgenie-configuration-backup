@@ -1,7 +1,5 @@
 package com.opsgenie.tools.backup;
 
-import com.ifountain.opsgenie.client.OpsGenieClient;
-import com.opsgenie.tools.backup.api.IntegrationApiRequester;
 import com.opsgenie.tools.backup.exporters.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +22,7 @@ public class ConfigurationExporter extends BaseBackup {
     private static List<Exporter> exporters;
     private final Logger logger = LogManager.getLogger(ConfigurationExporter.class);
 
-    public ConfigurationExporter(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
+    ConfigurationExporter(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
         super(backupProperties);
     }
 
@@ -35,28 +33,21 @@ public class ConfigurationExporter extends BaseBackup {
             logger.warn("Destination path " + rootPath + " already exists and is not an empty directory");
             logger.warn("Destination path " + rootPath + " will be deleted inorder to export current system");
             BackupUtils.deleteDirectory(backupRootFile);
-            backupRootFile.mkdirs();
-        } else {
-            backupRootFile.mkdirs();
+
         }
-        OpsGenieClient opsGenieClient = new OpsGenieClient();
-        opsGenieClient.setApiKey(getBackupProperties().getApiKey());
-        initializeExporters(rootPath, opsGenieClient);
+        backupRootFile.mkdirs();
+        initializeExporters(rootPath);
     }
 
-    private void initializeExporters(String rootPath, OpsGenieClient opsGenieClient) {
+    private void initializeExporters(String rootPath) {
         exporters = new ArrayList<com.opsgenie.tools.backup.exporters.Exporter>();
-        exporters.add(new HeartbeatExporter(opsGenieClient, rootPath));
-        exporters.add(new UserExporter(opsGenieClient, rootPath));
-        exporters.add(new UserNotificationExporter(opsGenieClient, rootPath));
-        exporters.add(new GroupExporter(opsGenieClient, rootPath));
-        exporters.add(new TeamExporter(opsGenieClient, rootPath));
-        exporters.add(new TeamRoutingRuleExporter(opsGenieClient, rootPath));
-        exporters.add(new ScheduleExporter(opsGenieClient, rootPath));
-        exporters.add(new EscalationExporter(opsGenieClient, rootPath));
-        exporters.add(new UserForwardingExporter(opsGenieClient, rootPath));
-        exporters.add(new ScheduleOverrideExporter(opsGenieClient, rootPath));
-        exporters.add(new IntegrationExporter(new IntegrationApiRequester(opsGenieClient.getApiKey(), getBackupProperties().getOpsgenieUrl()), rootPath));
+        exporters.add(new UserExporter(rootPath));
+        exporters.add(new TeamExporter(rootPath));
+        exporters.add(new ScheduleExporter(rootPath));
+        exporters.add(new EscalationExporter(rootPath));
+        exporters.add(new UserForwardingExporter(rootPath));
+        exporters.add(new PolicyExporter(rootPath));
+        exporters.add(new IntegrationExporter(rootPath));
     }
 
     /**
@@ -65,13 +56,13 @@ public class ConfigurationExporter extends BaseBackup {
      * git.
      */
 
-    public void export() throws GitAPIException {
+    void export() throws GitAPIException {
         if (getBackupProperties().isGitEnabled()) {
             cloneGit(getBackupProperties());
         }
         init();
         logger.info("Export operation started!");
-        for (com.opsgenie.tools.backup.exporters.Exporter exporter : exporters) {
+        for (Exporter exporter : exporters) {
             exporter.export();
         }
         if (getBackupProperties().isGitEnabled()) {
