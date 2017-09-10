@@ -9,6 +9,7 @@ import com.opsgenie.tools.backup.BackupUtils;
 import com.opsgenie.tools.backup.EntityListService;
 import com.opsgenie.tools.backup.UserConfig;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserImporter extends BaseImporter<UserConfig> {
@@ -72,6 +73,43 @@ public class UserImporter extends BaseImporter<UserConfig> {
 
         userApi.createUser(payload);
         addContacts(user);
+        final List<NotificationRule> notificationRuleList = userConfig.getNotificationRuleList();
+        compareNotificationRules(user, notificationRuleList);
+    }
+
+    private void createNotificationRule(User user, NotificationRule notificationRule) throws ApiException {
+        CreateNotificationRulePayload payload = new CreateNotificationRulePayload();
+        payload.setActionType(notificationRule.getActionType());
+        payload.setCriteria(notificationRule.getCriteria());
+        payload.setEnabled(notificationRule.isEnabled());
+        payload.setName(notificationRule.getName());
+        payload.setNotificationTime(notificationRule.getNotificationTime());
+        payload.setOrder(notificationRule.getOrder());
+        payload.setRepeat(notificationRule.getRepeat());
+        payload.setSchedules(notificationRule.getSchedules());
+        payload.setTimeRestriction(notificationRule.getTimeRestriction());
+        payload.setSteps(constructCreateNotificationRuleStepPayloadList(notificationRule));
+
+        CreateNotificationRuleRequest request = new CreateNotificationRuleRequest();
+        request.setBody(payload);
+        request.setIdentifier(user.getUsername());
+
+        notificationRuleApi.createNotificationRule(request).getData().getId();
+    }
+
+    private List<CreateNotificationRuleStepPayload> constructCreateNotificationRuleStepPayloadList(NotificationRule notificationRule) {
+        List<CreateNotificationRuleStepPayload> createNotificationRuleStepPayloadList = new ArrayList<CreateNotificationRuleStepPayload>();
+
+        for (NotificationRuleStep notificationRuleStep : notificationRule.getSteps()) {
+            createNotificationRuleStepPayloadList.add(
+                    new CreateNotificationRuleStepPayload()
+                            .contact(notificationRuleStep.getContact())
+                            .enabled(notificationRuleStep.isEnabled())
+                            .sendAfter(notificationRuleStep.getSendAfter())
+            );
+        }
+
+        return createNotificationRuleStepPayloadList;
     }
 
     @Override
@@ -102,6 +140,55 @@ public class UserImporter extends BaseImporter<UserConfig> {
         request.setBody(payload);
         userApi.updateUser(request);
         addContacts(user);
+        final List<NotificationRule> notificationRuleList = userConfig.getNotificationRuleList();
+        compareNotificationRules(user, notificationRuleList);
+    }
+
+    private void compareNotificationRules(User user, List<NotificationRule> notificationRuleList) throws ApiException {
+        if (notificationRuleList != null) {
+            logger.info("Updating notification rules for " + user.getUsername());
+            for (NotificationRule notificationRule : notificationRuleList) {
+                final String ruleIdByName = findRuleIdByName(user, notificationRule);
+                if (ruleIdByName != null) {
+                    updateNotificationRule(user, notificationRule);
+                } else {
+                    createNotificationRule(user, notificationRule);
+                }
+            }
+        }
+    }
+
+    protected void updateNotificationRule(User user, NotificationRule notificationRule) throws ApiException {
+        UpdateNotificationRulePayload payload = new UpdateNotificationRulePayload();
+        payload.setCriteria(notificationRule.getCriteria());
+        payload.setEnabled(notificationRule.isEnabled());
+        payload.setName(notificationRule.getName());
+        payload.setNotificationTime(notificationRule.getNotificationTime());
+        payload.setOrder(notificationRule.getOrder());
+        payload.setRepeat(notificationRule.getRepeat());
+        payload.setSchedules(notificationRule.getSchedules());
+        payload.setTimeRestriction(notificationRule.getTimeRestriction());
+        payload.setSteps(constructCreateNotificationRuleStepPayloadList(notificationRule));
+
+        UpdateNotificationRuleRequest request = new UpdateNotificationRuleRequest();
+        request.setRuleId(findRuleIdByName(user, notificationRule));
+        request.setIdentifier(user.getUsername());
+        request.setBody(payload);
+
+        notificationRuleApi.updateNotificationRule(request);
+    }
+
+    private String findRuleIdByName(User user, NotificationRule notificationRule) {
+        for (UserConfig userConfig : userConfigs) {
+            if (user.getUsername().equals(userConfig.getUser().getUsername())) {
+                for (NotificationRule currentNotificationRule : userConfig.getNotificationRuleList()) {
+                    if (currentNotificationRule.getName().equals(notificationRule.getName())) {
+                        return currentNotificationRule.getId();
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void addContacts(User user) throws ApiException {

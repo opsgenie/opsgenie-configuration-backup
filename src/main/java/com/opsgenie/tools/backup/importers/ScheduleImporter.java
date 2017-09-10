@@ -54,26 +54,6 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
         throw new IllegalStateException("This should not happen because schedule template importer should create all schedules");
     }
 
-    private void createScheduleOverride(EntityStatus entityStatus, ScheduleOverride scheduleOverride, Schedule schedule) throws ApiException {
-        CreateScheduleOverridePayload payload = new CreateScheduleOverridePayload();
-        payload.setUser(scheduleOverride.getUser());
-        payload.setAlias(scheduleOverride.getAlias());
-        payload.setEndDate(scheduleOverride.getEndDate());
-        payload.setStartDate(scheduleOverride.getStartDate());
-        payload.setRotations(scheduleOverride.getRotations());
-
-        CreateScheduleOverrideRequest request = new CreateScheduleOverrideRequest();
-        if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
-            request.setIdentifier(schedule.getId());
-        } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
-            request.setScheduleIdentifierType(CreateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
-            request.setIdentifier(schedule.getName());
-        }
-        request.setBody(payload);
-
-        scheduleOverrideApi.createScheduleOverride(request);
-    }
-
     @Override
     protected void updateEntity(ScheduleConfig scheduleConfig, EntityStatus entityStatus) throws ApiException {
         UpdateSchedulePayload payload = new UpdateSchedulePayload();
@@ -100,39 +80,6 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
 
         scheduleApi.updateSchedule(request);
         logger.info("Importing schedule overrides for " + scheduleConfig.getSchedule().getName());
-        compareScheduleOverrides(entityStatus, scheduleConfig);
-    }
-
-    private void compareScheduleOverrides(EntityStatus entityStatus, ScheduleConfig scheduleConfig) throws ApiException {
-        for (ScheduleOverride scheduleOverrideToImport : scheduleConfig.getScheduleOverrideList()) {
-            for (ScheduleConfig currentScheduleConfig : currentScheduleConfigs) {
-                for (ScheduleOverride scheduleOverride : currentScheduleConfig.getScheduleOverrideList()) {
-                    if (scheduleOverride.getAlias().equals(scheduleOverrideToImport.getAlias())) {
-                        updateScheduleOverride(entityStatus, scheduleOverrideToImport, scheduleConfig.getSchedule());
-                        break;
-                    }
-                }
-            }
-            createScheduleOverride(entityStatus, scheduleOverrideToImport, scheduleConfig.getSchedule());
-        }
-    }
-
-    private void updateScheduleOverride(EntityStatus entityStatus, ScheduleOverride scheduleOverride, Schedule schedule) throws ApiException {
-        final UpdateScheduleOverrideRequest request = new UpdateScheduleOverrideRequest();
-        if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
-            request.setIdentifier(schedule.getId());
-        } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
-            request.setScheduleIdentifierType(UpdateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
-            request.setIdentifier(schedule.getName());
-        }
-        request.alias(scheduleOverride.getAlias());
-        UpdateScheduleOverridePayload payload = new UpdateScheduleOverridePayload();
-        payload.setUser(scheduleOverride.getUser());
-        payload.setEndDate(scheduleOverride.getEndDate());
-        payload.setStartDate(scheduleOverride.getStartDate());
-        payload.setRotations(scheduleOverride.getRotations());
-        request.setBody(payload);
-        scheduleOverrideApi.updateScheduleOverride(request);
     }
 
     private List<CreateScheduleRotationPayload> constructCreateScheduleRotationPayloads(Schedule schedule) {

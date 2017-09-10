@@ -1,10 +1,15 @@
 package com.opsgenie.tools.backup;
 
 import com.beust.jcommander.JCommander;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.opsgenie.client.ApiClient;
 import com.opsgenie.client.Configuration;
 import com.opsgenie.client.api.AccountApi;
-import com.opsgenie.client.model.GetAccountInfoResponse;
+import com.opsgenie.client.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -73,5 +78,27 @@ public class ExportMain {
         defaultApiClient.setApiKey(apiKey);
         defaultApiClient.setBasePath(opsGenieHost);
         defaultApiClient.setDebugging(debug);
+
+        ObjectMapper mapper = defaultApiClient.getJSON().getContext(Object.class);
+        mapper.addMixIn(Recipient.class, IgnoredRecipient.class);
+        mapper.addMixIn(Filter.class, IgnoredType.class);
+        mapper.addMixIn(TimeRestrictionInterval.class, IgnoredType.class);
+        mapper.addMixIn(AlertPolicy.class, IgnoredType.class);
+        mapper.addMixIn(Integration.class, IgnoredType.class);
     }
+
+    abstract class IgnoredRecipient {
+
+        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+        String id;
+
+        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+        String type;
+    }
+
+    abstract class IgnoredType {
+        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+        String type;
+    }
+
 }

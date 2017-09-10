@@ -74,11 +74,11 @@ public class ImportMain {
 
     private static void configureClientObjectMapper(ApiClient defaultApiClient) {
         ObjectMapper mapper = defaultApiClient.getJSON().getContext(Object.class);
-        mapper.addMixIn(Filter.class, Ignored.class);
-        mapper.addMixIn(TimeRestrictionInterval.class, Ignored.class);
-        mapper.addMixIn(Recipient.class, Ignored.class);
-        mapper.addMixIn(AlertPolicy.class, Ignored.class);
-        mapper.addMixIn(Integration.class, Ignored.class);
+        mapper.addMixIn(Filter.class, IgnoredType.class);
+        mapper.addMixIn(TimeRestrictionInterval.class, IgnoredType.class);
+        mapper.addMixIn(Recipient.class, IgnoredType.class);
+        mapper.addMixIn(AlertPolicy.class, IgnoredType.class);
+        mapper.addMixIn(Integration.class, IgnoredType.class);
         mapper.addMixIn(BaseIntegrationAction.class, IgnoredIntegration.class);
     }
 
@@ -198,7 +198,7 @@ public class ImportMain {
         return null;
     }
 
-    abstract class Ignored {
+    abstract class IgnoredType {
         @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
         String type;
     }
@@ -210,4 +210,5 @@ public class ImportMain {
         @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
         String id;
     }
+
 }

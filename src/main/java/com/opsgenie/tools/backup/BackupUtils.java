@@ -1,5 +1,6 @@
 package com.opsgenie.tools.backup;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
@@ -18,6 +19,7 @@ public class BackupUtils {
     static {
         mapper.registerModule(new JodaModule());
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm"));
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
     public static String readFile(String fileName) throws IOException {

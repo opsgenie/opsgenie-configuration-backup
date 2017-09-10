@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.opsgenie.client.ApiException;
 import com.opsgenie.client.api.IntegrationApi;
+import com.opsgenie.client.model.CreateIntegrationResponse;
 import com.opsgenie.client.model.Integration;
 import com.opsgenie.client.model.UpdateIntegrationActionRequest;
 import com.opsgenie.client.model.UpdateIntegrationRequest;
@@ -70,7 +71,13 @@ public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
 
     @Override
     protected void createEntity(IntegrationConfig integrationConfig) throws ParseException, IOException, ApiException {
-        integrationApi.createIntegration(integrationConfig.getIntegration());
+        final Integration integration = integrationConfig.getIntegration();
+        final CreateIntegrationResponse createIntegrationResponse = integrationApi.createIntegration(integration);
+        System.out.println(createIntegrationResponse);
+        final UpdateIntegrationActionRequest updateIntegrationActionRequest = new UpdateIntegrationActionRequest()
+                .body(integrationConfig.getIntegrationActions())
+                .integrationId(createIntegrationResponse.getData().getId());
+        integrationApi.updateIntegrationActions(updateIntegrationActionRequest);
     }
 
     @Override
@@ -83,7 +90,9 @@ public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
             updateIntegrationRequest.setId(findIntegrationIdWithName(integration));
         }
         integrationApi.updateIntegration(updateIntegrationRequest);
-        final UpdateIntegrationActionRequest updateIntegrationActionRequest = new UpdateIntegrationActionRequest().body(integration.getIntegrationActions()).integrationId(integrationId);
+        final UpdateIntegrationActionRequest updateIntegrationActionRequest = new UpdateIntegrationActionRequest()
+                .body(integration.getIntegrationActions())
+                .integrationId(findIntegrationIdWithName(integration));
         integrationApi.updateIntegrationActions(updateIntegrationActionRequest);
     }
 

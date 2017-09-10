@@ -60,12 +60,16 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
 
         payload.setMembers(team.getMembers());
         teamApi.createTeam(payload);
-//        final List<TeamRoutingRule> teamRoutingRules = entity.getTeamRoutingRules();
-//        if (teamRoutingRules != null) {
-//            for (TeamRoutingRule teamRoutingRule : teamRoutingRules) {
-//                createTeamRoutingRule(team, teamRoutingRule);
-//            }
-//        }
+        final List<TeamRoutingRule> teamRoutingRules = entity.getTeamRoutingRules();
+        if (teamRoutingRules != null) {
+            for (TeamRoutingRule teamRoutingRule : teamRoutingRules) {
+                if (teamRoutingRule.isIsDefault()) {
+                    logger.info("Skipping default routing rule");
+                } else {
+                    createTeamRoutingRule(team, teamRoutingRule);
+                }
+            }
+        }
     }
 
     private void createTeamRoutingRule(Team team, TeamRoutingRule teamRoutingRule) throws ApiException {
@@ -78,7 +82,7 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
         payload.setTimezone(teamRoutingRule.getTimezone());
 
         CreateTeamRoutingRuleRequest request = new CreateTeamRoutingRuleRequest();
-        request.setIdentifier(team.getId());
+        request.setIdentifier(team.getName());
         request.setTeamIdentifierType(CreateTeamRoutingRuleRequest.TeamIdentifierTypeEnum.NAME);
         request.setBody(payload);
 
@@ -98,20 +102,43 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
         if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
             teamApi.updateTeam(team.getId(), payload);
         } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
-            teamApi.updateTeam(findTeamNameInCurrentEntities(entity), payload);
+            teamApi.updateTeam(findTeamIdInCurrentTeams(entity), payload);
         }
-//        final List<TeamRoutingRule> teamRoutingRules = entity.getTeamRoutingRules();
-//        if (teamRoutingRules != null) {
-//            for (TeamRoutingRule teamRoutingRule : teamRoutingRules) {
-//                updateTeamRoutingRule(team, teamRoutingRule, entityStatus);
-//            }
-//        }
+        final List<TeamRoutingRule> teamRoutingRules = entity.getTeamRoutingRules();
+        if (teamRoutingRules != null) {
+            for (TeamRoutingRule teamRoutingRule : teamRoutingRules) {
+
+                if (teamRoutingRule.isIsDefault()) {
+                    teamRoutingRule.setTimezone(null);
+                }
+                final String routingRuleIdInCurrent = findRoutingRuleIdInCurrent(entity, teamRoutingRule);
+                if (routingRuleIdInCurrent != null) {
+                    teamRoutingRule.setId(routingRuleIdInCurrent);
+                    updateTeamRoutingRule(team, teamRoutingRule, entityStatus);
+                } else {
+                    createTeamRoutingRule(team, teamRoutingRule);
+                }
+            }
+        }
     }
 
-    private String findTeamNameInCurrentEntities(TeamConfig entity) {
+    private String findTeamIdInCurrentTeams(TeamConfig entity) {
         for (TeamConfig teamConfig : teamConfigs) {
             if (entity.getTeam().getName().equals(teamConfig.getTeam().getName())) {
                 return teamConfig.getTeam().getId();
+            }
+        }
+        return null;
+    }
+
+    private String findRoutingRuleIdInCurrent(TeamConfig entity, TeamRoutingRule teamRoutingRule) {
+        for (TeamConfig teamConfig : teamConfigs) {
+            if (entity.getTeam().getName().equals(teamConfig.getTeam().getName())) {
+                for (TeamRoutingRule currentRoutingRule : teamConfig.getTeamRoutingRules()) {
+                    if (currentRoutingRule.getName().equals(teamRoutingRule.getName())) {
+                        return currentRoutingRule.getId();
+                    }
+                }
             }
         }
         return null;
