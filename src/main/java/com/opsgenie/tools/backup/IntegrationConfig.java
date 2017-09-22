@@ -1,12 +1,12 @@
 package com.opsgenie.tools.backup;
 
-import com.opsgenie.client.model.ActionCategorizedList;
+import com.opsgenie.client.model.ActionCategorized;
 import com.opsgenie.client.model.Integration;
 
 public class IntegrationConfig {
 
     private Integration integration;
-    private ActionCategorizedList integrationActions;
+    private ActionCategorized integrationActions;
 
     public Integration getIntegration() {
         return integration;
@@ -16,11 +16,11 @@ public class IntegrationConfig {
         this.integration = integration;
     }
 
-    public ActionCategorizedList getIntegrationActions() {
+    public ActionCategorized getIntegrationActions() {
         return integrationActions;
     }
 
-    public void setIntegrationActions(ActionCategorizedList integrationActions) {
+    public void setIntegrationActions(ActionCategorized integrationActions) {
         this.integrationActions = integrationActions;
     }
 }

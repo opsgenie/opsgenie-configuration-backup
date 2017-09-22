@@ -99,11 +99,15 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
             payload.setDescription(team.getDescription());
         }
         payload.setMembers(team.getMembers());
+
+        UpdateTeamRequest request = new UpdateTeamRequest().body(payload);
+
         if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
-            teamApi.updateTeam(team.getId(), payload);
+            teamApi.updateTeam(request.identifier(team.getId()));
         } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
-            teamApi.updateTeam(findTeamIdInCurrentTeams(entity), payload);
+            teamApi.updateTeam(request.identifier(findTeamIdInCurrentTeams(entity)));
         }
+
         final List<TeamRoutingRule> teamRoutingRules = entity.getTeamRoutingRules();
         if (teamRoutingRules != null) {
             for (TeamRoutingRule teamRoutingRule : teamRoutingRules) {

@@ -4,7 +4,7 @@ import com.beust.jcommander.Parameter;
 
 public class CommandLineArgs {
 
-    @Parameter(names = {"--apiKey"}, required = true, description = "Opsgenie Integration API Key")
+    @Parameter(names = {"--apiKey"}, required = true, description = "OpsGenie Integration API Key")
     private String apiKey;
 
     @Parameter(names = {"--backupPath"}, description = "Backup directory")

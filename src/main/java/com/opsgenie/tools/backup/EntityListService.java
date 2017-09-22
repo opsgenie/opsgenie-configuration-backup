@@ -22,8 +22,9 @@ public class EntityListService {
     private static ScheduleApi scheduleApi = new ScheduleApi();
     private static ScheduleOverrideApi overrideApi = new ScheduleOverrideApi();
     private static PolicyApi policyApi = new PolicyApi();
-    private static IntegrationApi integrationApi = new IntegrationApi();
     private static EscalationApi escalationApi = new EscalationApi();
+    private static IntegrationApi integrationApi = new IntegrationApi();
+    private static IntegrationActionApi integrationActionApi = new IntegrationActionApi();
 
     public static List<ForwardingRule> listForwardingRules() throws ApiException {
         return forwardingRuleApi.listForwardingRules().getData();
@@ -105,7 +106,7 @@ public class EntityListService {
             integration.setId(meta.getId());
             integrationConfig.setIntegration(integration);
             try {
-                integrationConfig.setIntegrationActions(integrationApi.getIntegrationActions(meta.getId()).getData());
+                integrationConfig.setIntegrationActions(integrationActionApi.listIntegrationActions(meta.getId()).getData());
             } catch (Exception e) {
                 logger.info(integration.getName() + " is not an advanced integration, so not exporting actions");
             }
