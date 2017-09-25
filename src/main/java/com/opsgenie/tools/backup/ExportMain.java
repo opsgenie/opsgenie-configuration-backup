@@ -80,15 +80,15 @@ public class ExportMain {
         defaultApiClient.setDebugging(debug);
 
         ObjectMapper mapper = defaultApiClient.getJSON().getContext(Object.class);
-        mapper.addMixIn(Recipient.class, IgnoredRecipient.class);
+        mapper.addMixIn(Recipient.class, IgnoredIdAndType.class);
         mapper.addMixIn(Filter.class, IgnoredType.class);
         mapper.addMixIn(TimeRestrictionInterval.class, IgnoredType.class);
         mapper.addMixIn(AlertPolicy.class, IgnoredType.class);
         mapper.addMixIn(Integration.class, IgnoredType.class);
+        mapper.addMixIn(BaseIntegrationAction.class, IgnoredIdAndType.class);
     }
 
-    abstract class IgnoredRecipient {
-
+    abstract class IgnoredIdAndType {
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         String id;
 
