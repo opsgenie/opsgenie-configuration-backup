@@ -90,7 +90,7 @@ Update Only: Slack App Integration, Slack, HipChat, FlowDockV2
 
 ##Executable Jars
 We build 2 different executable jars for ease of use:
-OpsGenieBackupExecutable.jar backs up your OpsGenie configuration data.
+`OpsGenieExportUtil-*.jar` backs up your OpsGenie configuration data.
 OpsGenieRestoreExecutable.jar restores your OpsGenie configuration from backup.
 
 
@@ -101,47 +101,45 @@ Possible run configurations for OpsGenieBackupExecutable:
 1. Run only with apiKey parameter.
 This option simply exports the OpsGenie configuration to run path (the directory which the jar file is located in) in a folder named OpsGenieBackups.
 
-java -jar OpsGenieConfigExporter --apiKey YOUR_API_KEY
+java -jar OpsGenieExportUtil-*.jar --apiKey YOUR_API_KEY
 
 
 2. Run with apiKey and backupPath parameters.
 This option extracts the OpsGenie configuration to the given path.
 
-java -jar OpsGenieConfigExporter --apiKey YOUR_API_KEY --backupPath EXTRACT_PATH
+java -jar OpsGenieExportUtil-*.jar --apiKey YOUR_API_KEY --backupPath EXTRACT_PATH
 
 
 3. Run with apiKey, git sshUrl and  sshKeyPath parameters.
 This command clones the remote repository into a directory called OpsGenieBackupGitRepository.
 After the cloning process the export jar backs up the data into this directory under a folder called OpsGenieBackups.
 
-java -jar OpsGenieConfigExporter --apiKey YOUR_API_KEY --sshUrl GIT_SSH_URL -sshKeyPath GIT_SSH_PATH 
+java -jar OpsGenieExportUtil-*.jar --apiKey YOUR_API_KEY --sshUrl GIT_SSH_URL -sshKeyPath GIT_SSH_PATH 
 
 
 4. Run with apiKey, git sshUrl,  sshKeyPath and backupPAth parameters.
 This option clones the remote git to the given path.
 
-java -jar OpsGenieConfigExporter --apiKey YOUR_API_KEY --sshUrl GIT_SSH_URL -sshKeyPath GIT_SSH_PATH --backupPath EXTRACT_PATH
+java -jar OpsGenieExportUtil-*.jar --apiKey YOUR_API_KEY --sshUrl GIT_SSH_URL -sshKeyPath GIT_SSH_PATH --backupPath EXTRACT_PATH
 
 ```
 
 Usage: OpsGenieConfigExporter [options]
   Options:
   * --apiKey
-       Opsgenie Integration API Key
-    --backupPath
+       Opsgenie Integration API Key. (API Key is mandatory)
+  *  --backupPath
        Backup directory
        Default: /Users/baris/git/client-configuration-backup
-    --opsgenieHost
+  *  --opsgenieHost
        OpsGenie host to use
        Default: https://api.opsgenie.com
-    --sshKeyPath
+  *  --sshKeyPath
        Ssh key path
-    --sshPassPhrase
+  *  --sshPassPhrase
        Ssh pass phrase
-    --sshUrl
+  *  --sshUrl
        Git ssh url
-
-*: required
 
 Possible run configurations for OpsGenieRestoreExecutable:
 ```
@@ -149,14 +147,14 @@ Possible run configurations for OpsGenieRestoreExecutable:
 This option searches for OpsGenieBackups folder in run path (the directory which the jar file is located in)
 If it finds the folder it restores the configurations to the OpsGenie account whose API key is given.
 
-java -jar OpsGenieConfigImporter --apiKey YOUR_API_KEY
+java -jar OpsGenieImportUtil-*.jar --apiKey YOUR_API_KEY
 
 
 2. Run with apiKey and backupPath parameters.
 This option searches for OpsGenieBackup folder in given path
 If it finds the folder named OpsGenieBackups it restores the configurations to the OpsGenie account whose API key is given.
 
-java -jar OpsGenieConfigImporter --apiKey YOUR_API_KEY --backupPath EXTRACT_PATH
+java -jar OpsGenieImportUtil-*.jar --apiKey YOUR_API_KEY --backupPath EXTRACT_PATH
 
 
 3. Run with apiKey, sshUrl and  sshKeyPath parameters.
@@ -164,13 +162,13 @@ This option clones the remote git to the run path.
 After cloning it searches the folder named OpsGenieBackups
 If it finds the folder, the restore operation  is performed
 
-java -jar OpsGenieConfigImporter --apiKey YOUR_API_KEY --sshUrl GIT_SSH_URL -sshKeyPath GIT_SSH_PATH 
+java -jar OpsGenieImportUtil-*.jar --apiKey YOUR_API_KEY --sshUrl GIT_SSH_URL -sshKeyPath GIT_SSH_PATH 
 
 
 4. Run with apiKey, sshUrl,  sshKeyPath and  backupPath parameters.
 This configuration clones the remote git to a folder named OpsGenieBackupGitRepository under the given path.
 
-java -jar OpsGenieConfigImporter --apiKey YOUR_API_KEY --sshUrl GIT_SSH_URL -sshKeyPath GIT_SSH_PATH --backupPath EXTRACT_PATH
+java -jar OpsGenieImportUtil-*.jar --apiKey YOUR_API_KEY --sshUrl GIT_SSH_URL -sshKeyPath GIT_SSH_PATH --backupPath EXTRACT_PATH
 
 ```
 
