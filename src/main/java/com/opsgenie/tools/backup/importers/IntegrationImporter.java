@@ -3,6 +3,7 @@ package com.opsgenie.tools.backup.importers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.opsgenie.client.ApiException;
+import com.opsgenie.client.api.IntegrationActionApi;
 import com.opsgenie.client.api.IntegrationApi;
 import com.opsgenie.client.model.CreateIntegrationResponse;
 import com.opsgenie.client.model.Integration;
@@ -21,6 +22,7 @@ import java.util.List;
 public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
 
     private static IntegrationApi integrationApi = new IntegrationApi();
+    private static IntegrationActionApi integrationActionApi = new IntegrationActionApi();
     private List<IntegrationConfig> integrationConfigList = new ArrayList<IntegrationConfig>();
 
     public IntegrationImporter(String backupRootDirectory, boolean addEntityEnabled, boolean updateEntityEnabled) {
@@ -76,8 +78,8 @@ public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
         System.out.println(createIntegrationResponse);
         final UpdateIntegrationActionRequest updateIntegrationActionRequest = new UpdateIntegrationActionRequest()
                 .body(integrationConfig.getIntegrationActions())
-                .integrationId(createIntegrationResponse.getData().getId());
-        integrationApi.updateIntegrationActions(updateIntegrationActionRequest);
+                .id(createIntegrationResponse.getData().getId());
+        integrationActionApi.updateIntegrationActions(updateIntegrationActionRequest);
     }
 
     @Override
@@ -92,8 +94,8 @@ public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
         integrationApi.updateIntegration(updateIntegrationRequest);
         final UpdateIntegrationActionRequest updateIntegrationActionRequest = new UpdateIntegrationActionRequest()
                 .body(integration.getIntegrationActions())
-                .integrationId(findIntegrationIdWithName(integration));
-        integrationApi.updateIntegrationActions(updateIntegrationActionRequest);
+                .id(findIntegrationIdWithName(integration));
+        integrationActionApi.updateIntegrationActions(updateIntegrationActionRequest);
     }
 
     private String findIntegrationIdWithName(IntegrationConfig integrationToImport) {
