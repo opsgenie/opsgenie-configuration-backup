@@ -1,11 +1,11 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.opsgenie.client.ApiException;
-import com.opsgenie.client.api.ForwardingRuleApi;
-import com.opsgenie.client.model.CreateForwardingRulePayload;
-import com.opsgenie.client.model.ForwardingRule;
-import com.opsgenie.client.model.UpdateForwardingRulePayload;
-import com.opsgenie.client.model.UpdateForwardingRuleRequest;
+import com.opsgenie.oas.sdk.ApiException;
+import com.opsgenie.oas.sdk.api.ForwardingRuleApi;
+import com.opsgenie.oas.sdk.model.CreateForwardingRulePayload;
+import com.opsgenie.oas.sdk.model.ForwardingRule;
+import com.opsgenie.oas.sdk.model.UpdateForwardingRulePayload;
+import com.opsgenie.oas.sdk.model.UpdateForwardingRuleRequest;
 import com.opsgenie.tools.backup.EntityListService;
 
 import java.util.ArrayList;

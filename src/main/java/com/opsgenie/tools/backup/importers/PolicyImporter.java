@@ -2,10 +2,10 @@ package com.opsgenie.tools.backup.importers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
-import com.opsgenie.client.ApiException;
-import com.opsgenie.client.api.PolicyApi;
-import com.opsgenie.client.model.AlertPolicy;
-import com.opsgenie.client.model.UpdateAlertPolicyRequest;
+import com.opsgenie.oas.sdk.ApiException;
+import com.opsgenie.oas.sdk.api.PolicyApi;
+import com.opsgenie.oas.sdk.model.AlertPolicy;
+import com.opsgenie.oas.sdk.model.UpdateAlertPolicyRequest;
 import com.opsgenie.tools.backup.BackupUtils;
 import com.opsgenie.tools.backup.EntityListService;
 

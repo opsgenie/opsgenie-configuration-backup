@@ -1,7 +1,7 @@
 package com.opsgenie.tools.backup;
 
-import com.opsgenie.client.model.ActionCategorized;
-import com.opsgenie.client.model.Integration;
+import com.opsgenie.oas.sdk.model.ActionCategorized;
+import com.opsgenie.oas.sdk.model.Integration;
 
 public class IntegrationConfig {
 

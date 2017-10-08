@@ -1,9 +1,9 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.opsgenie.client.ApiException;
-import com.opsgenie.client.model.AlertPolicy;
-import com.opsgenie.client.model.ModifyAlertPolicy;
-import com.opsgenie.client.model.Recipient;
+import com.opsgenie.oas.sdk.ApiException;
+import com.opsgenie.oas.sdk.model.AlertPolicy;
+import com.opsgenie.oas.sdk.model.ModifyAlertPolicy;
+import com.opsgenie.oas.sdk.model.Recipient;
 import com.opsgenie.tools.backup.EntityListService;
 
 import java.util.List;

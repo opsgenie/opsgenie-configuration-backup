@@ -13,7 +13,6 @@ During export, these features are exported to a local directory or remote Git br
 *Schedule information (name-timeZone-rotations-team -enabled-description-overrides)
 *Heartbeat information (name-description-interval-intervalUnit-enabled)
 *Integration information (enabled-allowConfigurationAccess-allowWriteAccess-isAdvanced-suppressNotifications-isDefaultIntegration-isGlobal-name-type)
-        
 ```
 
 The script exports data to a folder named OpsGenieBackups.

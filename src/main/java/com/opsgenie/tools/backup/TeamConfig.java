@@ -1,7 +1,7 @@
 package com.opsgenie.tools.backup;
 
-import com.opsgenie.client.model.Team;
-import com.opsgenie.client.model.TeamRoutingRule;
+import com.opsgenie.oas.sdk.model.Team;
+import com.opsgenie.oas.sdk.model.TeamRoutingRule;
 
 import java.util.List;
 

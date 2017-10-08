@@ -1,6 +1,6 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.opsgenie.client.ApiException;
+import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.tools.backup.BackupUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
