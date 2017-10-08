@@ -1,7 +1,7 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.opsgenie.client.ApiException;
-import com.opsgenie.client.model.ForwardingRule;
+import com.opsgenie.oas.sdk.ApiException;
+import com.opsgenie.oas.sdk.model.ForwardingRule;
 import com.opsgenie.tools.backup.EntityListService;
 
 import java.util.List;

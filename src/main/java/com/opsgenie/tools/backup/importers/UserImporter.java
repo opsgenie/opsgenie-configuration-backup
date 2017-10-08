@@ -1,10 +1,10 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.opsgenie.client.ApiException;
-import com.opsgenie.client.api.ContactApi;
-import com.opsgenie.client.api.NotificationRuleApi;
-import com.opsgenie.client.api.UserApi;
-import com.opsgenie.client.model.*;
+import com.opsgenie.oas.sdk.ApiException;
+import com.opsgenie.oas.sdk.api.ContactApi;
+import com.opsgenie.oas.sdk.api.NotificationRuleApi;
+import com.opsgenie.oas.sdk.api.UserApi;
+import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.BackupUtils;
 import com.opsgenie.tools.backup.EntityListService;
 import com.opsgenie.tools.backup.UserConfig;

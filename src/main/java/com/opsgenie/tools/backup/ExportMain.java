@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.opsgenie.client.ApiClient;
-import com.opsgenie.client.Configuration;
-import com.opsgenie.client.api.AccountApi;
-import com.opsgenie.client.model.*;
+import com.opsgenie.oas.sdk.ApiClient;
+import com.opsgenie.oas.sdk.Configuration;
+import com.opsgenie.oas.sdk.api.AccountApi;
+import com.opsgenie.oas.sdk.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

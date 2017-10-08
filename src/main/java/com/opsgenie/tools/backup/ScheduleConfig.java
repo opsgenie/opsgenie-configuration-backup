@@ -1,7 +1,7 @@
 package com.opsgenie.tools.backup;
 
-import com.opsgenie.client.model.Schedule;
-import com.opsgenie.client.model.ScheduleOverride;
+import com.opsgenie.oas.sdk.model.Schedule;
+import com.opsgenie.oas.sdk.model.ScheduleOverride;
 
 import java.util.List;
 

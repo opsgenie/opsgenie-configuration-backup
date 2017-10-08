@@ -1,7 +1,7 @@
 package com.opsgenie.tools.backup;
 
-import com.opsgenie.client.model.NotificationRule;
-import com.opsgenie.client.model.User;
+import com.opsgenie.oas.sdk.model.NotificationRule;
+import com.opsgenie.oas.sdk.model.User;
 
 import java.util.List;
 
