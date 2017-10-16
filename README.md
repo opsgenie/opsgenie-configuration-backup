@@ -6,28 +6,26 @@ OpsGenie customers can back up their account configuration and restore it later 
 During export, these features are exported to a local directory or remote Git branch:
 
 ```
-*User information (username-fullname-skypeUsername-timezone-userRole-userContacts-notificationRules)
-*Group information (name -users-description)
-*Team information (name-members-memberRoles-description)
-*Escalation information (name-rules-team-description-repeatInterval)
-*Schedule information (name-timeZone-rotations-team -enabled-description-overrides)
-*Heartbeat information (name-description-interval-intervalUnit-enabled)
-*Integration information (enabled-allowConfigurationAccess-allowWriteAccess-isAdvanced-suppressNotifications-isDefaultIntegration-isGlobal-name-type)
+* Users and Notification Rules
+* Forwarding Rules
+* Teams
+* Escalations
+* Schedules and Schedule Overrides
+* Alert Policies
+* Integrations and Integration Actions
 ```
 
 The script exports data to a folder named OpsGenieBackups.
-There are 9 sub-folders inside this main folder.
+There are 7 sub-folders inside this main folder.
 
 ```
-*users
-*groups
-*teams
-*escalations
-*schedules
-*scheduleOverrides
-*heartbeats
-*notifications
-*integrations
+* users
+* forwardings
+* teams
+* escalations
+* schedules
+* policies
+* integrations
 ```
 
 The script exports the data to those sub-folders according to their types.
@@ -35,7 +33,6 @@ The script exports the data to those sub-folders according to their types.
 While exporting those entities, the script creates a unique file for each entity which contains JSON data for the entity.
 For example if the account has 80 users, the script creates 80 different files with name “(username of the user)-(id of user)” and extension “.json” in the sub-folder named users.
 Such as mehmetdemircs@gmail.com-54fc708c-2324-48c7-bb7f-ee08063f729a.json file in the path “OpsGenieBackups/users/”.
-
 
 ## Separate Files
 The script uses separate files for each entity.
@@ -288,13 +285,3 @@ Importer importer = new Importer(properties,config);
 importer.restore();
         
 ```
-
-
-
-
-
-
-## Authors
-
-* **Mehmet Mustafa Demir <mehmetdemircs@gmail.com>** - *Initial work* 
-
