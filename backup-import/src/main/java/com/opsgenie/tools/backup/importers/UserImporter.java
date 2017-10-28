@@ -5,7 +5,7 @@ import com.opsgenie.oas.sdk.api.ContactApi;
 import com.opsgenie.oas.sdk.api.NotificationRuleApi;
 import com.opsgenie.oas.sdk.api.UserApi;
 import com.opsgenie.oas.sdk.model.*;
-import com.opsgenie.tools.backup.BackupUtils;
+import com.opsgenie.tools.backup.util.BackupUtils;
 import com.opsgenie.tools.backup.EntityListService;
 import com.opsgenie.tools.backup.dto.UserConfig;
 

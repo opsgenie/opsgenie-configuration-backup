@@ -1,11 +1,11 @@
 package com.opsgenie.tools.backup;
 
-import com.opsgenie.tools.backup.conf.BackupProperties;
 import com.opsgenie.tools.backup.exporters.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.opsgenie.tools.backup.util.BackupUtils;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class ConfigurationExporter extends BaseBackup {
     private static List<Exporter> exporters;
-    private final Logger logger = LogManager.getLogger(ConfigurationExporter.class);
+    private final Logger logger = LoggerFactory.getLogger(ConfigurationExporter.class);
 
     ConfigurationExporter(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
         super(backupProperties);

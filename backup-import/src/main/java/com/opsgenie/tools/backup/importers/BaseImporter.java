@@ -1,16 +1,16 @@
 package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.oas.sdk.ApiException;
-import com.opsgenie.tools.backup.BackupUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.opsgenie.tools.backup.util.BackupUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 
 abstract class BaseImporter<T> implements Importer {
-    protected final Logger logger = LogManager.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected File importDirectory;
     private boolean addEntityEnabled;
     private boolean updateEntityEnabled;

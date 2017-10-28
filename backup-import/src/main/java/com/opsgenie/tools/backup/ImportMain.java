@@ -7,10 +7,8 @@ import com.opsgenie.oas.sdk.ApiClient;
 import com.opsgenie.oas.sdk.Configuration;
 import com.opsgenie.oas.sdk.api.AccountApi;
 import com.opsgenie.oas.sdk.model.*;
-import com.opsgenie.tools.backup.conf.BackupProperties;
-import com.opsgenie.tools.backup.conf.CommandLineArgs;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileReader;
@@ -18,7 +16,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class ImportMain {
-    private final static Logger logger = LogManager.getLogger(ImportMain.class);
+    private final static Logger logger = LoggerFactory.getLogger(ImportMain.class);
 
     public static void main(String[] args) throws Exception {
         CommandLineArgs commandLineArgs = new CommandLineArgs();

@@ -6,7 +6,7 @@ import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.PolicyApi;
 import com.opsgenie.oas.sdk.model.AlertPolicy;
 import com.opsgenie.oas.sdk.model.UpdateAlertPolicyRequest;
-import com.opsgenie.tools.backup.BackupUtils;
+import com.opsgenie.tools.backup.util.BackupUtils;
 import com.opsgenie.tools.backup.EntityListService;
 
 import java.io.IOException;

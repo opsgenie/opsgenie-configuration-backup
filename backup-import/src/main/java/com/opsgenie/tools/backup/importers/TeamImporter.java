@@ -4,7 +4,7 @@ import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.TeamApi;
 import com.opsgenie.oas.sdk.api.TeamRoutingRuleApi;
 import com.opsgenie.oas.sdk.model.*;
-import com.opsgenie.tools.backup.BackupUtils;
+import com.opsgenie.tools.backup.util.BackupUtils;
 import com.opsgenie.tools.backup.EntityListService;
 import com.opsgenie.tools.backup.dto.TeamConfig;
 

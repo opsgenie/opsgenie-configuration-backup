@@ -1,9 +1,9 @@
 package com.opsgenie.tools.backup.exporters;
 
 import com.opsgenie.oas.sdk.ApiException;
-import com.opsgenie.tools.backup.BackupUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.opsgenie.tools.backup.util.BackupUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.text.ParseException;
 import java.util.List;
 
 abstract class BaseExporter<T> implements Exporter {
-    protected final Logger logger = LogManager.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private File exportDirectory;
 
     public BaseExporter(String backupRootDirectory, String exportDirectoryName) {

@@ -4,10 +4,8 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
-import com.opsgenie.tools.backup.conf.BackupProperties;
+import com.opsgenie.tools.backup.util.BackupUtils;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
@@ -16,6 +14,8 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.UnsupportedCredentialItem;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,7 +25,7 @@ import java.io.UnsupportedEncodingException;
  * @author Mehmet Mustafa Demir
  */
 abstract class BaseBackup {
-    private final Logger logger = LogManager.getLogger(BaseBackup.class);
+    private final Logger logger = LoggerFactory.getLogger(BaseBackup.class);
     private BackupProperties backupProperties;
     private Git git;
     private TransportConfigCallback callBack;

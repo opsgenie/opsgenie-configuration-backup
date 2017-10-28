@@ -9,7 +9,7 @@ import com.opsgenie.oas.sdk.model.CreateIntegrationResponse;
 import com.opsgenie.oas.sdk.model.Integration;
 import com.opsgenie.oas.sdk.model.UpdateIntegrationActionRequest;
 import com.opsgenie.oas.sdk.model.UpdateIntegrationRequest;
-import com.opsgenie.tools.backup.BackupUtils;
+import com.opsgenie.tools.backup.util.BackupUtils;
 import com.opsgenie.tools.backup.EntityListService;
 import com.opsgenie.tools.backup.dto.IntegrationConfig;
 

@@ -7,13 +7,11 @@ import com.opsgenie.oas.sdk.ApiClient;
 import com.opsgenie.oas.sdk.Configuration;
 import com.opsgenie.oas.sdk.api.AccountApi;
 import com.opsgenie.oas.sdk.model.*;
-import com.opsgenie.tools.backup.conf.BackupProperties;
-import com.opsgenie.tools.backup.conf.CommandLineArgs;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExportMain {
-    private final static Logger logger = LogManager.getLogger(ExportMain.class);
+    private final static Logger logger = LoggerFactory.getLogger(ExportMain.class);
 
     public static void main(String[] args) throws Exception {
         CommandLineArgs commandLineArgs = new CommandLineArgs();

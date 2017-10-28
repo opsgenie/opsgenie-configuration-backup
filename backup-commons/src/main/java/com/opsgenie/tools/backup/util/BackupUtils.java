@@ -1,18 +1,18 @@
-package com.opsgenie.tools.backup;
+package com.opsgenie.tools.backup.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 
 public class BackupUtils {
 
-    private static final Logger logger = LogManager.getLogger(BackupUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(BackupUtils.class);
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -52,11 +52,11 @@ public class BackupUtils {
         return (s != null && s.trim().length() > 0);
     }
 
-    static boolean isEmptyString(String s) {
+    public static boolean isEmptyString(String s) {
         return (s == null || s.trim().length() == 0);
     }
 
-    static void deleteDirectory(File dir) {
+    public static void deleteDirectory(File dir) {
         if (!dir.exists()) {
             return;
         } else if (!dir.isDirectory()) {

@@ -1,4 +1,4 @@
-package com.opsgenie.tools.backup.conf;
+package com.opsgenie.tools.backup;
 
 import com.beust.jcommander.Parameter;
 

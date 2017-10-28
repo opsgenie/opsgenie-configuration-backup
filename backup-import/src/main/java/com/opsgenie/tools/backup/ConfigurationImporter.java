@@ -1,10 +1,9 @@
 package com.opsgenie.tools.backup;
 
-import com.opsgenie.tools.backup.conf.BackupProperties;
 import com.opsgenie.tools.backup.importers.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,7 +13,7 @@ import java.util.List;
 
 public class ConfigurationImporter extends BaseBackup {
     private static List<Importer> importers;
-    private final Logger logger = LogManager.getLogger(ConfigurationImporter.class);
+    private final Logger logger = LoggerFactory.getLogger(ConfigurationImporter.class);
     private ImportConfig config;
 
     ConfigurationImporter(BackupProperties backupProperties, ImportConfig config) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
