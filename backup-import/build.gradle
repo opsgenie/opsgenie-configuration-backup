@@ -17,6 +17,7 @@ dependencies {
 }
 
 task importUtilJar(type: Jar) {
+    group 'package'
     manifest {
         attributes("Built-By": "http://www.opsgenie.com",
                 "Specification-Title": "OpsGenie Configuration Backup Tool",

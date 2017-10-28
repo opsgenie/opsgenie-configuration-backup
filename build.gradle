@@ -21,7 +21,6 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-
 task javadocJar(type: Jar, dependsOn: 'javadoc') {
     classifier 'javadoc'
     from javadoc.destinationDir
@@ -36,6 +35,21 @@ artifacts {
 signing {
     required { gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
+}
+
+jar {
+    manifest {
+        attributes("Built-By": "http://www.opsgenie.com",
+                "Specification-Title": "OpsGenie Configuration Backup Tool",
+                "Specification-Product": "opsgenie-configuration-backup",
+                "Specification-Version": project.version,
+                "Specification-Vendor": "http://www.opsgenie.com",
+                "Implementation-Title": "OpsGenie Configuration Backup Tool",
+                "Implementation-Product": "opsgenie-configuration-backup",
+                "Implementation-Vendor": "http://www.opsgenie.com",
+                "Implementation-Version": project.version,
+        )
+    }
 }
 
 uploadArchives {
