@@ -1,0 +1,35 @@
+group 'com.opsgenie.tools'
+version '0.8.1'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.6
+
+dependencies {
+    compile project(':backup-commons')
+}
+
+repositories {
+    mavenCentral()
+}
+
+task exportUtilJar(type: Jar) {
+    group 'package'
+    manifest {
+        attributes("Built-By": "http://www.opsgenie.com",
+                "Specification-Title": "OpsGenie Configuration Backup Tool",
+                "Specification-Product": "opsgenie-configuration-backup",
+                "Specification-Version": project.version,
+                "Specification-Vendor": "http://www.opsgenie.com",
+                "Implementation-Title": "OpsGenie Configuration Backup Tool",
+                "Implementation-Product": "opsgenie-configuration-backup",
+                "Implementation-Vendor": "http://www.opsgenie.com",
+                "Implementation-Version": project.version,
+                "Main-Class": "com.opsgenie.tools.backup.ExportMain"
+        )
+    }
+    baseName = "OpsGenieExportUtil"
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
+    with jar
+}

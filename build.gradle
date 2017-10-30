@@ -3,89 +3,23 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 group 'com.opsgenie.tools'
-version '0.8.0'
+version '0.8.1'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 repositories {
     mavenCentral()
-    mavenLocal()
     jcenter()
 }
 
 apply plugin: 'java'
 apply plugin: 'project-report'
 
-dependencies {
-    compile 'org.apache.logging.log4j:log4j:2.7'
-    compile 'org.apache.logging.log4j:log4j-core:2.7'
-    compile "com.beust:jcommander:1.48"
-    compile 'org.eclipse.jgit:org.eclipse.jgit:4.5.0.201609210915-r'
-    compile "com.opsgenie.oas:opsgenie-sdk-swagger:1.0.0"
-    compile "org.slf4j:slf4j-simple:1.7.5"
-}
-
-jar {
-    manifest {
-        attributes("Built-By": "http://www.opsgenie.com",
-                "Specification-Title": "OpsGenie Configuration Backup Tool",
-                "Specification-Product": "opsgenie-configuration-backup",
-                "Specification-Version": project.version,
-                "Specification-Vendor": "http://www.opsgenie.com",
-                "Implementation-Title": "OpsGenie Configuration Backup Tool",
-                "Implementation-Product": "opsgenie-configuration-backup",
-                "Implementation-Vendor": "http://www.opsgenie.com",
-                "Implementation-Version": project.version,
-        )
-    }
-}
-
-task importUtilJar(type: Jar) {
-    manifest {
-        attributes("Built-By": "http://www.opsgenie.com",
-                "Specification-Title": "OpsGenie Configuration Backup Tool",
-                "Specification-Product": "opsgenie-configuration-backup",
-                "Specification-Version": project.version,
-                "Specification-Vendor": "http://www.opsgenie.com",
-                "Implementation-Title": "OpsGenie Configuration Backup Tool",
-                "Implementation-Product": "opsgenie-configuration-backup",
-                "Implementation-Vendor": "http://www.opsgenie.com",
-                "Implementation-Version": project.version,
-                "Main-Class": "com.opsgenie.tools.backup.ImportMain"
-        )
-    }
-    baseName = "OpsGenieImportUtil"
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
-    with jar
-}
-
-task exportUtilJar(type: Jar) {
-    manifest {
-        attributes("Built-By": "http://www.opsgenie.com",
-                "Specification-Title": "OpsGenie Configuration Backup Tool",
-                "Specification-Product": "opsgenie-configuration-backup",
-                "Specification-Version": project.version,
-                "Specification-Vendor": "http://www.opsgenie.com",
-                "Implementation-Title": "OpsGenie Configuration Backup Tool",
-                "Implementation-Product": "opsgenie-configuration-backup",
-                "Implementation-Vendor": "http://www.opsgenie.com",
-                "Implementation-Version": project.version,
-                "Main-Class": "com.opsgenie.tools.backup.ExportMain"
-        )
-    }
-    baseName = "OpsGenieExportUtil"
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
-    with jar
-}
-
 task sourcesJar(type: Jar) {
     classifier 'sources'
     from sourceSets.main.allSource
 }
-
 
 task javadocJar(type: Jar, dependsOn: 'javadoc') {
     classifier 'javadoc'
@@ -101,6 +35,21 @@ artifacts {
 signing {
     required { gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
+}
+
+jar {
+    manifest {
+        attributes("Built-By": "http://www.opsgenie.com",
+                "Specification-Title": "OpsGenie Configuration Backup Tool",
+                "Specification-Product": "opsgenie-configuration-backup",
+                "Specification-Version": project.version,
+                "Specification-Vendor": "http://www.opsgenie.com",
+                "Implementation-Title": "OpsGenie Configuration Backup Tool",
+                "Implementation-Product": "opsgenie-configuration-backup",
+                "Implementation-Vendor": "http://www.opsgenie.com",
+                "Implementation-Version": project.version,
+        )
+    }
 }
 
 uploadArchives {

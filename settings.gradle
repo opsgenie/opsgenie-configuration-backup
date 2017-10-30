@@ -1,1 +1,4 @@
 rootProject.name = "configuration-backup"
+include 'backup-import'
+include 'backup-export'
+include 'backup-commons'
