@@ -1,6 +1,7 @@
 package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.oas.sdk.ApiException;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.util.BackupUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,12 +9,16 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 abstract class BaseImporter<T> implements Importer {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-    protected File importDirectory;
+    File importDirectory;
     private boolean addEntityEnabled;
     private boolean updateEntityEnabled;
+    private EntityRetriever<T> entityRetriever;
+    List<T> currentConfigs = new ArrayList<T>();
 
     BaseImporter(String backupRootDirectory, boolean addEntityEnabled, boolean updateEntityEnabled) {
         this.addEntityEnabled = addEntityEnabled;
@@ -39,11 +44,7 @@ abstract class BaseImporter<T> implements Importer {
             logger.warn("Warning: " + getImportDirectoryName() + " is empty. Restoring " + getImportDirectoryName() + " skipped");
             return;
         }
-        try {
-            populateCurrentEntityList();
-        } catch (ApiException e) {
-            logger.error("Could not get current configuration" + e.getMessage());
-        }
+        populateCurrentEntities();
         for (String fileName : files) {
             T entity = readEntity(fileName);
             if (entity != null) {
@@ -52,6 +53,18 @@ abstract class BaseImporter<T> implements Importer {
         }
 
         logger.info("Restoring " + getImportDirectoryName() + " finished");
+    }
+
+    private void populateCurrentEntities() {
+        try {
+            entityRetriever = initializeEntityRetriever();
+            currentConfigs = entityRetriever.retrieveEntities();
+            if (!updateEntityEnabled) {
+                logger.warn("Updating is disabled for " + getImportDirectoryName());
+            }
+        } catch (Exception e) {
+            logger.error("Could not get current configuration" + e.getMessage());
+        }
     }
 
     protected T readEntity(String fileName) {
@@ -92,9 +105,9 @@ abstract class BaseImporter<T> implements Importer {
         }
     }
 
-    protected abstract EntityStatus checkEntity(T entity) throws ApiException;
+    protected abstract EntityRetriever<T> initializeEntityRetriever();
 
-    protected abstract void populateCurrentEntityList() throws ApiException;
+    protected abstract EntityStatus checkEntity(T entity) throws ApiException;
 
     protected abstract void createEntity(T entity) throws ParseException, IOException, ApiException;
 

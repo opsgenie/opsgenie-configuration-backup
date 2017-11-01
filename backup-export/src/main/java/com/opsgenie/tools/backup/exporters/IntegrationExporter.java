@@ -1,12 +1,8 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.opsgenie.oas.sdk.ApiException;
-import com.opsgenie.tools.backup.EntityListService;
 import com.opsgenie.tools.backup.dto.IntegrationConfig;
-
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.List;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retrieval.IntegrationRetriever;
 
 public class IntegrationExporter extends BaseExporter<IntegrationConfig> {
 
@@ -15,12 +11,13 @@ public class IntegrationExporter extends BaseExporter<IntegrationConfig> {
     }
 
     @Override
+    protected EntityRetriever<IntegrationConfig> initializeEntityRetriever() {
+        return new IntegrationRetriever();
+    }
+
+    @Override
     protected String getEntityFileName(IntegrationConfig integrationConfig) {
         return integrationConfig.getIntegration().getId();
     }
 
-    @Override
-    protected List<IntegrationConfig> retrieveEntities() throws ParseException, IOException, ApiException {
-        return EntityListService.listIntegrations();
-    }
 }

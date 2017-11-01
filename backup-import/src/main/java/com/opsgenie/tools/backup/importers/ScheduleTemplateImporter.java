@@ -4,23 +4,26 @@ import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.ScheduleApi;
 import com.opsgenie.oas.sdk.model.CreateSchedulePayload;
 import com.opsgenie.oas.sdk.model.Schedule;
-import com.opsgenie.tools.backup.EntityListService;
 import com.opsgenie.tools.backup.dto.ScheduleConfig;
-
-import java.util.List;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retrieval.ScheduleRetriever;
 
 public class ScheduleTemplateImporter extends BaseImporter<ScheduleConfig> {
 
     private static ScheduleApi api = new ScheduleApi();
-    private List<ScheduleConfig> currentScheduleList;
 
     public ScheduleTemplateImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
+    protected EntityRetriever<ScheduleConfig> initializeEntityRetriever() {
+        return new ScheduleRetriever();
+    }
+
+    @Override
     protected EntityStatus checkEntity(ScheduleConfig entity) {
-        for (ScheduleConfig scheduleConfig : currentScheduleList) {
+        for (ScheduleConfig scheduleConfig : currentConfigs) {
             final Schedule currentSchedule = scheduleConfig.getSchedule();
             if (currentSchedule.getId().equals(entity.getSchedule().getId())) {
                 return EntityStatus.EXISTS_WITH_ID;
@@ -29,11 +32,6 @@ public class ScheduleTemplateImporter extends BaseImporter<ScheduleConfig> {
             }
         }
         return EntityStatus.NOT_EXIST;
-    }
-
-    @Override
-    protected void populateCurrentEntityList() throws ApiException {
-        currentScheduleList = EntityListService.listSchedules();
     }
 
     @Override

@@ -3,24 +3,26 @@ package com.opsgenie.tools.backup.importers;
 import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.EscalationApi;
 import com.opsgenie.oas.sdk.model.*;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retrieval.EscalationRetriever;
 import com.opsgenie.tools.backup.util.BackupUtils;
-import com.opsgenie.tools.backup.EntityListService;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class EscalationImporter extends BaseImporter<Escalation> {
 
     private static EscalationApi api = new EscalationApi();
-    private List<Escalation> currentEscalations = new ArrayList<Escalation>();
 
     public EscalationImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
+    protected EntityRetriever<Escalation> initializeEntityRetriever() {
+        return new EscalationRetriever();
+    }
+
+    @Override
     protected EntityStatus checkEntity(Escalation entity) throws ApiException {
-        for (Escalation escalation : currentEscalations) {
+        for (Escalation escalation : currentConfigs) {
             if (escalation.getId().equals(entity.getId())) {
                 return EntityStatus.EXISTS_WITH_ID;
             } else if (escalation.getName().equals(entity.getName())) {
@@ -28,11 +30,6 @@ public class EscalationImporter extends BaseImporter<Escalation> {
             }
         }
         return EntityStatus.NOT_EXIST;
-    }
-
-    @Override
-    protected void populateCurrentEntityList() throws ApiException {
-        currentEscalations = EntityListService.listEscalations();
     }
 
     @Override

@@ -31,7 +31,7 @@ public class ConfigurationImporter extends BaseBackup {
      * folder or remote git. If git is enabled from BackupProperties parameters it will import those
      * configurations from remote git.
      */
-    void restore() throws GitAPIException {
+    void restore() throws GitAPIException, InterruptedException {
         if (getBackupProperties().isGitEnabled()) {
             cloneGit(getBackupProperties());
         }

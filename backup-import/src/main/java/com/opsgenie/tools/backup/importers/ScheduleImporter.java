@@ -2,11 +2,11 @@ package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.ScheduleApi;
-import com.opsgenie.oas.sdk.api.ScheduleOverrideApi;
 import com.opsgenie.oas.sdk.model.*;
-import com.opsgenie.tools.backup.util.BackupUtils;
-import com.opsgenie.tools.backup.EntityListService;
 import com.opsgenie.tools.backup.dto.ScheduleConfig;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retrieval.ScheduleRetriever;
+import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,16 +14,19 @@ import java.util.List;
 public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
 
     private static ScheduleApi scheduleApi = new ScheduleApi();
-    private static ScheduleOverrideApi scheduleOverrideApi = new ScheduleOverrideApi();
-    private List<ScheduleConfig> currentScheduleConfigs = new ArrayList<ScheduleConfig>();
 
     public ScheduleImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
+    protected EntityRetriever<ScheduleConfig> initializeEntityRetriever() {
+        return new ScheduleRetriever();
+    }
+
+    @Override
     protected EntityStatus checkEntity(ScheduleConfig entity) {
-        for (ScheduleConfig scheduleConfig : currentScheduleConfigs) {
+        for (ScheduleConfig scheduleConfig : currentConfigs) {
             final Schedule currentSchedule = scheduleConfig.getSchedule();
             if (currentSchedule.getId().equals(entity.getSchedule().getId())) {
                 return EntityStatus.EXISTS_WITH_ID;
@@ -32,11 +35,6 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
             }
         }
         return EntityStatus.NOT_EXIST;
-    }
-
-    @Override
-    protected void populateCurrentEntityList() throws ApiException {
-        currentScheduleConfigs = EntityListService.listSchedules();
     }
 
     @Override

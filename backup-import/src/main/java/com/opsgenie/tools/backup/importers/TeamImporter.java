@@ -4,26 +4,30 @@ import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.TeamApi;
 import com.opsgenie.oas.sdk.api.TeamRoutingRuleApi;
 import com.opsgenie.oas.sdk.model.*;
-import com.opsgenie.tools.backup.util.BackupUtils;
-import com.opsgenie.tools.backup.EntityListService;
 import com.opsgenie.tools.backup.dto.TeamConfig;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retrieval.TeamRetriever;
+import com.opsgenie.tools.backup.util.BackupUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TeamImporter extends BaseImporter<TeamConfig> {
 
     private static TeamApi teamApi = new TeamApi();
     private static TeamRoutingRuleApi teamRoutingRuleApi = new TeamRoutingRuleApi();
-    private List<TeamConfig> teamConfigs = new ArrayList<TeamConfig>();
 
     public TeamImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
+    protected EntityRetriever<TeamConfig> initializeEntityRetriever() {
+        return new TeamRetriever();
+    }
+
+    @Override
     protected EntityStatus checkEntity(TeamConfig teamConfig) {
-        for (TeamConfig config : teamConfigs) {
+        for (TeamConfig config : currentConfigs) {
             final Team currentTeam = config.getTeam();
             if (currentTeam.getId().equals(teamConfig.getTeam().getId())) {
                 return EntityStatus.EXISTS_WITH_ID;
@@ -32,11 +36,6 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
             }
         }
         return EntityStatus.NOT_EXIST;
-    }
-
-    @Override
-    protected void populateCurrentEntityList() throws ApiException {
-        teamConfigs = EntityListService.listTeams();
     }
 
     @Override
@@ -127,7 +126,7 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
     }
 
     private String findTeamIdInCurrentTeams(TeamConfig entity) {
-        for (TeamConfig teamConfig : teamConfigs) {
+        for (TeamConfig teamConfig : currentConfigs) {
             if (entity.getTeam().getName().equals(teamConfig.getTeam().getName())) {
                 return teamConfig.getTeam().getId();
             }
@@ -136,7 +135,7 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
     }
 
     private String findRoutingRuleIdInCurrent(TeamConfig entity, TeamRoutingRule teamRoutingRule) {
-        for (TeamConfig teamConfig : teamConfigs) {
+        for (TeamConfig teamConfig : currentConfigs) {
             if (entity.getTeam().getName().equals(teamConfig.getTeam().getName())) {
                 for (TeamRoutingRule currentRoutingRule : teamConfig.getTeamRoutingRules()) {
                     if (currentRoutingRule.getName().equals(teamRoutingRule.getName())) {

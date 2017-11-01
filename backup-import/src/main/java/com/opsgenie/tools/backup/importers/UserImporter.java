@@ -5,8 +5,9 @@ import com.opsgenie.oas.sdk.api.ContactApi;
 import com.opsgenie.oas.sdk.api.NotificationRuleApi;
 import com.opsgenie.oas.sdk.api.UserApi;
 import com.opsgenie.oas.sdk.model.*;
-import com.opsgenie.tools.backup.EntityListService;
 import com.opsgenie.tools.backup.dto.UserConfig;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retrieval.UserRetriever;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.util.ArrayList;
@@ -17,15 +18,19 @@ public class UserImporter extends BaseImporter<UserConfig> {
     private static UserApi userApi = new UserApi();
     private static ContactApi contactApi = new ContactApi();
     private static NotificationRuleApi notificationRuleApi = new NotificationRuleApi();
-    private List<UserConfig> userConfigs;
 
     public UserImporter(String backupRootDirectory, boolean addEntity, boolean updateEntity) {
         super(backupRootDirectory, addEntity, updateEntity);
     }
 
     @Override
+    protected EntityRetriever<UserConfig> initializeEntityRetriever() {
+        return new UserRetriever();
+    }
+
+    @Override
     protected EntityStatus checkEntity(UserConfig entity) throws ApiException {
-        for (UserConfig config : userConfigs) {
+        for (UserConfig config : currentConfigs) {
             final User currentUser = config.getUser();
             if (currentUser.getId().equals(entity.getUser().getId())) {
                 return EntityStatus.EXISTS_WITH_ID;
@@ -34,11 +39,6 @@ public class UserImporter extends BaseImporter<UserConfig> {
             }
         }
         return EntityStatus.NOT_EXIST;
-    }
-
-    @Override
-    protected void populateCurrentEntityList() throws ApiException {
-        userConfigs = EntityListService.listUserConfigs();
     }
 
     @Override
@@ -101,12 +101,16 @@ public class UserImporter extends BaseImporter<UserConfig> {
         List<CreateNotificationRuleStepPayload> createNotificationRuleStepPayloadList = new ArrayList<CreateNotificationRuleStepPayload>();
 
         for (NotificationRuleStep notificationRuleStep : notificationRule.getSteps()) {
-            createNotificationRuleStepPayloadList.add(
-                    new CreateNotificationRuleStepPayload()
-                            .contact(notificationRuleStep.getContact())
-                            .enabled(notificationRuleStep.isEnabled())
-                            .sendAfter(notificationRuleStep.getSendAfter())
-            );
+            final CreateNotificationRuleStepPayload notificationRuleStepPayload = new CreateNotificationRuleStepPayload()
+                    .contact(notificationRuleStep.getContact())
+                    .enabled(notificationRuleStep.isEnabled())
+                    .sendAfter(notificationRuleStep.getSendAfter());
+            if(notificationRuleStepPayload.getContact().getMethod().equals(ContactMeta.MethodEnum.MOBILE)) {
+                logger.warn("Skipping mobile contact method");
+            }else{
+                createNotificationRuleStepPayloadList.add(
+                        notificationRuleStepPayload);
+            }
         }
 
         return createNotificationRuleStepPayloadList;
@@ -149,16 +153,20 @@ public class UserImporter extends BaseImporter<UserConfig> {
             logger.info("Updating notification rules for " + user.getUsername());
             for (NotificationRule notificationRule : notificationRuleList) {
                 final String ruleIdByName = findRuleIdByName(user, notificationRule);
-                if (ruleIdByName != null) {
-                    updateNotificationRule(user, notificationRule);
-                } else {
-                    createNotificationRule(user, notificationRule);
+                try {
+                    if (ruleIdByName != null) {
+                        updateNotificationRule(user, notificationRule);
+                    } else {
+                        createNotificationRule(user, notificationRule);
+                    }
+                } catch (Exception e) {
+                    logger.error("Could not update notification rule for user: " + user.getUsername() + ", " + e.getMessage());
                 }
             }
         }
     }
 
-    protected void updateNotificationRule(User user, NotificationRule notificationRule) throws ApiException {
+    private void updateNotificationRule(User user, NotificationRule notificationRule) throws ApiException {
         UpdateNotificationRulePayload payload = new UpdateNotificationRulePayload();
         payload.setCriteria(notificationRule.getCriteria());
         payload.setEnabled(notificationRule.isEnabled());
@@ -179,7 +187,7 @@ public class UserImporter extends BaseImporter<UserConfig> {
     }
 
     private String findRuleIdByName(User user, NotificationRule notificationRule) {
-        for (UserConfig userConfig : userConfigs) {
+        for (UserConfig userConfig : currentConfigs) {
             if (user.getUsername().equals(userConfig.getUser().getUsername())) {
                 for (NotificationRule currentNotificationRule : userConfig.getNotificationRuleList()) {
                     if (currentNotificationRule.getName().equals(notificationRule.getName())) {
@@ -200,23 +208,27 @@ public class UserImporter extends BaseImporter<UserConfig> {
 
         if (backupContactList != null) {
             for (UserContact userContact : backupContactList) {
-                if (userContact.getContactMethod() != null && !userContact.getContactMethod().equals(UserContact.ContactMethodEnum.MOBILE)) {
-                    boolean notExist = true;
-                    for (ContactWithApplyOrder currentContact : currentContactList) {
-                        if (userContact.getTo().equals(currentContact.getTo())
-                                && userContact.getContactMethod().getValue().equals(currentContact.getMethod())) {
-                            notExist = false;
-                            break;
+                try {
+                    if (userContact.getContactMethod() != null && !userContact.getContactMethod().equals(UserContact.ContactMethodEnum.MOBILE)) {
+                        boolean notExist = true;
+                        for (ContactWithApplyOrder currentContact : currentContactList) {
+                            if (userContact.getTo().equals(currentContact.getTo())
+                                    && userContact.getContactMethod().getValue().equals(currentContact.getMethod())) {
+                                notExist = false;
+                                break;
+                            }
                         }
-                    }
-                    if (notExist) {
-                        CreateContactPayload payload = new CreateContactPayload();
-                        payload.setMethod(CreateContactPayload.MethodEnum.fromValue(userContact.getContactMethod().getValue()));
-                        payload.setTo(userContact.getTo());
-                        createContactRequest.body(payload);
-                        contactApi.createContact(createContactRequest);
-                    }
+                        if (notExist) {
+                            CreateContactPayload payload = new CreateContactPayload();
+                            payload.setMethod(CreateContactPayload.MethodEnum.fromValue(userContact.getContactMethod().getValue()));
+                            payload.setTo(userContact.getTo());
+                            createContactRequest.body(payload);
+                            contactApi.createContact(createContactRequest);
+                        }
 
+                    }
+                } catch (Exception e) {
+                    logger.error("Could not add contact " + userContact.getContactMethod() + "to user:" + user.getUsername() + ", " + e.getMessage());
                 }
             }
         }

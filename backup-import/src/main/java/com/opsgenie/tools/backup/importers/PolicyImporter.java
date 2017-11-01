@@ -6,18 +6,16 @@ import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.PolicyApi;
 import com.opsgenie.oas.sdk.model.AlertPolicy;
 import com.opsgenie.oas.sdk.model.UpdateAlertPolicyRequest;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retrieval.PolicyRetriever;
 import com.opsgenie.tools.backup.util.BackupUtils;
-import com.opsgenie.tools.backup.EntityListService;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PolicyImporter extends BaseImporter<AlertPolicy> {
 
     private static PolicyApi api = new PolicyApi();
-    private List<AlertPolicy> currentPolicies = new ArrayList<AlertPolicy>();
 
     public PolicyImporter(String backupRootDirectory, boolean addEntity, boolean updateEntity) {
         super(backupRootDirectory, addEntity, updateEntity);
@@ -35,8 +33,13 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     }
 
     @Override
+    protected EntityRetriever<AlertPolicy> initializeEntityRetriever() {
+        return new PolicyRetriever();
+    }
+
+    @Override
     protected EntityStatus checkEntity(AlertPolicy entity) {
-        for (AlertPolicy policy : currentPolicies) {
+        for (AlertPolicy policy : currentConfigs) {
             if (policy.getId().equals(entity.getId())) {
                 return EntityStatus.EXISTS_WITH_ID;
             } else if (policy.getName().equals(entity.getName())) {
@@ -44,11 +47,6 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
             }
         }
         return EntityStatus.NOT_EXIST;
-    }
-
-    @Override
-    protected void populateCurrentEntityList() throws ApiException {
-        currentPolicies = EntityListService.listPolicies();
     }
 
     private AlertPolicy readJson(String alertPolicyJson) throws IOException {
@@ -85,7 +83,7 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     }
 
     private String findPolicyIdInCurrentConf(AlertPolicy alertPolicy) {
-        for (AlertPolicy currentPolicy : currentPolicies) {
+        for (AlertPolicy currentPolicy : currentConfigs) {
             if (currentPolicy.getName().equals(alertPolicy.getName())) {
                 return currentPolicy.getId();
             }

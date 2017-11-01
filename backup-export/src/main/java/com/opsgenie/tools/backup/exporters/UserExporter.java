@@ -1,10 +1,8 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.opsgenie.oas.sdk.ApiException;
-import com.opsgenie.tools.backup.EntityListService;
 import com.opsgenie.tools.backup.dto.UserConfig;
-
-import java.util.List;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retrieval.UserRetriever;
 
 public class UserExporter extends BaseExporter<UserConfig> {
     public UserExporter(String backupRootDirectory) {
@@ -17,7 +15,9 @@ public class UserExporter extends BaseExporter<UserConfig> {
     }
 
     @Override
-    protected List<UserConfig> retrieveEntities() throws ApiException {
-        return EntityListService.listUserConfigs();
+    protected EntityRetriever<UserConfig> initializeEntityRetriever() {
+        return new UserRetriever();
     }
+
+
 }

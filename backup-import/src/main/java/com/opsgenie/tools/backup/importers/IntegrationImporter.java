@@ -9,21 +9,19 @@ import com.opsgenie.oas.sdk.model.CreateIntegrationResponse;
 import com.opsgenie.oas.sdk.model.Integration;
 import com.opsgenie.oas.sdk.model.UpdateIntegrationActionRequest;
 import com.opsgenie.oas.sdk.model.UpdateIntegrationRequest;
-import com.opsgenie.tools.backup.util.BackupUtils;
-import com.opsgenie.tools.backup.EntityListService;
 import com.opsgenie.tools.backup.dto.IntegrationConfig;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retrieval.IntegrationRetriever;
+import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
 
     private static IntegrationApi integrationApi = new IntegrationApi();
     private static IntegrationActionApi integrationActionApi = new IntegrationActionApi();
-    private List<IntegrationConfig> integrationConfigList = new ArrayList<IntegrationConfig>();
 
     public IntegrationImporter(String backupRootDirectory, boolean addEntityEnabled, boolean updateEntityEnabled) {
         super(backupRootDirectory, addEntityEnabled, updateEntityEnabled);
@@ -41,8 +39,13 @@ public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
     }
 
     @Override
+    protected EntityRetriever<IntegrationConfig> initializeEntityRetriever() {
+        return new IntegrationRetriever();
+    }
+
+    @Override
     protected EntityStatus checkEntity(IntegrationConfig integrationConfigToImport) throws ApiException {
-        for (IntegrationConfig currentIntegrationConfig : integrationConfigList) {
+        for (IntegrationConfig currentIntegrationConfig : currentConfigs) {
             final Integration currentIntegration = currentIntegrationConfig.getIntegration();
             if (currentIntegration.getId().equals(integrationConfigToImport.getIntegration().getId())) {
                 return EntityStatus.EXISTS_WITH_ID;
@@ -51,11 +54,6 @@ public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
             }
         }
         return EntityStatus.NOT_EXIST;
-    }
-
-    @Override
-    protected void populateCurrentEntityList() throws ApiException {
-        integrationConfigList = EntityListService.listIntegrations();
     }
 
     private IntegrationConfig readJson(String entityJson) throws IOException {
@@ -99,7 +97,7 @@ public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
     }
 
     private String findIntegrationIdWithName(IntegrationConfig integrationToImport) {
-        for (IntegrationConfig currentConf : integrationConfigList) {
+        for (IntegrationConfig currentConf : currentConfigs) {
             if (currentConf.getIntegration().getName().equals(integrationToImport.getIntegration().getName())) {
                 return currentConf.getIntegration().getId();
             }

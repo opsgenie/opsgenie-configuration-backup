@@ -6,25 +6,26 @@ import com.opsgenie.oas.sdk.model.CreateForwardingRulePayload;
 import com.opsgenie.oas.sdk.model.ForwardingRule;
 import com.opsgenie.oas.sdk.model.UpdateForwardingRulePayload;
 import com.opsgenie.oas.sdk.model.UpdateForwardingRuleRequest;
-import com.opsgenie.tools.backup.EntityListService;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retrieval.ForwardingRetriever;
 
-import java.util.ArrayList;
-import java.util.List;
-
-;
 
 public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
 
     private static ForwardingRuleApi forwardingRuleApi = new ForwardingRuleApi();
-    private List<ForwardingRule> currentForwardingRules = new ArrayList<ForwardingRule>();
 
     public UserForwardingImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(backupRootDirectory, addEntity, updateEntitiy);
     }
 
     @Override
+    protected EntityRetriever<ForwardingRule> initializeEntityRetriever() {
+        return new ForwardingRetriever();
+    }
+
+    @Override
     protected EntityStatus checkEntity(ForwardingRule entity) {
-        for (ForwardingRule forwardingRule : currentForwardingRules) {
+        for (ForwardingRule forwardingRule : currentConfigs) {
             if (forwardingRule.getId().equals(entity.getId())) {
                 return EntityStatus.EXISTS_WITH_ID;
             } else if (forwardingRule.getToUser().equals(entity.getToUser())) {
@@ -32,11 +33,6 @@ public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
             }
         }
         return EntityStatus.NOT_EXIST;
-    }
-
-    @Override
-    protected void populateCurrentEntityList() throws ApiException {
-        currentForwardingRules = EntityListService.listForwardingRules();
     }
 
     @Override
@@ -91,7 +87,7 @@ public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
     }
 
     private String findForwardingRuleId(ForwardingRule forwardingRuleToImport) {
-        for (ForwardingRule forwardingRule : currentForwardingRules) {
+        for (ForwardingRule forwardingRule : currentConfigs) {
             if (forwardingRule.getToUser().equals(forwardingRuleToImport.getToUser())) {
                 return forwardingRule.getId();
             }
