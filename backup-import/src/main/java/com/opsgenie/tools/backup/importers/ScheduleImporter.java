@@ -2,6 +2,8 @@ package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.ScheduleApi;
+import com.opsgenie.oas.sdk.api.ScheduleOverrideApi;
+import com.opsgenie.oas.sdk.api.ScheduleRotationApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.ScheduleConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
@@ -9,11 +11,13 @@ import com.opsgenie.tools.backup.retrieval.ScheduleRetriever;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
 
     private static ScheduleApi scheduleApi = new ScheduleApi();
+    private static ScheduleOverrideApi overrideApi = new ScheduleOverrideApi();
 
     public ScheduleImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
         super(backupRootDirectory, addEntity, updateEntitiy);
@@ -21,7 +25,7 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
 
     @Override
     protected EntityRetriever<ScheduleConfig> initializeEntityRetriever() {
-        return new ScheduleRetriever();
+        return new ScheduleRetriever(true);
     }
 
     @Override
@@ -77,8 +81,66 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
         request.setBody(payload);
 
         scheduleApi.updateSchedule(request);
-        logger.info("Importing schedule overrides for " + scheduleConfig.getSchedule().getName());
+
+        List<ScheduleOverride> overridesFromConfig = scheduleConfig.getScheduleOverrideList();
+        if (overridesFromConfig != null && !overridesFromConfig.isEmpty()){
+            logger.info("Importing schedule overrides for " + scheduleConfig.getSchedule().getName());
+            ArrayList<ScheduleOverride> overridesReversed = new ArrayList<ScheduleOverride>(overridesFromConfig);
+            Collections.reverse(overridesReversed);
+
+            for (ScheduleOverride override : overridesReversed){
+                    if (findOverrideByAlias(scheduleConfig.getSchedule().getName(), override) != null){
+                        updateScheduleOverride(scheduleConfig.getSchedule().getName(), override);
+                    }
+                    else {
+                        createScheduleOverride(scheduleConfig.getSchedule().getName(), override);
+                    }
+            }
+        }
     }
+    private ScheduleOverride findOverrideByAlias(String scheduleName, ScheduleOverride override) {
+
+        for (ScheduleConfig scheduleConfig : currentConfigs) {
+            if (scheduleName.equals(scheduleConfig.getSchedule().getName())) {
+                for (ScheduleOverride currentConfigOverride : scheduleConfig.getScheduleOverrideList()) {
+                    if (currentConfigOverride.getAlias().equals(override.getAlias())) {
+                        return currentConfigOverride;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private void createScheduleOverride(String scheduleName, ScheduleOverride override){
+        CreateScheduleOverridePayload createPayload = new CreateScheduleOverridePayload();
+        createPayload.setRotations(override.getRotations());
+        createPayload.setAlias(override.getAlias());
+        createPayload.setEndDate(override.getEndDate());
+        createPayload.setStartDate(override.getStartDate());
+        createPayload.setUser(override.getUser());
+
+        CreateScheduleOverrideRequest createRequest = new CreateScheduleOverrideRequest();
+        createRequest.setIdentifier(scheduleName);
+        createRequest.setScheduleIdentifierType(CreateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
+        createRequest.setBody(createPayload);
+        overrideApi.createScheduleOverride(createRequest);
+    }
+    private void updateScheduleOverride(String scheduleName, ScheduleOverride override) {
+        UpdateScheduleOverridePayload updatePayload = new UpdateScheduleOverridePayload();
+        updatePayload.setEndDate(override.getEndDate());
+        updatePayload.setStartDate(override.getStartDate());
+        updatePayload.setRotations(override.getRotations());
+        updatePayload.setUser(override.getUser());
+
+        UpdateScheduleOverrideRequest updateRequest = new UpdateScheduleOverrideRequest();
+        updateRequest.setAlias(override.getAlias());
+        updateRequest.setIdentifier(scheduleName);
+        updateRequest.setScheduleIdentifierType(UpdateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
+        updateRequest.setBody(updatePayload);
+        overrideApi.updateScheduleOverride(updateRequest);
+    }
+
 
     private List<CreateScheduleRotationPayload> constructCreateScheduleRotationPayloads(Schedule schedule) {
 
