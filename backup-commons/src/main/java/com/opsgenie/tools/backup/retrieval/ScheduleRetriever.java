@@ -6,6 +6,7 @@ import com.opsgenie.oas.sdk.model.ListScheduleOverrideResponse;
 import com.opsgenie.oas.sdk.model.ListScheduleOverridesRequest;
 import com.opsgenie.oas.sdk.model.Schedule;
 import com.opsgenie.oas.sdk.model.ScheduleOverride;
+import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.ScheduleConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,11 +57,30 @@ public class ScheduleRetriever implements EntityRetriever<ScheduleConfig> {
             listRequest.setScheduleIdentifierType(ListScheduleOverridesRequest.ScheduleIdentifierTypeEnum.NAME);
             ListScheduleOverrideResponse response = overrideApi.listScheduleOverride(listRequest);
             if (response != null) {
-                return response.getData();
+                return getOverridesWithRotationNames(schedule, response.getData());
             }
         } catch (Exception e) {
             logger.error("Could not list schedule overrides for " + schedule.getId());
         }
         return Collections.emptyList();
+    }
+
+    private List<ScheduleOverride> getOverridesWithRotationNames(Schedule schedule, List<ScheduleOverride> overrideList) {
+
+        List<ScheduleOverride> overrideListWithRotationNames = new ArrayList<ScheduleOverride>();
+        for (ScheduleOverride override : overrideList){
+
+            GetScheduleOverrideRequest request = new GetScheduleOverrideRequest();
+            request.setAlias(override.getAlias());
+            request.setIdentifier(schedule.getName());
+            request.setScheduleIdentifierType(GetScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
+
+            GetScheduleOverrideResponse overrideResponse = overrideApi.getScheduleOverride(request);
+            if (overrideResponse != null){
+                overrideListWithRotationNames.add(overrideResponse.getData());
+            }
+
+        }
+        return overrideListWithRotationNames;
     }
 }

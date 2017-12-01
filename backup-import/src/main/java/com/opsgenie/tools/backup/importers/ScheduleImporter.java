@@ -113,6 +113,7 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
     }
 
     private void createScheduleOverride(String scheduleName, ScheduleOverride override){
+        deleteRotationIds(override.getRotations());
         CreateScheduleOverridePayload createPayload = new CreateScheduleOverridePayload();
         createPayload.setRotations(override.getRotations());
         createPayload.setAlias(override.getAlias());
@@ -127,6 +128,7 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
         overrideApi.createScheduleOverride(createRequest);
     }
     private void updateScheduleOverride(String scheduleName, ScheduleOverride override) {
+        deleteRotationIds(override.getRotations());
         UpdateScheduleOverridePayload updatePayload = new UpdateScheduleOverridePayload();
         updatePayload.setEndDate(override.getEndDate());
         updatePayload.setStartDate(override.getStartDate());
@@ -139,6 +141,12 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
         updateRequest.setScheduleIdentifierType(UpdateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
         updateRequest.setBody(updatePayload);
         overrideApi.updateScheduleOverride(updateRequest);
+    }
+
+    private void deleteRotationIds(List<ScheduleOverrideRotation> rotations){
+        for (ScheduleOverrideRotation rotation : rotations){
+         rotation.setId("");
+        }
     }
 
 
