@@ -55,6 +55,7 @@ public class EscalationImporter extends BaseImporter<Escalation> {
             escalationRule.getRecipient().setId(null);
         }
 
+        payload.setRepeat(entity.getRepeat());
         payload.setOwnerTeam(entity.getOwnerTeam());
         payload.setRules(entity.getRules());
 
@@ -77,6 +78,12 @@ public class EscalationImporter extends BaseImporter<Escalation> {
             escalationRule.getRecipient().setId(null);
         }
 
+        if(entity.getRepeat() == null){
+            EscalationRepeat repeat = new EscalationRepeat();
+            repeat.setWaitInterval(0);
+            entity.setRepeat(repeat);
+        }
+        payload.setRepeat(entity.getRepeat());
         payload.setRules(entity.getRules());
 
         UpdateEscalationRequest request = new UpdateEscalationRequest();
