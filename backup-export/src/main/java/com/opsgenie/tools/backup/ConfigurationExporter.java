@@ -48,6 +48,7 @@ public class ConfigurationExporter extends BaseBackup {
         exporters.add(new EscalationExporter(rootPath));
         exporters.add(new UserForwardingExporter(rootPath));
         exporters.add(new PolicyExporter(rootPath));
+        exporters.add(new PolicyOrderExporter(rootPath));
         exporters.add(new IntegrationExporter(rootPath));
     }
 

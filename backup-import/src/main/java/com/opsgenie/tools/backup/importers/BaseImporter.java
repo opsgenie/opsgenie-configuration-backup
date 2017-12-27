@@ -1,6 +1,7 @@
 package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.oas.sdk.ApiException;
+import com.opsgenie.tools.backup.dto.PolicyConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.util.BackupUtils;
 import org.slf4j.Logger;
@@ -14,10 +15,9 @@ import java.util.List;
 
 abstract class BaseImporter<T> implements Importer {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-    File importDirectory;
+    protected File importDirectory;
     private boolean addEntityEnabled;
     private boolean updateEntityEnabled;
-    private EntityRetriever<T> entityRetriever;
     List<T> currentConfigs = new ArrayList<T>();
 
     BaseImporter(String backupRootDirectory, boolean addEntityEnabled, boolean updateEntityEnabled) {
@@ -51,13 +51,14 @@ abstract class BaseImporter<T> implements Importer {
                 importEntity(entity);
             }
         }
+        updateEntityOrders();
 
         logger.info("Restoring " + getImportDirectoryName() + " finished");
     }
 
     private void populateCurrentEntities() {
         try {
-            entityRetriever = initializeEntityRetriever();
+            EntityRetriever<T> entityRetriever = initializeEntityRetriever();
             currentConfigs = entityRetriever.retrieveEntities();
             if (!updateEntityEnabled) {
                 logger.warn("Updating is disabled for " + getImportDirectoryName());
@@ -121,4 +122,5 @@ abstract class BaseImporter<T> implements Importer {
 
     protected abstract String getImportDirectoryName();
 
+    protected void updateEntityOrders() { }
 }

@@ -4,21 +4,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.PolicyApi;
-import com.opsgenie.oas.sdk.model.AlertPolicy;
-import com.opsgenie.oas.sdk.model.UpdateAlertPolicyRequest;
+import com.opsgenie.oas.sdk.model.*;
+import com.opsgenie.tools.backup.dto.PolicyConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.PolicyRetriever;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class PolicyImporter extends BaseImporter<AlertPolicy> {
 
     private static PolicyApi api = new PolicyApi();
+    private String rootPath;
+    private List<PolicyConfig> policyOrderConfig = new ArrayList<PolicyConfig>();
 
     public PolicyImporter(String backupRootDirectory, boolean addEntity, boolean updateEntity) {
         super(backupRootDirectory, addEntity, updateEntity);
+        this.rootPath = backupRootDirectory;
     }
 
     @Override
@@ -77,14 +83,14 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
         if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
             request.setPolicyId(id);
         } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
-            request.setPolicyId(findPolicyIdInCurrentConf(alertPolicy));
+            request.setPolicyId(findPolicyIdInCurrentConf(alertPolicy.getName()));
         }
         api.updateAlertPolicy(request);
     }
 
-    private String findPolicyIdInCurrentConf(AlertPolicy alertPolicy) {
+    private String findPolicyIdInCurrentConf(String alertPolicyName) {
         for (AlertPolicy currentPolicy : currentConfigs) {
-            if (currentPolicy.getName().equals(alertPolicy.getName())) {
+            if (currentPolicy.getName().equals(alertPolicyName)) {
                 return currentPolicy.getId();
             }
         }
@@ -94,5 +100,52 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     @Override
     protected String getEntityIdentifierName(AlertPolicy alertPolicy) {
         return "Policy " + alertPolicy.getName();
+    }
+
+    @Override
+    protected void updateEntityOrders() {
+        try {
+            String entityJson = BackupUtils.readFile(rootPath + "/orders/PolicyOrders.json");
+            this.policyOrderConfig = BackupUtils.readWithTypeReference(entityJson);
+        } catch (Exception e) {
+            logger.error("Could not read policy orders from file: " + e.getMessage());
+            return;
+        }
+        List<AlertPolicyMeta> list = new PolicyRetriever().retrievePolicyMetaList();
+
+        List<PolicyConfig> configs = new ArrayList<PolicyConfig>();
+        for (AlertPolicyMeta meta : list) {
+            configs.add(new PolicyConfig().setId(meta.getId()).setName(meta.getName()).setOrder(meta.getOrder()));
+        }
+        if (equalsIgnoreOrder(configs, this.policyOrderConfig)) {
+            return;
+        }
+        int size = this.currentConfigs.size();
+        for (PolicyConfig config : policyOrderConfig) {
+            ChangeAlertPolicyOrderRequest params = new ChangeAlertPolicyOrderRequest();
+            params.setPolicyId(getCurrentPolicyId(config.getId(), config.getName()));
+            if (params.getPolicyId() == null) {
+                continue;
+            }
+            ChangeAlertPolicyOrderPayload body = new ChangeAlertPolicyOrderPayload();
+            body.setTargetIndex(size + config.getOrder());
+            params.setBody(body);
+            api.changeAlertPolicyOrder(params);
+        }
+    }
+
+    private static boolean equalsIgnoreOrder(Collection<?> a, Collection<?> b) {
+        return a == b || a != null && b != null && a.size() == b.size() && a.containsAll(b);
+    }
+
+    private String getCurrentPolicyId(String id, String name) {
+        for (AlertPolicy policy : currentConfigs) {
+            if (policy.getId().equals(id)) {
+                return id;
+            } else if (policy.getName().equals(name)) {
+                return policy.getId();
+            }
+        }
+        return null;
     }
 }

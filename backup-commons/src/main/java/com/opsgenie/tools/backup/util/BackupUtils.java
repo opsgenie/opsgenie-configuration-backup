@@ -2,13 +2,16 @@ package com.opsgenie.tools.backup.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.opsgenie.tools.backup.dto.PolicyConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 public class BackupUtils {
 
@@ -81,5 +84,9 @@ public class BackupUtils {
 
     public static void fromJson(Object object, String json) throws IOException {
         mapper.readerForUpdating(object).readValue(json);
+    }
+
+    public static List<PolicyConfig> readWithTypeReference(String json) throws IOException {
+        return mapper.readValue(json, new TypeReference<List<PolicyConfig>>(){});
     }
 }
