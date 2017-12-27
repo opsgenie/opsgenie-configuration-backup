@@ -19,13 +19,15 @@ public class PolicyRetriever implements EntityRetriever<AlertPolicy> {
     public List<AlertPolicy> retrieveEntities() {
         logger.info("------------------------------------");
         logger.info("Retrieving current policy configurations");
-        final List<AlertPolicyMeta> policyMetaList = policyApi.listAlertPolicies().getData();
         List<AlertPolicy> policies = new ArrayList<AlertPolicy>();
-        for (AlertPolicyMeta meta : policyMetaList) {
+        for (AlertPolicyMeta meta : retrievePolicyMetaList()) {
             policies.add(policyApi.getAlertPolicy(meta.getId()).getData());
         }
         return policies;
+    }
 
-
+    public List<AlertPolicyMeta> retrievePolicyMetaList() {
+        logger.info("Retrieving policy meta list");
+        return policyApi.listAlertPolicies().getData();
     }
 }

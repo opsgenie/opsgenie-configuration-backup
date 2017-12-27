@@ -56,17 +56,23 @@ public class ExportMain {
             properties.setPassphrase(sshPassphrase);
         }
 
-
         configureDefaultApiClient(apiKey, opsGenieHost, debug);
 
         AccountApi accountApi = new AccountApi();
-        final GetAccountInfoResponse info = accountApi.getInfo();
-        logger.info("Account name is " + info.getData().getName() + "\n");
+        try {
+            final GetAccountInfoResponse info = accountApi.getInfo();
+            logger.info("Account name is " + info.getData().getName() + "\n");
 
-        ConfigurationExporter exporter = new ConfigurationExporter(properties);
-        exporter.export();
+            ConfigurationExporter exporter = new ConfigurationExporter(properties);
+            exporter.export();
 
-        logger.info("Finished");
+            logger.info("Finished");
+        }
+        catch (Exception e)
+        {
+            logger.error("Could not connect to host: " + opsGenieHost);
+            System.exit(1);
+        }
     }
 
     private static void configureDefaultApiClient(String apiKey, String opsGenieHost, boolean debug) {

@@ -10,15 +10,15 @@ import java.io.PrintWriter;
 import java.util.List;
 
 abstract class BaseExporter<T> implements Exporter {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-    private File exportDirectory;
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected File exportDirectory;
 
     BaseExporter(String backupRootDirectory, String exportDirectoryName) {
         this.exportDirectory = new File(backupRootDirectory + "/" + exportDirectoryName + "/");
         this.exportDirectory.mkdirs();
     }
 
-    private void exportFile(String fileName, T entity) {
+    protected void exportFile(String fileName, T entity) {
         try {
             PrintWriter writer = new PrintWriter(fileName, "UTF-8");
             writer.print(BackupUtils.toJson(entity));
@@ -48,7 +48,7 @@ abstract class BaseExporter<T> implements Exporter {
 
     protected abstract String getEntityFileName(T entity);
 
-    private File getExportDirectory() {
+    protected File getExportDirectory() {
         return exportDirectory;
     }
 
