@@ -16,7 +16,7 @@ During export, these features are exported to a local directory or remote Git br
 ```
 
 The script exports data to a folder named OpsGenieBackups.
-There are 7 sub-folders inside this main folder.
+There are 8 sub-folders inside this main folder.
 
 ```
 * users
@@ -25,6 +25,7 @@ There are 7 sub-folders inside this main folder.
 * escalations
 * schedules
 * policies
+* orders
 * integrations
 ```
 
@@ -59,7 +60,7 @@ While importing, the script reads the data from remote Git repository or local p
 
 The file formats should be the same as export file formats.
 Since entities data is stored in JSON format, users can change it manually.
-However they should not change the file format. There should be one main folder named OpsGenieBackups and 9 sub-folders.
+However they should not change the file format. There should be one main folder named OpsGenieBackups and 8 sub-folders.
 
 ## Update current data
 The script adds missing entities or updates current entities.
@@ -73,6 +74,9 @@ If the owner does not import missing users (which he/she can do it with ImportCo
 Therefore, the owner should be careful about changing ImportConfig.
 Another word, if the owner only imports some entities, he/she should consider the relations with the other entities.
 If the script encounters such an error, it will generate a logger error and simply skip this entity and continue to import other entities.
+
+##Entity Orders
+Orders are preserved while importing Alert Policies. If new alert policies were added after the backup, then the imported ones are added to the end with their orders preserved.
 
 ##Current Limitations
 Currently, there is no api to export custom role configs. Creating rules before importing users is recommended
