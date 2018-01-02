@@ -6,6 +6,7 @@ OpsGenie customers can back up their account configuration and restore it later 
 During export, these features are exported to a local directory or remote Git branch:
 
 ```
+* Custom User Roles
 * Users and Notification Rules
 * Forwarding Rules
 * Teams
@@ -16,9 +17,10 @@ During export, these features are exported to a local directory or remote Git br
 ```
 
 The script exports data to a folder named OpsGenieBackups.
-There are 8 sub-folders inside this main folder.
+There are 9 sub-folders inside this main folder.
 
 ```
+* customUserRoles
 * users
 * forwardings
 * teams
@@ -60,7 +62,7 @@ While importing, the script reads the data from remote Git repository or local p
 
 The file formats should be the same as export file formats.
 Since entities data is stored in JSON format, users can change it manually.
-However they should not change the file format. There should be one main folder named OpsGenieBackups and 8 sub-folders.
+However they should not change the file format. There should be one main folder named OpsGenieBackups and 9 sub-folders.
 
 ## Update current data
 The script adds missing entities or updates current entities.
@@ -79,8 +81,6 @@ If the script encounters such an error, it will generate a logger error and simp
 Orders are preserved while importing Alert Policies. If new alert policies were added after the backup, then the imported ones are added to the end with their orders preserved.
 
 ##Current Limitations
-Currently, there is no api to export custom role configs. Creating rules before importing users is recommended
-
 Exporting some integration types is not possible since they are not supported at api level
 
 Not supported: PingdomWebHook, Nagios, Observium, NagiosXI, Hipchat, Incoming Call   

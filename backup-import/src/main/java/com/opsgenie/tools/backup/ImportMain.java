@@ -183,6 +183,18 @@ public class ImportMain {
                     logger.warn("Updating existing policies disabled.");
                 }
 
+                str = props.getProperty("addNewCustomUserRoles");
+                if (str != null && str.contains("false")) {
+                    config.setAddNewCustomUserRoles(false);
+                    logger.warn("Adding new custom user roles disabled.");
+                }
+
+                str = props.getProperty("updateExistingCustomUserRoles");
+                if (str != null && str.contains("false")) {
+                    config.setUpdateExistingCustomUserRoles(false);
+                    logger.warn("Updating existing custom user roles disabled.");
+                }
+
                 return config;
 
             } catch (Exception e) {
