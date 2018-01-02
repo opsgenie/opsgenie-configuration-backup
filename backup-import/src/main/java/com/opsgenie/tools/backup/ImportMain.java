@@ -69,7 +69,6 @@ public class ImportMain {
         ConfigurationImporter importer = new ConfigurationImporter(properties, config);
         importer.restore();
         logger.info("Finished");
-
     }
 
     private static void configureClientObjectMapper(ApiClient defaultApiClient) {
