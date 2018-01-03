@@ -78,6 +78,9 @@ public class ConfigurationExporter extends BaseBackup {
             });
         }
         pool.shutdown();
+        while (!pool.awaitTermination(15, TimeUnit.SECONDS)) {
+            logger.info("Waiting for export operations to finish");
+        }
 
         if (getBackupProperties().isGitEnabled()) {
             logger.info("Export to remote git operation started!");

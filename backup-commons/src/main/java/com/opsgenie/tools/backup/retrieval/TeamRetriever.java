@@ -25,7 +25,6 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
 
     @Override
     public List<TeamConfig> retrieveEntities() throws InterruptedException {
-        logger.info("------------------------------------");
         logger.info("Retrieving current team configurations");
         final List<Team> teams = teamApi.listTeams(new ArrayList<String>()).getData();
         final ConcurrentLinkedQueue<TeamConfig> teamsWithDetails = new ConcurrentLinkedQueue<TeamConfig>();

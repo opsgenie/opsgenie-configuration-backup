@@ -34,7 +34,6 @@ public class ScheduleRetriever implements EntityRetriever<ScheduleConfig> {
 
     @Override
     public List<ScheduleConfig> retrieveEntities() {
-        logger.info("------------------------------------");
         logger.info("Retrieving current schedule configurations");
         List<ScheduleConfig> scheduleConfigs = new ArrayList<ScheduleConfig>();
         final List<Schedule> schedules = scheduleApi.listSchedules(Collections.singletonList("rotation")).getData();

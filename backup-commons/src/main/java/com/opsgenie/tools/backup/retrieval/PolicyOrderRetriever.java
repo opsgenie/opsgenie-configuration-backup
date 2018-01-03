@@ -17,7 +17,6 @@ public class PolicyOrderRetriever implements EntityRetriever<PolicyConfig> {
 
     @Override
     public List<PolicyConfig> retrieveEntities() {
-        logger.info("------------------------------------");
         logger.info("Retrieving current policy orders");
         final List<AlertPolicyMeta> policyMetaList = policyApi.listAlertPolicies().getData();
         List<PolicyConfig> policyOrderList = new ArrayList<PolicyConfig>();

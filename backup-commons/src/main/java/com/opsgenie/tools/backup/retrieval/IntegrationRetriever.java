@@ -25,7 +25,6 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
 
     @Override
     public List<IntegrationConfig> retrieveEntities() throws InterruptedException {
-        logger.info("------------------------------------");
         logger.info("Retrieving current integration configurations");
         final List<IntegrationMeta> integrationMetaList = integrationApi.listIntegrations(new ListIntegrationRequest()).getData();
         final ConcurrentLinkedQueue<IntegrationConfig> integrations = new ConcurrentLinkedQueue<IntegrationConfig>();

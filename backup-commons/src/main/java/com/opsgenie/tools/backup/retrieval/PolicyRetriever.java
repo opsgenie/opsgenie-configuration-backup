@@ -17,7 +17,6 @@ public class PolicyRetriever implements EntityRetriever<AlertPolicy> {
 
     @Override
     public List<AlertPolicy> retrieveEntities() {
-        logger.info("------------------------------------");
         logger.info("Retrieving current policy configurations");
         List<AlertPolicy> policies = new ArrayList<AlertPolicy>();
         for (AlertPolicyMeta meta : retrievePolicyMetaList()) {

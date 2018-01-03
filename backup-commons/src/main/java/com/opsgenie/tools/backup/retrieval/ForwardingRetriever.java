@@ -15,7 +15,6 @@ public class ForwardingRetriever implements EntityRetriever<ForwardingRule> {
 
     @Override
     public List<ForwardingRule> retrieveEntities() {
-        logger.info("------------------------------------");
         logger.info("Retrieving current forwardings");
         return forwardingRuleApi.listForwardingRules().getData();
     }

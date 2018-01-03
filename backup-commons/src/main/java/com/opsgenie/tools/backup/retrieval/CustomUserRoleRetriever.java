@@ -17,7 +17,6 @@ public class CustomUserRoleRetriever implements EntityRetriever<CustomUserRole>{
 
     @Override
     public List<CustomUserRole> retrieveEntities() {
-        logger.info("------------------------------------");
         logger.info("Retrieving current custom user role configurations");
         List<CustomUserRole> roleSummaryList = customUserRoleApi.listCustomUserRoles().getData();
         List<CustomUserRole> customUserRoleList = new ArrayList<CustomUserRole>();

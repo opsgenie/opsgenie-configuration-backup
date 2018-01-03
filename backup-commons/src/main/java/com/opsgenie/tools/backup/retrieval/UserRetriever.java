@@ -25,7 +25,6 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
 
     @Override
     public List<UserConfig> retrieveEntities() throws Exception {
-        logger.info("------------------------------------");
         logger.info("Retrieving current user configurations");
         final List<User> userList = getAllUsers();
         final List<User> usersWithContacts = new ArrayList<User>(populateUserContacts(userList));
