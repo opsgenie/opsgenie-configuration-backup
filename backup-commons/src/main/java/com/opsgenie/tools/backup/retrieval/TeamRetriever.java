@@ -1,11 +1,9 @@
 package com.opsgenie.tools.backup.retrieval;
 
 import com.opsgenie.oas.sdk.api.TeamApi;
+import com.opsgenie.oas.sdk.api.TeamRoleApi;
 import com.opsgenie.oas.sdk.api.TeamRoutingRuleApi;
-import com.opsgenie.oas.sdk.model.GetTeamRequest;
-import com.opsgenie.oas.sdk.model.ListTeamRoutingRulesRequest;
-import com.opsgenie.oas.sdk.model.Team;
-import com.opsgenie.oas.sdk.model.TeamRoutingRule;
+import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.TeamConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +21,7 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
 
     private static final TeamApi teamApi = new TeamApi();
     private static final TeamRoutingRuleApi teamRoutingRuleApi = new TeamRoutingRuleApi();
+    private static final TeamRoleApi teamRoleApi = new TeamRoleApi();
 
     @Override
     public List<TeamConfig> retrieveEntities() throws InterruptedException {
@@ -52,6 +51,15 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
                         failed = true;
                         logger.error("Could not get team details for team: " + teamMeta.getId());
                     }
+
+                    try {
+                        final List<TeamRole> teamRoles = teamRoleApi.listTeamRoles(new ListTeamRolesRequest().identifier(teamMeta.getId())).getData();
+                        teamConfig.setTeamRoles(teamRoles);
+                    } catch (Exception e) {
+                        failed = true;
+                        logger.error("Could not list team roles for team: " + teamMeta.getId());
+                    }
+
                     if (!failed) {
                         teamsWithDetails.add(teamConfig);
                     }

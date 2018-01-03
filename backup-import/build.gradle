@@ -1,5 +1,5 @@
 group 'com.opsgenie.tools'
-version '0.13.0'
+version '0.15.0'
 
 apply plugin: 'java'
 
@@ -10,6 +10,7 @@ dependencies {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 dependencies {

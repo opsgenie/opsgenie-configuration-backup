@@ -12,6 +12,9 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This is base exporter class. It takes {@link BackupProperties} class inorder to set export
@@ -50,6 +53,7 @@ public class ConfigurationExporter extends BaseBackup {
         exporters.add(new PolicyExporter(rootPath));
         exporters.add(new PolicyOrderExporter(rootPath));
         exporters.add(new IntegrationExporter(rootPath));
+        exporters.add(new CustomUserRoleExporter(rootPath));
     }
 
     /**
@@ -58,15 +62,23 @@ public class ConfigurationExporter extends BaseBackup {
      * git.
      */
 
-    void export() throws GitAPIException {
+    void export() throws GitAPIException, InterruptedException {
         if (getBackupProperties().isGitEnabled()) {
             cloneGit(getBackupProperties());
         }
         init();
         logger.info("Export operation started!");
-        for (Exporter exporter : exporters) {
-            exporter.export();
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+        for (final Exporter exporter : exporters) {
+            pool.submit(new Runnable() {
+                @Override
+                public void run() {
+                    exporter.export();
+                }
+            });
         }
+        pool.shutdown();
+
         if (getBackupProperties().isGitEnabled()) {
             logger.info("Export to remote git operation started!");
             getGit().add().addFilepattern("OpsGenieBackups").call();

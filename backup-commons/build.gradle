@@ -3,12 +3,13 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 group 'com.opsgenie.tools'
-version '0.13.0'
+version '0.15.0'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 repositories {
+    mavenLocal()
     mavenCentral()
     jcenter()
 }
@@ -22,5 +23,5 @@ dependencies {
     compile "org.apache.logging.log4j:log4j-slf4j-impl:2.9.1"
     compile "com.beust:jcommander:1.48"
     compile 'org.eclipse.jgit:org.eclipse.jgit:4.5.0.201609210915-r'
-    compile "com.opsgenie.oas:opsgenie-sdk-swagger:1.0.2"
+    compile "com.opsgenie.oas:opsgenie-sdk-swagger:1.0.4"
 }

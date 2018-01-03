@@ -62,6 +62,7 @@ public class ConfigurationImporter extends BaseBackup {
 
     private void initializeImporters(String rootPath) {
         importers = new ArrayList<Importer>();
+        importers.add(new CustomUserRoleImporter(rootPath, config.isAddNewCustomUserRoles(), config.isUpdateExistingCustomUserRoles()));
         importers.add(new UserImporter(rootPath, config.isAddNewUsers(), config.isUpdateExistingUsers()));
         importers.add(new TeamImporter(rootPath, config.isAddNewTeams(), config.isUpdateExistingTeams()));
         importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));

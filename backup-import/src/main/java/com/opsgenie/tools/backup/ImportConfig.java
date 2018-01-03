@@ -16,6 +16,8 @@ public class ImportConfig {
 
     private boolean addNewIntegrations = true, updateExistingIntegrations = true;
 
+    private boolean addNewCustomUserRoles = true, updateExistingCustomUserRoles = true;
+
     public boolean isAddNewUsers() {
         return addNewUsers;
     }
@@ -138,5 +140,22 @@ public class ImportConfig {
 
     public void setUpdateExistingPolicies(boolean updateExistingPolicies) {
         this.updateExistingPolicies = updateExistingPolicies;
+    }
+
+    public boolean isAddNewCustomUserRoles() {
+        return addNewCustomUserRoles;
+    }
+
+    public ImportConfig setAddNewCustomUserRoles(boolean addNewCustomUserRoles) {
+        this.addNewCustomUserRoles = addNewCustomUserRoles;
+        return this;
+    }
+
+    public boolean isUpdateExistingCustomUserRoles() {
+        return updateExistingCustomUserRoles;
+    }
+
+    public void setUpdateExistingCustomUserRoles(boolean updateExistingCustomUserRoles) {
+        this.updateExistingCustomUserRoles = updateExistingCustomUserRoles;
     }
 }
