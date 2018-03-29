@@ -1,9 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'maven'
-apply plugin: 'signing'
 
 group 'com.opsgenie.tools'
-version '0.15.0'
+version '0.16.0'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6

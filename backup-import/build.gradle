@@ -1,5 +1,5 @@
 group 'com.opsgenie.tools'
-version '0.15.0'
+version '0.16.0'
 
 apply plugin: 'java'
 
@@ -12,9 +12,6 @@ dependencies {
 repositories {
     mavenLocal()
     mavenCentral()
-}
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
 task importUtilJar(type: Jar) {
