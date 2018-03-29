@@ -128,8 +128,11 @@ When the script tries to push the schedule directory to the remote Git, it wonâ€
 While importing, the script reads the data from remote Git repository or local path.
 
 The file formats should be the same as export file formats.
-Since entities data is stored in JSON format, users can change it manually.
-However they should not change the file format. There should be one main folder named OpsGenieBackups and 9 sub-folders.
+Since entities data is stored in JSON format, users can change it manually but they should not change the file format.
+
+The default restore operation imports everything in your backup folder to your OpsGenie account.
+In order to configure your restore settings you can use restoreConfig.properties file.
+OpsGenieImportUtil uses restoreConfig.properties file if there is any in run directory (the directory which the jar file is located in).
 
 ## Update current data
 The script adds missing entities or updates current entities.
@@ -148,22 +151,18 @@ If the script encounters such an error, it will generate a logger error and simp
 Orders are preserved while importing Alert Policies. 
 If new alert policies were added after the backup, then the imported ones are added to the end with their orders preserved.
 
-## Current Limitations
-### Transient Data
+# Current Limitations
+## Transient Data
 Exporting dynamic data like alerts, alert and customer logs, notifications etc. is not possible and not intended.
 
-### Heartbeats
+## Heartbeats
 Exporting heartbeats is not possible since listing heartbeats is not possible at api level.
 
-### Policy and Maintenance
+## Policy and Maintenance
 Exporting maintenances and new policies are not supported right now but they will be added soon.
 
-### Integrations
+## Integrations
 Exporting some integration types is not possible since they are not supported at api level.
 
 Not supported: Incoming Call, PingdomWebHook, Nagios, Observium, Hipchat
 Update Only: Slack, HipChat, FlowDockV2
-
-The default restore operation imports everything in your backup folder to your OpsGenie account.
-In order to configure your restore settings you can use restoreConfig.properties file.
-OpsGenieImportUtil uses restoreConfig.properties file if there is any in run directory (the directory which the jar file is located in).
