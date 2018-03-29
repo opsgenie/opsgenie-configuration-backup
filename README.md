@@ -2,35 +2,6 @@
 
 OpsGenie customers can back up their account configuration and restore it later using this script.
 
-# Export
-During export, these features are exported to a local directory or a git repository:
-
-```
-* Custom User Roles
-* Users and Notification Rules
-* Forwarding Rules
-* Teams
-* Escalations
-* Schedules and Schedule Overrides
-* Alert Policies
-* Integrations and Integration Actions
-```
-
-The script exports data to a folder named OpsGenieBackups.
-There are 9 sub-folders inside this main folder.
-
-```
-* customUserRoles
-* users
-* forwardings
-* teams
-* escalations
-* schedules
-* policies
-* orders
-* integrations
-```
-
 You can download the executable jars from [releases]( https://github.com/opsgenie/opsgenie-configuration-backup/releases).
 
 ## Parameters
@@ -105,6 +76,34 @@ java -jar OpsGenieImportUtil-*.jar --apiKey YOUR_API_KEY --sshUrl GIT_SSH_URL -s
 ```
 
 # Export
+During export, these features are exported to a local directory or a git repository:
+
+```
+* Custom User Roles
+* Users and Notification Rules
+* Forwarding Rules
+* Teams
+* Escalations
+* Schedules and Schedule Overrides
+* Alert Policies
+* Integrations and Integration Actions
+```
+
+The script exports data to a folder named OpsGenieBackups.
+There are 9 sub-folders inside this main folder.
+
+```
+* customUserRoles
+* users
+* forwardings
+* teams
+* escalations
+* schedules
+* policies
+* orders
+* integrations
+```
+
 ## Separate Files
 The script uses separate files for each entity.
 The reason is when the script tries to update the file, it only updates the modified entity’s file.
