@@ -153,13 +153,13 @@ If new alert policies were added after the backup, then the imported ones are ad
 
 # Current Limitations
 ## Transient Data
-Exporting dynamic data like alerts, incidents, alert and customer logs, notifications etc. is not possible and not intended.
+Exporting dynamic data like alerts, incidents, alert and customer logs, notifications etc. is not possible and will not be implemented.
 
 ## Account Configuration
 Exporting account configuration like sso settings, password policy, central notification template is not supported since there are no public api endpoints for them 
 
 ## Heartbeats
-Exporting heartbeats is not possible since listing heartbeats is not possible at api level.
+Exporting heartbeats is not possible since listing heartbeats is not possible at api level and will not be implemented.
 
 ## Policy and Maintenance
 Exporting maintenances and new policies are not supported right now but we will add support to them soon
