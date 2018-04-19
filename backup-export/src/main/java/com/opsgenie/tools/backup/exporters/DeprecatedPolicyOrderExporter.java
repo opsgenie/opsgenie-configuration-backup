@@ -2,21 +2,21 @@ package com.opsgenie.tools.backup.exporters;
 
 import com.opsgenie.tools.backup.dto.PolicyConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
-import com.opsgenie.tools.backup.retrieval.PolicyOrderRetriever;
+import com.opsgenie.tools.backup.retrieval.DeprecatedPolicyOrderRetriever;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.io.PrintWriter;
 
-public class PolicyOrderExporter extends BaseExporter<PolicyConfig> {
+public class DeprecatedPolicyOrderExporter extends BaseExporter<PolicyConfig> {
     private String fileName = "PolicyOrders";
 
-    public PolicyOrderExporter(String backupRootDirectory) {
+    public DeprecatedPolicyOrderExporter(String backupRootDirectory) {
         super(backupRootDirectory, "orders");
     }
 
     @Override
     protected EntityRetriever<PolicyConfig> initializeEntityRetriever() {
-        return new PolicyOrderRetriever();
+        return new DeprecatedPolicyOrderRetriever();
     }
 
     @Override

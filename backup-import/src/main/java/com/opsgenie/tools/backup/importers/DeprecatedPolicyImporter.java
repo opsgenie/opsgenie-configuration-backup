@@ -3,11 +3,11 @@ package com.opsgenie.tools.backup.importers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.opsgenie.oas.sdk.ApiException;
-import com.opsgenie.oas.sdk.api.PolicyApi;
+import com.opsgenie.oas.sdk.api.DeprecatedPolicyApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.PolicyConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
-import com.opsgenie.tools.backup.retrieval.PolicyRetriever;
+import com.opsgenie.tools.backup.retrieval.DeprecatedPolicyRetriever;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.io.IOException;
@@ -16,19 +16,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class PolicyImporter extends BaseImporter<AlertPolicy> {
+public class DeprecatedPolicyImporter extends BaseImporter<DeprecatedAlertPolicy> {
 
-    private static PolicyApi api = new PolicyApi();
+    private static DeprecatedPolicyApi api = new DeprecatedPolicyApi();
     private String rootPath;
     private List<PolicyConfig> policyOrderConfig = new ArrayList<PolicyConfig>();
 
-    public PolicyImporter(String backupRootDirectory, boolean addEntity, boolean updateEntity) {
+    public DeprecatedPolicyImporter(String backupRootDirectory, boolean addEntity, boolean updateEntity) {
         super(backupRootDirectory, addEntity, updateEntity);
         this.rootPath = backupRootDirectory;
     }
 
     @Override
-    protected AlertPolicy readEntity(String fileName) {
+    protected DeprecatedAlertPolicy readEntity(String fileName) {
         try {
             String alertPolicyJson = BackupUtils.readFile(importDirectory.getAbsolutePath() + "/" + fileName);
             return readJson(alertPolicyJson);
@@ -39,13 +39,13 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     }
 
     @Override
-    protected EntityRetriever<AlertPolicy> initializeEntityRetriever() {
-        return new PolicyRetriever();
+    protected EntityRetriever<DeprecatedAlertPolicy> initializeEntityRetriever() {
+        return new DeprecatedPolicyRetriever();
     }
 
     @Override
-    protected EntityStatus checkEntity(AlertPolicy entity) {
-        for (AlertPolicy policy : currentConfigs) {
+    protected EntityStatus checkEntity(DeprecatedAlertPolicy entity) {
+        for (DeprecatedAlertPolicy policy : currentConfigs) {
             if (policy.getId().equals(entity.getId())) {
                 return EntityStatus.EXISTS_WITH_ID;
             } else if (policy.getName().equals(entity.getName())) {
@@ -55,12 +55,12 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
         return EntityStatus.NOT_EXIST;
     }
 
-    private AlertPolicy readJson(String alertPolicyJson) throws IOException {
+    private DeprecatedAlertPolicy readJson(String alertPolicyJson) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JodaModule());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         mapper.setDateFormat(sdf);
-        return mapper.readValue(alertPolicyJson, AlertPolicy.class);
+        return mapper.readValue(alertPolicyJson, DeprecatedAlertPolicy.class);
     }
 
     @Override
@@ -69,13 +69,13 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     }
 
     @Override
-    protected void createEntity(AlertPolicy entity) throws ApiException {
+    protected void createEntity(DeprecatedAlertPolicy entity) throws ApiException {
         entity.setId(null);
         api.createAlertPolicy(entity);
     }
 
     @Override
-    protected void updateEntity(AlertPolicy alertPolicy, EntityStatus entityStatus) throws ApiException {
+    protected void updateEntity(DeprecatedAlertPolicy alertPolicy, EntityStatus entityStatus) throws ApiException {
         UpdateAlertPolicyRequest request = new UpdateAlertPolicyRequest();
         request.setBody(alertPolicy);
         final String id = alertPolicy.getId();
@@ -89,7 +89,7 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     }
 
     private String findPolicyIdInCurrentConf(String alertPolicyName) {
-        for (AlertPolicy currentPolicy : currentConfigs) {
+        for (DeprecatedAlertPolicy currentPolicy : currentConfigs) {
             if (currentPolicy.getName().equals(alertPolicyName)) {
                 return currentPolicy.getId();
             }
@@ -98,7 +98,7 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     }
 
     @Override
-    protected String getEntityIdentifierName(AlertPolicy alertPolicy) {
+    protected String getEntityIdentifierName(DeprecatedAlertPolicy alertPolicy) {
         return "Policy " + alertPolicy.getName();
     }
 
@@ -111,10 +111,10 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
             logger.error("Could not read policy orders from file: " + e.getMessage());
             return;
         }
-        List<AlertPolicyMeta> list = new PolicyRetriever().retrievePolicyMetaList();
+        List<DeprecatedAlertPolicyMeta> list = new DeprecatedPolicyRetriever().retrievePolicyMetaList();
 
         List<PolicyConfig> configs = new ArrayList<PolicyConfig>();
-        for (AlertPolicyMeta meta : list) {
+        for (DeprecatedAlertPolicyMeta meta : list) {
             configs.add(new PolicyConfig().setId(meta.getId()).setName(meta.getName()).setOrder(meta.getOrder()));
         }
         if (equalsIgnoreOrder(configs, this.policyOrderConfig)) {
@@ -127,7 +127,7 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
             if (params.getPolicyId() == null) {
                 continue;
             }
-            ChangeAlertPolicyOrderPayload body = new ChangeAlertPolicyOrderPayload();
+            DeprecatedChangeAlertPolicyOrderPayload body = new DeprecatedChangeAlertPolicyOrderPayload();
             body.setTargetIndex(size + config.getOrder());
             params.setBody(body);
             api.changeAlertPolicyOrder(params);
@@ -139,7 +139,7 @@ public class PolicyImporter extends BaseImporter<AlertPolicy> {
     }
 
     private String getCurrentPolicyId(String id, String name) {
-        for (AlertPolicy policy : currentConfigs) {
+        for (DeprecatedAlertPolicy policy : currentConfigs) {
             if (policy.getId().equals(id)) {
                 return id;
             } else if (policy.getName().equals(name)) {
