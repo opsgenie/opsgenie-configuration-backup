@@ -162,7 +162,7 @@ Exporting account configuration like sso settings, password policy, central noti
 Exporting heartbeats is not possible since listing heartbeats is not possible at api level and will not be implemented.
 
 ## Policy and Maintenance
-Exporting maintenances and new policies are not supported right now but we will add support to them soon
+Exporting maintenance and new policies are not supported right now but we will add support to them soon
 
 ## Services
 Exporting services is not supported right now but it will be implemented eventually

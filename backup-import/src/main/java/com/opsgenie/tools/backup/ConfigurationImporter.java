@@ -71,7 +71,8 @@ public class ConfigurationImporter extends BaseBackup {
         //importers.add(new UserForwardingImporter(rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
         importers.add(new DeprecatedPolicyImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
         //importers.add(new IntegrationImporter(rootPath, config.isAddNewIntegrations(), config.isUpdateExistingIntegrations()));
-        importers.add(new PolicyImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
+        importers.add(new PolicyImporter(rootPath, config.isAddNewPoliciesV2(), config.isUpdateExistingPoliciesV2()));
+        importers.add(new MaintenanceImporter(rootPath, config.isAddNewMaintenance(), config.isUpdateExistingMaintenance()));
 
     }
 }

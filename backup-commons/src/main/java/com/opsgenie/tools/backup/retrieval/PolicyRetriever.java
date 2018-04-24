@@ -25,7 +25,7 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
 
     @Override
     public List<PolicyWithTeamInfo> retrieveEntities() throws Exception {
-        logger.info("Retrieving current policy (old version) configurations");
+        logger.info("Retrieving current policy (new version) configurations");
         retrieveGlobalPolicies();
         retrieveTeamPolicies();
         return policies;
