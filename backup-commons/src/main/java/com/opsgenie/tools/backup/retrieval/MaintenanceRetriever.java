@@ -23,9 +23,9 @@ public class MaintenanceRetriever  implements EntityRetriever<Maintenance>{
 
 
     @Override
-    public List<Maintenance> retrieveEntities() throws Exception {
-        logger.info("Retrieving current escalation configurations");
-        List<MaintenanceMeta> metas = maintenanceApi.listMaintenance("non-expired").getData();//todo zeynep all mu olmalı
+    public List<Maintenance> retrieveEntities() {
+        logger.info("Retrieving current maintenance configurations");
+        List<MaintenanceMeta> metas = maintenanceApi.listMaintenance("non-expired").getData();
         retrieveMaintenance(metas);
 
         return maintenanceList;

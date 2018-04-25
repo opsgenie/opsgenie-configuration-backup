@@ -62,15 +62,15 @@ public class ConfigurationImporter extends BaseBackup {
 
     private void initializeImporters(String rootPath) {
         importers = new ArrayList<Importer>();
-        //importers.add(new CustomUserRoleImporter(rootPath, config.isAddNewCustomUserRoles(), config.isUpdateExistingCustomUserRoles()));
-        //importers.add(new UserImporter(rootPath, config.isAddNewUsers(), config.isUpdateExistingUsers()));
+        importers.add(new CustomUserRoleImporter(rootPath, config.isAddNewCustomUserRoles(), config.isUpdateExistingCustomUserRoles()));
+        importers.add(new UserImporter(rootPath, config.isAddNewUsers(), config.isUpdateExistingUsers()));
         importers.add(new TeamImporter(rootPath, config.isAddNewTeams(), config.isUpdateExistingTeams()));
-        //importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
-        //importers.add(new EscalationImporter(rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
-       // importers.add(new ScheduleImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
-        //importers.add(new UserForwardingImporter(rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
+        importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
+        importers.add(new EscalationImporter(rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
+        importers.add(new ScheduleImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
+        importers.add(new UserForwardingImporter(rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
         importers.add(new DeprecatedPolicyImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
-        //importers.add(new IntegrationImporter(rootPath, config.isAddNewIntegrations(), config.isUpdateExistingIntegrations()));
+        importers.add(new IntegrationImporter(rootPath, config.isAddNewIntegrations(), config.isUpdateExistingIntegrations()));
         importers.add(new PolicyImporter(rootPath, config.isAddNewPoliciesV2(), config.isUpdateExistingPoliciesV2()));
         importers.add(new MaintenanceImporter(rootPath, config.isAddNewMaintenance(), config.isUpdateExistingMaintenance()));
 

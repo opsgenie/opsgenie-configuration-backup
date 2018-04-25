@@ -85,8 +85,9 @@ During export, these features are exported to a local directory or a git reposit
 * Teams
 * Escalations
 * Schedules and Schedule Overrides
-* Alert Policies
+* Alert Policies (old version)
 * Integrations and Integration Actions
+* Policies
 ```
 
 The script exports data to a folder named OpsGenieBackups.
@@ -102,6 +103,7 @@ There are 9 sub-folders inside this main folder.
 * policies
 * orders
 * integrations
+*policiesV2
 ```
 
 ## Separate Files
@@ -160,9 +162,6 @@ Exporting account configuration like sso settings, password policy, central noti
 
 ## Heartbeats
 Exporting heartbeats is not possible since listing heartbeats is not possible at api level and will not be implemented.
-
-## Policy and Maintenance
-Exporting maintenance and new policies are not supported right now but we will add support to them soon
 
 ## Services
 Exporting services is not supported right now but it will be implemented eventually
