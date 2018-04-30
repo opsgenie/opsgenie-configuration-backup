@@ -1,23 +1,26 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.opsgenie.oas.sdk.model.AlertPolicy;
+import com.opsgenie.oas.sdk.model.Policy;
+import com.opsgenie.tools.backup.dto.PolicyWithTeamInfo;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.PolicyRetriever;
 
-public class PolicyExporter extends BaseExporter<AlertPolicy> {
-
+/**
+ * @author Zeynep Sengil
+ * @version 19.04.2018 14:34
+ */
+public class PolicyExporter extends BaseExporter<PolicyWithTeamInfo> {
     public PolicyExporter(String backupRootDirectory) {
-        super(backupRootDirectory, "policies");
+        super(backupRootDirectory, "policiesV2");
     }
 
     @Override
-    protected EntityRetriever<AlertPolicy> initializeEntityRetriever() {
+    protected EntityRetriever<PolicyWithTeamInfo> initializeEntityRetriever() {
         return new PolicyRetriever();
     }
 
     @Override
-    protected String getEntityFileName(AlertPolicy alertPolicy) {
-        return alertPolicy.getId();
+    protected String getEntityFileName(PolicyWithTeamInfo policyWithTeamInfo) {
+        return policyWithTeamInfo.getPolicy().getId();
     }
-
 }

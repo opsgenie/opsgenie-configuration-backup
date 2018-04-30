@@ -18,6 +18,10 @@ public class ImportConfig {
 
     private boolean addNewCustomUserRoles = true, updateExistingCustomUserRoles = true;
 
+    private boolean addNewPoliciesV2 = true, updateExistingPoliciesV2 = true;
+
+    private boolean addNewMaintenance = true, updateExistingMaintenance = true;
+
     public boolean isAddNewUsers() {
         return addNewUsers;
     }
@@ -157,5 +161,41 @@ public class ImportConfig {
 
     public void setUpdateExistingCustomUserRoles(boolean updateExistingCustomUserRoles) {
         this.updateExistingCustomUserRoles = updateExistingCustomUserRoles;
+    }
+
+    public boolean isAddNewPoliciesV2() {
+        return addNewPoliciesV2;
+    }
+
+    public ImportConfig setAddNewPoliciesV2(boolean addNewPoliciesV2) {
+        this.addNewPoliciesV2 = addNewPoliciesV2;
+        return this;
+    }
+
+    public boolean isUpdateExistingPoliciesV2() {
+        return updateExistingPoliciesV2;
+    }
+
+    public ImportConfig setUpdateExistingPoliciesV2(boolean updateExistingPoliciesV2) {
+        this.updateExistingPoliciesV2 = updateExistingPoliciesV2;
+        return this;
+    }
+
+    public boolean isAddNewMaintenance() {
+        return addNewMaintenance;
+    }
+
+    public ImportConfig setAddNewMaintenance(boolean addNewMaintenance) {
+        this.addNewMaintenance = addNewMaintenance;
+        return this;
+    }
+
+    public boolean isUpdateExistingMaintenance() {
+        return updateExistingMaintenance;
+    }
+
+    public ImportConfig setUpdateExistingMaintenance(boolean updateExistingMaintenance) {
+        this.updateExistingMaintenance = updateExistingMaintenance;
+        return this;
     }
 }

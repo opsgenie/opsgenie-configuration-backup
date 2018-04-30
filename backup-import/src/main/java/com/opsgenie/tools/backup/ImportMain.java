@@ -76,9 +76,10 @@ public class ImportMain {
         mapper.addMixIn(Filter.class, IgnoredType.class);
         mapper.addMixIn(TimeRestrictionInterval.class, IgnoredType.class);
         mapper.addMixIn(Recipient.class, IgnoredType.class);
-        mapper.addMixIn(AlertPolicy.class, IgnoredType.class);
+        mapper.addMixIn(DeprecatedAlertPolicy.class, IgnoredType.class);
         mapper.addMixIn(Integration.class, IgnoredType.class);
         mapper.addMixIn(BaseIntegrationAction.class, IgnoredIntegration.class);
+        mapper.addMixIn(Policy.class, IgnoredType.class);
     }
 
     private static ApiClient configureDefaultApiClient(String apiKey, String opsGenieHost, boolean debug) {

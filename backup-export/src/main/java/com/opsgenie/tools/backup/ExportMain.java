@@ -86,7 +86,7 @@ public class ExportMain {
         mapper.addMixIn(Recipient.class, IgnoredIdAndType.class);
         mapper.addMixIn(Filter.class, IgnoredType.class);
         mapper.addMixIn(TimeRestrictionInterval.class, IgnoredType.class);
-        mapper.addMixIn(AlertPolicy.class, IgnoredType.class);
+        mapper.addMixIn(DeprecatedAlertPolicy.class, IgnoredType.class);
         mapper.addMixIn(Integration.class, IgnoredType.class);
         mapper.addMixIn(BaseIntegrationAction.class, IgnoredIdAndType.class);
     }
