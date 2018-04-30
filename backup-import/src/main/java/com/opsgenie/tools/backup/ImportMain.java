@@ -196,6 +196,30 @@ public class ImportMain {
                     logger.warn("Updating existing custom user roles disabled.");
                 }
 
+                str = props.getProperty("addNewPoliciesV2");
+                if (str != null && str.contains("false")) {
+                    config.setAddNewPoliciesV2(false);
+                    logger.warn("Adding new policies (new version) disabled.");
+                }
+
+                str = props.getProperty("updateExistingPoliciesV2");
+                if (str != null && str.contains("false")) {
+                    config.setUpdateExistingPoliciesV2(false);
+                    logger.warn("Updating existing policies (new version) disabled.");
+                }
+
+                str = props.getProperty("addNewMaintenance");
+                if (str != null && str.contains("false")) {
+                    config.setAddNewPoliciesV2(false);
+                    logger.warn("Adding new maintenance disabled.");
+                }
+
+                str = props.getProperty("updateExistingMaintenance");
+                if (str != null && str.contains("false")) {
+                    config.setUpdateExistingPoliciesV2(false);
+                    logger.warn("Updating existing maintenance disabled.");
+                }
+
                 return config;
 
             } catch (Exception e) {
