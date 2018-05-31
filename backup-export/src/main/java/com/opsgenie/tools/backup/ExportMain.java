@@ -89,6 +89,8 @@ public class ExportMain {
         mapper.addMixIn(DeprecatedAlertPolicy.class, IgnoredType.class);
         mapper.addMixIn(Integration.class, IgnoredType.class);
         mapper.addMixIn(BaseIntegrationAction.class, IgnoredIdAndType.class);
+        mapper.addMixIn(Responder.class, IgnoredType.class);
+        mapper.addMixIn(Policy.class, IgnoredType.class);
     }
 
     abstract class IgnoredIdAndType {

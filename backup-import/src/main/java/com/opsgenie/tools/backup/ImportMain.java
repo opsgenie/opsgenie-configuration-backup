@@ -80,6 +80,7 @@ public class ImportMain {
         mapper.addMixIn(Integration.class, IgnoredType.class);
         mapper.addMixIn(BaseIntegrationAction.class, IgnoredIntegration.class);
         mapper.addMixIn(Policy.class, IgnoredType.class);
+        mapper.addMixIn(Responder.class, IgnoredType.class);
     }
 
     private static ApiClient configureDefaultApiClient(String apiKey, String opsGenieHost, boolean debug) {
