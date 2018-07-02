@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'maven'
 
 group 'com.opsgenie.tools'
 version '0.17.0'
@@ -10,39 +9,4 @@ targetCompatibility = 1.6
 repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
-}
-
-apply plugin: 'java'
-apply plugin: 'project-report'
-
-task sourcesJar(type: Jar) {
-    classifier 'sources'
-    from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar, dependsOn: 'javadoc') {
-    classifier 'javadoc'
-    from javadoc.destinationDir
-}
-
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
-jar {
-    manifest {
-        attributes("Built-By": "http://www.opsgenie.com",
-                "Specification-Title": "OpsGenie Configuration Backup Tool",
-                "Specification-Product": "opsgenie-configuration-backup",
-                "Specification-Version": project.version,
-                "Specification-Vendor": "http://www.opsgenie.com",
-                "Implementation-Title": "OpsGenie Configuration Backup Tool",
-                "Implementation-Product": "opsgenie-configuration-backup",
-                "Implementation-Vendor": "http://www.opsgenie.com",
-                "Implementation-Version": project.version,
-        )
-    }
 }
