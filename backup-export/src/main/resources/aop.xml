@@ -1,0 +1,8 @@
+<aspectj>
+    <aspects>
+        <aspect name="RetryMechanism"/>
+    </aspects>
+    <weaver options="-verbose">
+        <include within="com.opsgenie..*" />
+    </weaver>
+</aspectj>
