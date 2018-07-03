@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * @author Zeynep Sengil
@@ -23,17 +24,29 @@ public class MaintenanceRetriever  implements EntityRetriever<Maintenance>{
 
 
     @Override
-    public List<Maintenance> retrieveEntities() {
+    public List<Maintenance> retrieveEntities() throws Exception {
         logger.info("Retrieving current maintenance configurations");
-        List<MaintenanceMeta> metas = maintenanceApi.listMaintenance("non-expired").getData();
+        List<MaintenanceMeta> metas = apiAdapter.invoke(new Callable<List<MaintenanceMeta>>() {
+            @Override
+            public List<MaintenanceMeta> call() throws Exception {
+                return maintenanceApi.listMaintenance("non-expired").getData();
+            }
+        });
+
         retrieveMaintenance(metas);
 
         return maintenanceList;
     }
 
-    private void retrieveMaintenance(List<MaintenanceMeta> maintenanceMetaList){
-        for (MaintenanceMeta maintenanceMeta : maintenanceMetaList){
-            Maintenance maintenance = maintenanceApi.getMaintenance(maintenanceMeta.getId()).getData();
+    private void retrieveMaintenance(List<MaintenanceMeta> maintenanceMetaList) throws Exception {
+        for ( MaintenanceMeta maintenanceMeta : maintenanceMetaList){
+            Maintenance maintenance = apiAdapter.invoke(new Callable<Maintenance>() {
+                @Override
+                public Maintenance call() throws Exception {
+                    return maintenanceApi.getMaintenance(maintenanceMeta.getId()).getData();
+                }
+            });
+
             if (maintenance != null){
                 maintenanceList.add(maintenance);
             }

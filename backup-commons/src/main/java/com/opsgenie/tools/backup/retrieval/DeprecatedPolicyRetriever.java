@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public class DeprecatedPolicyRetriever implements EntityRetriever<DeprecatedAlertPolicy> {
 
@@ -20,13 +21,26 @@ public class DeprecatedPolicyRetriever implements EntityRetriever<DeprecatedAler
         logger.info("Retrieving current policy (old version) configurations");
         List<DeprecatedAlertPolicy> policies = new ArrayList<DeprecatedAlertPolicy>();
         for (DeprecatedAlertPolicyMeta meta : retrievePolicyMetaList()) {
-            policies.add(policyApi.getAlertPolicy(meta.getId()).getData());
+            String metaId = meta.getId();
+            policies.add(apiAdapter.invoke(new Callable<DeprecatedAlertPolicy>() {
+                        @Override
+                        public DeprecatedAlertPolicy call() throws Exception {
+                            return policyApi.getAlertPolicy(meta.getId()).getData());
+                        }
+                    });
+
         }
         return policies;
     }
 
-    public List<DeprecatedAlertPolicyMeta> retrievePolicyMetaList() {
+    public List<DeprecatedAlertPolicyMeta> retrievePolicyMetaList() throws Exception {
         logger.info("Retrieving policy meta list (old version)");
-        return policyApi.listAlertPolicies().getData();
+        return apiAdapter.invoke(new Callable<List<DeprecatedAlertPolicyMeta>>() {
+            @Override
+            public List<DeprecatedAlertPolicyMeta> call() throws Exception {
+                return policyApi.listAlertPolicies().getData();
+            }
+        });
+
     }
 }

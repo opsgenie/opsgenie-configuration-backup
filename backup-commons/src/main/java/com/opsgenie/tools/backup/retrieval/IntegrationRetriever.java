@@ -2,6 +2,7 @@ package com.opsgenie.tools.backup.retrieval;
 
 import com.opsgenie.oas.sdk.api.IntegrationActionApi;
 import com.opsgenie.oas.sdk.api.IntegrationApi;
+import com.opsgenie.oas.sdk.model.ActionCategorized;
 import com.opsgenie.oas.sdk.model.Integration;
 import com.opsgenie.oas.sdk.model.IntegrationMeta;
 import com.opsgenie.oas.sdk.model.ListIntegrationRequest;
@@ -11,10 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> {
 
@@ -24,9 +22,15 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
     private static IntegrationActionApi integrationActionApi = new IntegrationActionApi();
 
     @Override
-    public List<IntegrationConfig> retrieveEntities() throws InterruptedException {
+    public List<IntegrationConfig> retrieveEntities() throws Exception {
         logger.info("Retrieving current integration configurations");
-        final List<IntegrationMeta> integrationMetaList = integrationApi.listIntegrations(new ListIntegrationRequest()).getData();
+        final List<IntegrationMeta> integrationMetaList = apiAdapter.invoke(new Callable<List<IntegrationMeta>>() {
+            @Override
+            public List<IntegrationMeta> call() throws Exception {
+                return integrationApi.listIntegrations(new ListIntegrationRequest()).getData();
+            }
+        });
+
         final ConcurrentLinkedQueue<IntegrationConfig> integrations = new ConcurrentLinkedQueue<IntegrationConfig>();
         ExecutorService pool = Executors.newFixedThreadPool(10);
         for (final IntegrationMeta meta : integrationMetaList) {
@@ -51,12 +55,24 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
 
     private IntegrationConfig populateIntegrationActions(IntegrationMeta meta) {
         final IntegrationConfig integrationConfig = new IntegrationConfig();
-        final Integration integration = integrationApi.getIntegration(meta.getId()).getData();
+        final Integration integration = apiAdapter.invoke(new Callable<Integration>() {
+            @Override
+            public Integration call() throws Exception {
+                return integrationApi.getIntegration(meta.getId()).getData();
+            }
+        });
+
 
         integration.setId(meta.getId());
         integrationConfig.setIntegration(integration);
         try {
-            integrationConfig.setIntegrationActions(integrationActionApi.listIntegrationActions(meta.getId()).getData());
+            integrationConfig.setIntegrationActions(apiAdapter.invoke(new Callable<ActionCategorized>() {
+                        @Override
+                        public ActionCategorized call() throws Exception {
+                            return integrationActionApi.listIntegrationActions(meta.getId()).getData());
+                        }
+                    });
+
         } catch (Exception e) {
             logger.info(integration.getName() + " is not an advanced integration, so not exporting actions");
         }
