@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * @author Zeynep Sengil
@@ -31,40 +32,70 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
         return policies;
     }
 
-    public void retrieveGlobalPolicies() {
+    public void retrieveGlobalPolicies() throws Exception {
         logger.info("Retrieving global alert policy meta list");
-        List<PolicyMeta> globalPolicies =  policyApi.listAlertPolicies(null).getData();
+        List<PolicyMeta> globalPolicies = apiAdapter.invoke(new Callable<List<PolicyMeta>>() {
+            @Override
+            public List<PolicyMeta> call()  {
+                return policyApi.listAlertPolicies(null).getData();
+            }
+        });
+
         getPolicies(globalPolicies, null);
     }
 
-    public void retrieveTeamPolicies(){
+    public void retrieveTeamPolicies() throws Exception {
         logger.info("Retrieving team metas for team policies");
-        final List<Team> teams = teamApi.listTeams(new ArrayList<String>()).getData();
+        final List<Team> teams = apiAdapter.invoke(new Callable<List<Team>>() {
+            @Override
+            public List<Team> call()  {
+                return teamApi.listTeams(new ArrayList<String>()).getData();
+            }
+        });
+
         for (Team teamMeta : teams){
             getAlertPolicies(teamMeta.getId());
             getNotificationPolicies(teamMeta.getId());
         }
     }
 
-    public void getAlertPolicies(String teamId){
+    public void getAlertPolicies(final String teamId) throws Exception {
         logger.info("Retrieving alert policy list for team with id: " + teamId);
-        ListPoliciesResponse listAlertPoliciesResponse = policyApi.listAlertPolicies(teamId);
+        ListPoliciesResponse listAlertPoliciesResponse = apiAdapter.invoke(new Callable<ListPoliciesResponse>() {
+            @Override
+            public ListPoliciesResponse call()  {
+                return policyApi.listAlertPolicies(teamId);
+            }
+        });
+
         List<PolicyMeta> policyMetaList = listAlertPoliciesResponse.getData();
         getPolicies(policyMetaList, teamId);
     }
 
-    public void getNotificationPolicies(String teamId){
+    public void getNotificationPolicies(final String teamId) throws Exception {
         logger.info("Retrieving notification policy list for team with id: " + teamId);
-        ListPoliciesResponse listNotfPoliciesResponse = policyApi.listNotificationPolicies(teamId);
+        ListPoliciesResponse listNotfPoliciesResponse = apiAdapter.invoke(new Callable<ListPoliciesResponse>() {
+            @Override
+            public ListPoliciesResponse call()  {
+                return policyApi.listNotificationPolicies(teamId);
+            }
+        });
+
         List<PolicyMeta> notfPolicyMetaList = listNotfPoliciesResponse.getData();
 
         getPolicies(notfPolicyMetaList, teamId);
     }
 
-    public void getPolicies(List<PolicyMeta> policyMetaList, String teamId){
+    public void getPolicies(List<PolicyMeta> policyMetaList, final String teamId) throws Exception {
         if (policyMetaList != null){
-            for (PolicyMeta policyMeta : policyMetaList){
-                GetPolicyResponse policyResponse = policyApi.getPolicy(policyMeta.getId(), teamId);
+            for (final PolicyMeta policyMeta : policyMetaList){
+                GetPolicyResponse policyResponse = apiAdapter.invoke(new Callable<GetPolicyResponse>() {
+                    @Override
+                    public GetPolicyResponse call()  {
+                        return policyApi.getPolicy(policyMeta.getId(), teamId);
+                    }
+                });
+
                 Policy policy = policyResponse.getData();
                 if (policy != null){
                     policies.add(new PolicyWithTeamInfo(teamId, policy));

@@ -28,7 +28,7 @@ public class MaintenanceRetriever  implements EntityRetriever<Maintenance>{
         logger.info("Retrieving current maintenance configurations");
         List<MaintenanceMeta> metas = apiAdapter.invoke(new Callable<List<MaintenanceMeta>>() {
             @Override
-            public List<MaintenanceMeta> call() throws Exception {
+            public List<MaintenanceMeta> call()  {
                 return maintenanceApi.listMaintenance("non-expired").getData();
             }
         });
@@ -39,10 +39,10 @@ public class MaintenanceRetriever  implements EntityRetriever<Maintenance>{
     }
 
     private void retrieveMaintenance(List<MaintenanceMeta> maintenanceMetaList) throws Exception {
-        for ( MaintenanceMeta maintenanceMeta : maintenanceMetaList){
+        for ( final MaintenanceMeta maintenanceMeta : maintenanceMetaList){
             Maintenance maintenance = apiAdapter.invoke(new Callable<Maintenance>() {
                 @Override
-                public Maintenance call() throws Exception {
+                public Maintenance call()  {
                     return maintenanceApi.getMaintenance(maintenanceMeta.getId()).getData();
                 }
             });

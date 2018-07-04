@@ -9,12 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class UserRetriever implements EntityRetriever<UserConfig> {
 
@@ -31,13 +29,25 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
         return populateUsersWithNotificationRules(usersWithContacts);
     }
 
-    private static List<User> getAllUsers() throws ApiException {
-        final ListUsersResponse listUsersResponse = userApi.listUsers(new ListUsersRequest());
+    private static List<User> getAllUsers() throws Exception {
+        final ListUsersResponse listUsersResponse = apiAdapter.invoke(new Callable<ListUsersResponse>() {
+            @Override
+            public ListUsersResponse call() {
+                return userApi.listUsers(new ListUsersRequest());
+            }
+        });
+
         List<User> userList = listUsersResponse.getData();
         final Long pageCount = listUsersResponse.getTotalCount() + 1;
         logger.info("Retrieved " + userList.size() + "/" + listUsersResponse.getTotalCount());
         for (int i = 1; i < (pageCount * 1.0) / 100; i++) {
-            userList.addAll(userApi.listUsers(new ListUsersRequest().offset(100 * i)).getData());
+            final int offset = 100 * i;
+            userList.addAll(apiAdapter.invoke(new Callable<Collection<? extends User>>() {
+                        @Override
+                        public Collection<? extends User> call()  {
+                            return userApi.listUsers(new ListUsersRequest().offset(offset)).getData();
+                        }
+                    }));
             logger.info("Retrieved " + userList.size() + "/" + listUsersResponse.getTotalCount());
         }
         return userList;
@@ -51,7 +61,17 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
             pool.submit(new Runnable() {
                 @Override
                 public void run() {
-                    usersWithContact.add(userApi.getUser(new GetUserRequest().identifier(user.getId()).expand(Collections.singletonList("contact"))).getData());
+                    try {
+                        usersWithContact.add(apiAdapter.invoke(new Callable<User>() {
+                                    @Override
+                                    public User call()  {
+                                        return userApi.getUser(new GetUserRequest().identifier(user.getId()).expand(Collections.singletonList("contact"))).getData();
+                                    }
+                                }));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                 }
             });
         }
@@ -71,11 +91,28 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
                 @Override
                 public void run() {
                     UserConfig userConfigWrapper = new UserConfig();
-                    final List<NotificationRuleMeta> data = notificationRuleApi.listNotificationRules(user.getId()).getData();
+                    List<NotificationRuleMeta> data = null;
+                    try {
+                        data = apiAdapter.invoke(new Callable<List<NotificationRuleMeta>>() {
+                            @Override
+                            public List<NotificationRuleMeta> call()  {
+                                return notificationRuleApi.listNotificationRules(user.getId()).getData();
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                     List<NotificationRule> rules = new ArrayList<NotificationRule>();
-                    for (NotificationRuleMeta meta : data) {
+                    for (final NotificationRuleMeta meta : data) {
                         try {
-                            final NotificationRule notificationRule = notificationRuleApi.getNotificationRule(new GetNotificationRuleRequest().identifier(user.getId()).ruleId(meta.getId())).getData();
+                            final NotificationRule notificationRule = apiAdapter.invoke(new Callable<NotificationRule>() {
+                                @Override
+                                public NotificationRule call()  {
+                                    return notificationRuleApi.getNotificationRule(new GetNotificationRuleRequest().identifier(user.getId()).ruleId(meta.getId())).getData();
+                                }
+                            });
+
                             rules.add(notificationRule);
                         } catch (Exception e) {
                             logger.error("Could not populate notification rule " + meta.getId() + "for user " + user.getUsername());

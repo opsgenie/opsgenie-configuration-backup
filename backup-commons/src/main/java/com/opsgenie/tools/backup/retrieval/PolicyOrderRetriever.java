@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * @author Zeynep Sengil
@@ -24,21 +25,45 @@ public class PolicyOrderRetriever implements EntityRetriever<PolicyConfig> {
     private static final TeamApi teamApi = new TeamApi();
 
     @Override
-    public List<PolicyConfig> retrieveEntities() {
+    public List<PolicyConfig> retrieveEntities() throws Exception {
         logger.info("Retrieving current policy V2 orders");
         List<PolicyConfig> policyOrderList = new ArrayList<PolicyConfig>();
 
-        final List<Team> teamList = teamApi.listTeams(new ArrayList<String>()).getData();
-        final List<PolicyMeta> globalPolicyMetaList = policyApi.listAlertPolicies("").getData();
+        final List<Team> teamList = apiAdapter.invoke(new Callable<List<Team>>() {
+            @Override
+            public List<Team> call()  {
+                return teamApi.listTeams(new ArrayList<String>()).getData();
+            }
+        });
+
+        final List<PolicyMeta> globalPolicyMetaList = apiAdapter.invoke(new Callable<List<PolicyMeta>>() {
+            @Override
+            public List<PolicyMeta> call()  {
+                return policyApi.listAlertPolicies("").getData();
+            }
+        });
+
 
         for (PolicyMeta meta : globalPolicyMetaList) {
             policyOrderList.add(new PolicyConfig().setId(meta.getId()).setName(meta.getName())
                     .setOrder(meta.getOrder()).setTeam(""));
         }
 
-        for (Team team : teamList){
-            final List<PolicyMeta> alertPolicyMetaList = policyApi.listAlertPolicies(team.getId()).getData();
-            final List<PolicyMeta> notfPolicyMetaList = policyApi.listNotificationPolicies(team.getId()).getData();
+        for (final Team team : teamList){
+            final List<PolicyMeta> alertPolicyMetaList = apiAdapter.invoke(new Callable<List<PolicyMeta>>() {
+                @Override
+                public List<PolicyMeta> call()  {
+                    return policyApi.listAlertPolicies(team.getId()).getData();
+                }
+            });
+
+            final List<PolicyMeta> notfPolicyMetaList = apiAdapter.invoke(new Callable<List<PolicyMeta>>() {
+                @Override
+                public List<PolicyMeta> call()  {
+                    return policyApi.listNotificationPolicies(team.getId()).getData();
+                }
+            });
+
 
             for (PolicyMeta meta : alertPolicyMetaList) {
                 policyOrderList.add(new PolicyConfig().setId(meta.getId()).setName(meta.getName())

@@ -26,11 +26,11 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
         logger.info("Retrieving current integration configurations");
         final List<IntegrationMeta> integrationMetaList = apiAdapter.invoke(new Callable<List<IntegrationMeta>>() {
             @Override
-            public List<IntegrationMeta> call() throws Exception {
+            public List<IntegrationMeta> call()  {
                 return integrationApi.listIntegrations(new ListIntegrationRequest()).getData();
             }
         });
-
+        //Todo
         final ConcurrentLinkedQueue<IntegrationConfig> integrations = new ConcurrentLinkedQueue<IntegrationConfig>();
         ExecutorService pool = Executors.newFixedThreadPool(10);
         for (final IntegrationMeta meta : integrationMetaList) {
@@ -53,11 +53,11 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
         return new ArrayList<IntegrationConfig>(integrations);
     }
 
-    private IntegrationConfig populateIntegrationActions(IntegrationMeta meta) {
+    private IntegrationConfig populateIntegrationActions(final IntegrationMeta meta) throws Exception {
         final IntegrationConfig integrationConfig = new IntegrationConfig();
         final Integration integration = apiAdapter.invoke(new Callable<Integration>() {
             @Override
-            public Integration call() throws Exception {
+            public Integration call()  {
                 return integrationApi.getIntegration(meta.getId()).getData();
             }
         });
@@ -68,10 +68,10 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
         try {
             integrationConfig.setIntegrationActions(apiAdapter.invoke(new Callable<ActionCategorized>() {
                         @Override
-                        public ActionCategorized call() throws Exception {
-                            return integrationActionApi.listIntegrationActions(meta.getId()).getData());
+                        public ActionCategorized call()  {
+                            return integrationActionApi.listIntegrationActions(meta.getId()).getData();
                         }
-                    });
+                    }));
 
         } catch (Exception e) {
             logger.info(integration.getName() + " is not an advanced integration, so not exporting actions");

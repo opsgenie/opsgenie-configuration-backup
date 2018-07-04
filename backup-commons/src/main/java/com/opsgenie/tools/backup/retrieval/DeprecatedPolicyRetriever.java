@@ -17,17 +17,16 @@ public class DeprecatedPolicyRetriever implements EntityRetriever<DeprecatedAler
     private static final DeprecatedPolicyApi policyApi = new DeprecatedPolicyApi();
 
     @Override
-    public List<DeprecatedAlertPolicy> retrieveEntities() {
+    public List<DeprecatedAlertPolicy> retrieveEntities() throws Exception {
         logger.info("Retrieving current policy (old version) configurations");
         List<DeprecatedAlertPolicy> policies = new ArrayList<DeprecatedAlertPolicy>();
-        for (DeprecatedAlertPolicyMeta meta : retrievePolicyMetaList()) {
-            String metaId = meta.getId();
+        for (final DeprecatedAlertPolicyMeta meta : retrievePolicyMetaList()) {
             policies.add(apiAdapter.invoke(new Callable<DeprecatedAlertPolicy>() {
                         @Override
-                        public DeprecatedAlertPolicy call() throws Exception {
-                            return policyApi.getAlertPolicy(meta.getId()).getData());
+                        public DeprecatedAlertPolicy call()  {
+                            return policyApi.getAlertPolicy(meta.getId()).getData();
                         }
-                    });
+                    }));
 
         }
         return policies;
@@ -37,7 +36,7 @@ public class DeprecatedPolicyRetriever implements EntityRetriever<DeprecatedAler
         logger.info("Retrieving policy meta list (old version)");
         return apiAdapter.invoke(new Callable<List<DeprecatedAlertPolicyMeta>>() {
             @Override
-            public List<DeprecatedAlertPolicyMeta> call() throws Exception {
+            public List<DeprecatedAlertPolicyMeta> call()  {
                 return policyApi.listAlertPolicies().getData();
             }
         });

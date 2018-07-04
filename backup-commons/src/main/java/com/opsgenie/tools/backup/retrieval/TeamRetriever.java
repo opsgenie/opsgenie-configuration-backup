@@ -10,10 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class TeamRetriever implements EntityRetriever<TeamConfig> {
 
@@ -24,9 +21,15 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
     private static final TeamRoleApi teamRoleApi = new TeamRoleApi();
 
     @Override
-    public List<TeamConfig> retrieveEntities() throws InterruptedException {
+    public List<TeamConfig> retrieveEntities() throws Exception {
         logger.info("Retrieving current team configurations");
-        final List<Team> teams = teamApi.listTeams(new ArrayList<String>()).getData();
+        final List<Team> teams = apiAdapter.invoke(new Callable<List<Team>>() {
+            @Override
+            public List<Team> call()  {
+                return teamApi.listTeams(new ArrayList<String>()).getData();
+            }
+        });
+
         final ConcurrentLinkedQueue<TeamConfig> teamsWithDetails = new ConcurrentLinkedQueue<TeamConfig>();
         ExecutorService pool = Executors.newFixedThreadPool(10);
         for (final Team teamMeta : teams) {
@@ -36,7 +39,13 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
                     TeamConfig teamConfig = new TeamConfig();
                     boolean failed = false;
                     try {
-                        final List<TeamRoutingRule> routingRules = teamRoutingRuleApi.listTeamRoutingRules(new ListTeamRoutingRulesRequest().identifier(teamMeta.getId())).getData();
+                        final List<TeamRoutingRule> routingRules = apiAdapter.invoke(new Callable<List<TeamRoutingRule>>() {
+                            @Override
+                            public List<TeamRoutingRule> call()  {
+                                return teamRoutingRuleApi.listTeamRoutingRules(new ListTeamRoutingRulesRequest().identifier(teamMeta.getId())).getData();
+                            }
+                        });
+
                         teamConfig.setTeamRoutingRules(routingRules);
                     } catch (Exception e) {
                         failed = true;
@@ -52,7 +61,13 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
                     }
 
                     try {
-                        final List<TeamRole> teamRoles = teamRoleApi.listTeamRoles(new ListTeamRolesRequest().identifier(teamMeta.getId())).getData();
+                        final List<TeamRole> teamRoles = apiAdapter.invoke(new Callable<List<TeamRole>>() {
+                            @Override
+                            public List<TeamRole> call()  {
+                                return teamRoleApi.listTeamRoles(new ListTeamRolesRequest().identifier(teamMeta.getId())).getData();
+                            }
+                        });
+
                         teamConfig.setTeamRoles(teamRoles);
                     } catch (Exception e) {
                         failed = true;
