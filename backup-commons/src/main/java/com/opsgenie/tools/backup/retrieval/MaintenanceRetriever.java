@@ -39,7 +39,7 @@ public class MaintenanceRetriever  implements EntityRetriever<Maintenance>{
     }
 
     private void retrieveMaintenance(List<MaintenanceMeta> maintenanceMetaList) throws Exception {
-        for ( MaintenanceMeta maintenanceMeta : maintenanceMetaList){
+        for ( final MaintenanceMeta maintenanceMeta : maintenanceMetaList){
             Maintenance maintenance = apiAdapter.invoke(new Callable<Maintenance>() {
                 @Override
                 public Maintenance call() throws Exception {
