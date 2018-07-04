@@ -7,8 +7,18 @@ import com.opsgenie.oas.sdk.ApiClient;
 import com.opsgenie.oas.sdk.Configuration;
 import com.opsgenie.oas.sdk.api.AccountApi;
 import com.opsgenie.oas.sdk.model.*;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class ExportMain {
     private final static Logger logger = LoggerFactory.getLogger(ExportMain.class);
@@ -59,6 +69,7 @@ public class ExportMain {
         configureDefaultApiClient(apiKey, opsGenieHost, debug);
 
         AccountApi accountApi = new AccountApi();
+        getApiLimits(apiKey);
         try {
             final GetAccountInfoResponse info = accountApi.getInfo();
             logger.info("Account name is " + info.getData().getName() + "\n");
@@ -67,9 +78,7 @@ public class ExportMain {
             exporter.export();
 
             logger.info("Finished");
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             logger.error("Could not connect to host: " + opsGenieHost);
             System.exit(1);
         }
@@ -91,6 +100,21 @@ public class ExportMain {
         mapper.addMixIn(BaseIntegrationAction.class, IgnoredIdAndType.class);
         mapper.addMixIn(Responder.class, IgnoredType.class);
         mapper.addMixIn(Policy.class, IgnoredType.class);
+    }
+
+    private static String getApiLimits(String apiKey) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpGet httpGet = new HttpGet("http://localhost:9004/v2/api-limits/");
+        httpGet.addHeader(HttpHeaders.AUTHORIZATION, "GenieKey " + apiKey);
+        HttpResponse response = client.execute(httpGet);
+        ResponseHandler handler = new BasicResponseHandler();
+
+        String body = (String) client.execute(httpGet, handler);
+        Header[] headers = response.getAllHeaders();
+        for (Header header : headers) {
+            System.out.println(header.toString());
+        }
+        return "";
     }
 
     abstract class IgnoredIdAndType {

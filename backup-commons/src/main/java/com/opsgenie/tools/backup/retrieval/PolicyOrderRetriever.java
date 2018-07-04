@@ -43,7 +43,6 @@ public class PolicyOrderRetriever implements EntityRetriever<PolicyConfig> {
             }
         });
 
-
         for (PolicyMeta meta : globalPolicyMetaList) {
             policyOrderList.add(new PolicyConfig().setId(meta.getId()).setName(meta.getName())
                     .setOrder(meta.getOrder()).setTeam(""));

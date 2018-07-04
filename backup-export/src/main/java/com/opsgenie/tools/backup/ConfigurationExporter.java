@@ -2,6 +2,14 @@ package com.opsgenie.tools.backup;
 
 import com.opsgenie.tools.backup.exporters.*;
 import com.opsgenie.tools.backup.util.BackupUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
@@ -9,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +61,7 @@ public class ConfigurationExporter extends BaseBackup {
         exporters.add(new UserForwardingExporter(rootPath));
         exporters.add(new DeprecatedPolicyExporter(rootPath));
         exporters.add(new DeprecatedPolicyOrderExporter(rootPath));
-        exporters.add(new IntegrationExporter(rootPath));
+        //exporters.add(new IntegrationExporter(rootPath));
         exporters.add(new CustomUserRoleExporter(rootPath));
         exporters.add(new PolicyExporter(rootPath));
         exporters.add(new PolicyOrderExporter(rootPath));
@@ -64,8 +73,7 @@ public class ConfigurationExporter extends BaseBackup {
      * is enabled from BackupProperties parameters it will export those configurations to remote
      * git.
      */
-
-    void export() throws GitAPIException, InterruptedException {
+    void export() throws GitAPIException, InterruptedException, IOException {
         if (getBackupProperties().isGitEnabled()) {
             cloneGit(getBackupProperties());
         }
