@@ -111,6 +111,7 @@ public class DeprecatedPolicyImporter extends BaseImporter<DeprecatedAlertPolicy
             logger.error("Could not read policy orders from file: " + e.getMessage());
             return;
         }
+        try{
         List<DeprecatedAlertPolicyMeta> list = new DeprecatedPolicyRetriever().retrievePolicyMetaList();
 
         List<PolicyConfig> configs = new ArrayList<PolicyConfig>();
@@ -131,6 +132,9 @@ public class DeprecatedPolicyImporter extends BaseImporter<DeprecatedAlertPolicy
             body.setTargetIndex(size + config.getOrder());
             params.setBody(body);
             api.changeAlertPolicyOrder(params);
+        }
+        }catch (Exception e){
+            logger.error("Could not read policy orders " + e.getMessage());
         }
     }
 

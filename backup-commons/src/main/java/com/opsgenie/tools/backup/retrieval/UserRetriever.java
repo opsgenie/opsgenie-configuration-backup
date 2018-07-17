@@ -1,6 +1,5 @@
 package com.opsgenie.tools.backup.retrieval;
 
-import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.NotificationRuleApi;
 import com.opsgenie.oas.sdk.api.UserApi;
 import com.opsgenie.oas.sdk.model.*;
@@ -30,7 +29,7 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
     }
 
     private static List<User> getAllUsers() throws Exception {
-        final ListUsersResponse listUsersResponse = apiAdapter.invoke(new Callable<ListUsersResponse>() {
+        final ListUsersResponse listUsersResponse = ApiAdapter.invoke(new Callable<ListUsersResponse>() {
             @Override
             public ListUsersResponse call() {
                 return userApi.listUsers(new ListUsersRequest());
@@ -42,7 +41,7 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
         logger.info("Retrieved " + userList.size() + "/" + listUsersResponse.getTotalCount());
         for (int i = 1; i < (pageCount * 1.0) / 100; i++) {
             final int offset = 100 * i;
-            userList.addAll(apiAdapter.invoke(new Callable<Collection<? extends User>>() {
+            userList.addAll(ApiAdapter.invoke(new Callable<Collection<? extends User>>() {
                         @Override
                         public Collection<? extends User> call()  {
                             return userApi.listUsers(new ListUsersRequest().offset(offset)).getData();
@@ -62,7 +61,7 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
                 @Override
                 public void run() {
                     try {
-                        usersWithContact.add(apiAdapter.invoke(new Callable<User>() {
+                        usersWithContact.add(ApiAdapter.invoke(new Callable<User>() {
                                     @Override
                                     public User call()  {
                                         return userApi.getUser(new GetUserRequest().identifier(user.getId()).expand(Collections.singletonList("contact"))).getData();
@@ -93,7 +92,7 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
                     UserConfig userConfigWrapper = new UserConfig();
                     List<NotificationRuleMeta> data = null;
                     try {
-                        data = apiAdapter.invoke(new Callable<List<NotificationRuleMeta>>() {
+                        data = ApiAdapter.invoke(new Callable<List<NotificationRuleMeta>>() {
                             @Override
                             public List<NotificationRuleMeta> call()  {
                                 return notificationRuleApi.listNotificationRules(user.getId()).getData();
@@ -106,7 +105,7 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
                     List<NotificationRule> rules = new ArrayList<NotificationRule>();
                     for (final NotificationRuleMeta meta : data) {
                         try {
-                            final NotificationRule notificationRule = apiAdapter.invoke(new Callable<NotificationRule>() {
+                            final NotificationRule notificationRule = ApiAdapter.invoke(new Callable<NotificationRule>() {
                                 @Override
                                 public NotificationRule call()  {
                                     return notificationRuleApi.getNotificationRule(new GetNotificationRuleRequest().identifier(user.getId()).ruleId(meta.getId())).getData();

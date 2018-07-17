@@ -24,7 +24,7 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
     @Override
     public List<IntegrationConfig> retrieveEntities() throws Exception {
         logger.info("Retrieving current integration configurations");
-        final List<IntegrationMeta> integrationMetaList = apiAdapter.invoke(new Callable<List<IntegrationMeta>>() {
+        final List<IntegrationMeta> integrationMetaList = ApiAdapter.invoke(new Callable<List<IntegrationMeta>>() {
             @Override
             public List<IntegrationMeta> call()  {
                 return integrationApi.listIntegrations(new ListIntegrationRequest()).getData();
@@ -55,7 +55,7 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
 
     private IntegrationConfig populateIntegrationActions(final IntegrationMeta meta) throws Exception {
         final IntegrationConfig integrationConfig = new IntegrationConfig();
-        final Integration integration = apiAdapter.invoke(new Callable<Integration>() {
+        final Integration integration = ApiAdapter.invoke(new Callable<Integration>() {
             @Override
             public Integration call()  {
                 return integrationApi.getIntegration(meta.getId()).getData();
@@ -66,7 +66,7 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
         integration.setId(meta.getId());
         integrationConfig.setIntegration(integration);
         try {
-            integrationConfig.setIntegrationActions(apiAdapter.invoke(new Callable<ActionCategorized>() {
+            integrationConfig.setIntegrationActions(ApiAdapter.invoke(new Callable<ActionCategorized>() {
                         @Override
                         public ActionCategorized call()  {
                             return integrationActionApi.listIntegrationActions(meta.getId()).getData();

@@ -9,7 +9,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class apiAdapter {
+public class ApiAdapter {
 
     private static final int DEFAULT_MAX_RETRIES = 20;
 

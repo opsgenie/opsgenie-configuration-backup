@@ -17,7 +17,7 @@ public class ForwardingRetriever implements EntityRetriever<ForwardingRule> {
     @Override
     public List<ForwardingRule> retrieveEntities() throws Exception {
         logger.info("Retrieving current forwardings");
-        return apiAdapter.invoke(new Callable<List<ForwardingRule>>() {
+        return ApiAdapter.invoke(new Callable<List<ForwardingRule>>() {
             @Override
             public List<ForwardingRule> call() {
                 return forwardingRuleApi.listForwardingRules().getData();

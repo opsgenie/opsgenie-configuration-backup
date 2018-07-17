@@ -20,7 +20,7 @@ public class CustomUserRoleRetriever implements EntityRetriever<CustomUserRole>{
     @Override
     public List<CustomUserRole> retrieveEntities() throws Exception {
         logger.info("Retrieving current custom user role configurations");
-        List<CustomUserRole> roleSummaryList = apiAdapter.invoke(new Callable<List<CustomUserRole>>() {
+        List<CustomUserRole> roleSummaryList = ApiAdapter.invoke(new Callable<List<CustomUserRole>>() {
             @Override
             public List<CustomUserRole> call()  {
                 return customUserRoleApi.listCustomUserRoles().getData();
@@ -31,7 +31,7 @@ public class CustomUserRoleRetriever implements EntityRetriever<CustomUserRole>{
             final GetCustomUserRoleRequest request = new GetCustomUserRoleRequest();
             request.setIdentifier(role.getId());
             request.setIdentifierType(GetCustomUserRoleRequest.IdentifierTypeEnum.ID);
-            customUserRoleList.add(apiAdapter.invoke(new Callable<CustomUserRole>() {
+            customUserRoleList.add(ApiAdapter.invoke(new Callable<CustomUserRole>() {
                         @Override
                         public CustomUserRole call() {
                             return customUserRoleApi.getCustomUserRole(request).getData();

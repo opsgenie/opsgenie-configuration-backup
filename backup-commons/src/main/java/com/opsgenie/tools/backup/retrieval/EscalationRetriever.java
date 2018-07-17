@@ -17,7 +17,7 @@ public class EscalationRetriever implements EntityRetriever<Escalation>{
     @Override
     public List<Escalation> retrieveEntities() throws Exception {
         logger.info("Retrieving current escalation configurations");
-        return apiAdapter.invoke(new Callable<List<Escalation>>() {
+        return ApiAdapter.invoke(new Callable<List<Escalation>>() {
             @Override
             public List<Escalation> call()  {
                 return escalationApi.listEscalations().getData();

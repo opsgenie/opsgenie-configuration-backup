@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.PolicyApi;
-import com.opsgenie.oas.sdk.model.*;
+import com.opsgenie.oas.sdk.model.ChangePolicyOrderPayload;
+import com.opsgenie.oas.sdk.model.ChangePolicyOrderRequest;
+import com.opsgenie.oas.sdk.model.Policy;
+import com.opsgenie.oas.sdk.model.UpdatePolicyRequest;
 import com.opsgenie.tools.backup.dto.PolicyConfig;
 import com.opsgenie.tools.backup.dto.PolicyWithTeamInfo;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
@@ -18,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * @author Zeynep Sengil
@@ -34,6 +36,7 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
         super(backupRootDirectory, addEntity, updateEntity);
         this.rootPath = backupRootDirectory;
     }
+
     @Override
     protected EntityRetriever<PolicyWithTeamInfo> initializeEntityRetriever() {
         return new PolicyRetriever();
@@ -92,24 +95,26 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
             return;
         }
         List<PolicyConfig> currentOrderConfigs;
-        currentOrderConfigs = new PolicyOrderRetriever().retrieveEntities();
-
-
-        if (equalsIgnoreOrder(currentOrderConfigs, this.policyOrderConfigFromFile)) {
-            return;
-        }
-        int size = currentOrderConfigs.size();
-        for (PolicyConfig config : policyOrderConfigFromFile) {
-            ChangePolicyOrderRequest params = new ChangePolicyOrderRequest();
-            params.setPolicyId(getCurrentPolicyId(config.getId(), config.getName(), currentOrderConfigs));
-            if (params.getPolicyId() == null) {
-                continue;
+        try {
+            currentOrderConfigs = new PolicyOrderRetriever().retrieveEntities();
+            if (equalsIgnoreOrder(currentOrderConfigs, this.policyOrderConfigFromFile)) {
+                return;
             }
-            ChangePolicyOrderPayload body = new ChangePolicyOrderPayload();
-            body.setTargetIndex(size + config.getOrder());
-            params.setBody(body);
-            params.setTeamId(config.getTeam());
-            api.changePolicyOrder(params);
+            int size = currentOrderConfigs.size();
+            for (PolicyConfig config : policyOrderConfigFromFile) {
+                ChangePolicyOrderRequest params = new ChangePolicyOrderRequest();
+                params.setPolicyId(getCurrentPolicyId(config.getId(), config.getName(), currentOrderConfigs));
+                if (params.getPolicyId() == null) {
+                    continue;
+                }
+                ChangePolicyOrderPayload body = new ChangePolicyOrderPayload();
+                body.setTargetIndex(size + config.getOrder());
+                params.setBody(body);
+                params.setTeamId(config.getTeam());
+                api.changePolicyOrder(params);
+            }
+        } catch (Exception e) {
+            logger.error("Could not read policy V2 orders" + e.getMessage());
         }
     }
 

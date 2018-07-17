@@ -34,7 +34,7 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
 
     public void retrieveGlobalPolicies() throws Exception {
         logger.info("Retrieving global alert policy meta list");
-        List<PolicyMeta> globalPolicies = apiAdapter.invoke(new Callable<List<PolicyMeta>>() {
+        List<PolicyMeta> globalPolicies = ApiAdapter.invoke(new Callable<List<PolicyMeta>>() {
             @Override
             public List<PolicyMeta> call()  {
                 return policyApi.listAlertPolicies(null).getData();
@@ -46,7 +46,7 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
 
     public void retrieveTeamPolicies() throws Exception {
         logger.info("Retrieving team metas for team policies");
-        final List<Team> teams = apiAdapter.invoke(new Callable<List<Team>>() {
+        final List<Team> teams = ApiAdapter.invoke(new Callable<List<Team>>() {
             @Override
             public List<Team> call()  {
                 return teamApi.listTeams(new ArrayList<String>()).getData();
@@ -61,7 +61,7 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
 
     public void getAlertPolicies(final String teamId) throws Exception {
         logger.info("Retrieving alert policy list for team with id: " + teamId);
-        ListPoliciesResponse listAlertPoliciesResponse = apiAdapter.invoke(new Callable<ListPoliciesResponse>() {
+        ListPoliciesResponse listAlertPoliciesResponse = ApiAdapter.invoke(new Callable<ListPoliciesResponse>() {
             @Override
             public ListPoliciesResponse call()  {
                 return policyApi.listAlertPolicies(teamId);
@@ -74,7 +74,7 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
 
     public void getNotificationPolicies(final String teamId) throws Exception {
         logger.info("Retrieving notification policy list for team with id: " + teamId);
-        ListPoliciesResponse listNotfPoliciesResponse = apiAdapter.invoke(new Callable<ListPoliciesResponse>() {
+        ListPoliciesResponse listNotfPoliciesResponse = ApiAdapter.invoke(new Callable<ListPoliciesResponse>() {
             @Override
             public ListPoliciesResponse call()  {
                 return policyApi.listNotificationPolicies(teamId);
@@ -89,7 +89,7 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
     public void getPolicies(List<PolicyMeta> policyMetaList, final String teamId) throws Exception {
         if (policyMetaList != null){
             for (final PolicyMeta policyMeta : policyMetaList){
-                GetPolicyResponse policyResponse = apiAdapter.invoke(new Callable<GetPolicyResponse>() {
+                GetPolicyResponse policyResponse = ApiAdapter.invoke(new Callable<GetPolicyResponse>() {
                     @Override
                     public GetPolicyResponse call()  {
                         return policyApi.getPolicy(policyMeta.getId(), teamId);

@@ -23,7 +23,7 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
     @Override
     public List<TeamConfig> retrieveEntities() throws Exception {
         logger.info("Retrieving current team configurations");
-        final List<Team> teams = apiAdapter.invoke(new Callable<List<Team>>() {
+        final List<Team> teams = ApiAdapter.invoke(new Callable<List<Team>>() {
             @Override
             public List<Team> call()  {
                 return teamApi.listTeams(new ArrayList<String>()).getData();
@@ -39,7 +39,7 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
                     TeamConfig teamConfig = new TeamConfig();
                     boolean failed = false;
                     try {
-                        final List<TeamRoutingRule> routingRules = apiAdapter.invoke(new Callable<List<TeamRoutingRule>>() {
+                        final List<TeamRoutingRule> routingRules = ApiAdapter.invoke(new Callable<List<TeamRoutingRule>>() {
                             @Override
                             public List<TeamRoutingRule> call()  {
                                 return teamRoutingRuleApi.listTeamRoutingRules(new ListTeamRoutingRulesRequest().identifier(teamMeta.getId())).getData();
@@ -61,7 +61,7 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
                     }
 
                     try {
-                        final List<TeamRole> teamRoles = apiAdapter.invoke(new Callable<List<TeamRole>>() {
+                        final List<TeamRole> teamRoles = ApiAdapter.invoke(new Callable<List<TeamRole>>() {
                             @Override
                             public List<TeamRole> call()  {
                                 return teamRoleApi.listTeamRoles(new ListTeamRolesRequest().identifier(teamMeta.getId())).getData();

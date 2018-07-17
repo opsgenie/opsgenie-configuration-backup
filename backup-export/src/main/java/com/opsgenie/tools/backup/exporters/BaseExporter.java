@@ -31,15 +31,15 @@ abstract class BaseExporter<T> implements Exporter {
 
     @Override
     public void export() {
-        List<T> currentBeanList;
+        List<T> currentEntityList;
         try {
-            currentBeanList = initializeEntityRetriever().retrieveEntities();
+            currentEntityList = initializeEntityRetriever().retrieveEntities();
         } catch (Exception e) {
             logger.error("Could not list " + exportDirectory.getName(), e);
             return;
         }
 
-        for (T bean : currentBeanList) {
+        for (T bean : currentEntityList) {
             exportFile(getExportDirectory().getAbsolutePath() + "/" + getEntityFileName(bean) + ".json", bean);
         }
     }
