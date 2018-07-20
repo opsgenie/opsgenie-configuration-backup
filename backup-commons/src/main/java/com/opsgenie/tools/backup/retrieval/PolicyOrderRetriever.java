@@ -5,6 +5,7 @@ import com.opsgenie.oas.sdk.api.TeamApi;
 import com.opsgenie.oas.sdk.model.PolicyMeta;
 import com.opsgenie.oas.sdk.model.Team;
 import com.opsgenie.tools.backup.dto.PolicyConfig;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,14 +30,14 @@ public class PolicyOrderRetriever implements EntityRetriever<PolicyConfig> {
         logger.info("Retrieving current policy V2 orders");
         List<PolicyConfig> policyOrderList = new ArrayList<PolicyConfig>();
 
-        final List<Team> teamList = ApiAdapter.invoke(new Callable<List<Team>>() {
+        final List<Team> teamList = RetryPolicyAdapter.invoke(new Callable<List<Team>>() {
             @Override
             public List<Team> call()  {
                 return teamApi.listTeams(new ArrayList<String>()).getData();
             }
         });
 
-        final List<PolicyMeta> globalPolicyMetaList = ApiAdapter.invoke(new Callable<List<PolicyMeta>>() {
+        final List<PolicyMeta> globalPolicyMetaList = RetryPolicyAdapter.invoke(new Callable<List<PolicyMeta>>() {
             @Override
             public List<PolicyMeta> call()  {
                 return policyApi.listAlertPolicies("").getData();
@@ -49,14 +50,14 @@ public class PolicyOrderRetriever implements EntityRetriever<PolicyConfig> {
         }
 
         for (final Team team : teamList){
-            final List<PolicyMeta> alertPolicyMetaList = ApiAdapter.invoke(new Callable<List<PolicyMeta>>() {
+            final List<PolicyMeta> alertPolicyMetaList = RetryPolicyAdapter.invoke(new Callable<List<PolicyMeta>>() {
                 @Override
                 public List<PolicyMeta> call()  {
                     return policyApi.listAlertPolicies(team.getId()).getData();
                 }
             });
 
-            final List<PolicyMeta> notfPolicyMetaList = ApiAdapter.invoke(new Callable<List<PolicyMeta>>() {
+            final List<PolicyMeta> notfPolicyMetaList = RetryPolicyAdapter.invoke(new Callable<List<PolicyMeta>>() {
                 @Override
                 public List<PolicyMeta> call()  {
                     return policyApi.listNotificationPolicies(team.getId()).getData();

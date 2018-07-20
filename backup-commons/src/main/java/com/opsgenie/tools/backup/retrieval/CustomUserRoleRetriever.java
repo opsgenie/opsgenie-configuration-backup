@@ -4,6 +4,7 @@ import com.opsgenie.oas.sdk.api.CustomUserRoleApi;
 import com.opsgenie.oas.sdk.model.CustomUserRole;
 import com.opsgenie.oas.sdk.model.GetCustomUserRoleRequest;
 //import com.sun.tools.javac.comp.Todo;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,7 @@ public class CustomUserRoleRetriever implements EntityRetriever<CustomUserRole>{
     @Override
     public List<CustomUserRole> retrieveEntities() throws Exception {
         logger.info("Retrieving current custom user role configurations");
-        List<CustomUserRole> roleSummaryList = ApiAdapter.invoke(new Callable<List<CustomUserRole>>() {
+        List<CustomUserRole> roleSummaryList = RetryPolicyAdapter.invoke(new Callable<List<CustomUserRole>>() {
             @Override
             public List<CustomUserRole> call()  {
                 return customUserRoleApi.listCustomUserRoles().getData();
@@ -31,7 +32,7 @@ public class CustomUserRoleRetriever implements EntityRetriever<CustomUserRole>{
             final GetCustomUserRoleRequest request = new GetCustomUserRoleRequest();
             request.setIdentifier(role.getId());
             request.setIdentifierType(GetCustomUserRoleRequest.IdentifierTypeEnum.ID);
-            customUserRoleList.add(ApiAdapter.invoke(new Callable<CustomUserRole>() {
+            customUserRoleList.add(RetryPolicyAdapter.invoke(new Callable<CustomUserRole>() {
                         @Override
                         public CustomUserRole call() {
                             return customUserRoleApi.getCustomUserRole(request).getData();

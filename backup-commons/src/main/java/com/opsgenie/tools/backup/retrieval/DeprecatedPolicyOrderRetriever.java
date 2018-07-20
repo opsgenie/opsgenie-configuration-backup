@@ -3,6 +3,7 @@ package com.opsgenie.tools.backup.retrieval;
 import com.opsgenie.oas.sdk.api.DeprecatedPolicyApi;
 import com.opsgenie.oas.sdk.model.DeprecatedAlertPolicyMeta;
 import com.opsgenie.tools.backup.dto.PolicyConfig;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,7 @@ public class DeprecatedPolicyOrderRetriever implements EntityRetriever<PolicyCon
     @Override
     public List<PolicyConfig> retrieveEntities() throws Exception {
         logger.info("Retrieving current policy orders");
-        final List<DeprecatedAlertPolicyMeta> policyMetaList = ApiAdapter.invoke(new Callable<List<DeprecatedAlertPolicyMeta>>() {
+        final List<DeprecatedAlertPolicyMeta> policyMetaList = RetryPolicyAdapter.invoke(new Callable<List<DeprecatedAlertPolicyMeta>>() {
             @Override
             public List<DeprecatedAlertPolicyMeta> call()  {
                 return policyApi.listAlertPolicies().getData();

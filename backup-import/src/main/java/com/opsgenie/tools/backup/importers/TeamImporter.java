@@ -2,17 +2,18 @@ package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.TeamApi;
-import com.opsgenie.oas.sdk.api.TeamMemberApi;
 import com.opsgenie.oas.sdk.api.TeamRoleApi;
 import com.opsgenie.oas.sdk.api.TeamRoutingRuleApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.TeamConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.TeamRetriever;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public class TeamImporter extends BaseImporter<TeamConfig> {
 
@@ -53,8 +54,8 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
     }
 
     @Override
-    protected void createEntity(TeamConfig entity) throws ApiException {
-        CreateTeamPayload payload = new CreateTeamPayload();
+    protected void createEntity(TeamConfig entity) throws Exception {
+        final CreateTeamPayload payload = new CreateTeamPayload();
         final Team team = entity.getTeam();
         payload.setName(team.getName());
 
@@ -62,7 +63,13 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
             payload.setDescription(team.getDescription());
 
         payload.setMembers(new ArrayList<TeamMember>());
-        SuccessResponse teamCreateResult = teamApi.createTeam(payload);
+        final SuccessResponse teamCreateResult = RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return teamApi.createTeam(payload);
+            }
+        });
+
         final List<TeamRoutingRule> teamRoutingRules = entity.getTeamRoutingRules();
         if (teamRoutingRules != null) {
             for (TeamRoutingRule teamRoutingRule : teamRoutingRules) {
@@ -87,11 +94,17 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
             updateTeamPayload.setDescription(team.getDescription());
         }
         updateTeamPayload.setMembers(team.getMembers());
-        UpdateTeamRequest request = new UpdateTeamRequest().body(updateTeamPayload);
-        teamApi.updateTeam(request.identifier(teamCreateResult.getData().getId()));
+        final UpdateTeamRequest request = new UpdateTeamRequest().body(updateTeamPayload);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return teamApi.updateTeam(request.identifier(teamCreateResult.getData().getId()));
+            }
+        });
+
     }
 
-    private void createTeamRoutingRule(Team team, TeamRoutingRule teamRoutingRule) throws ApiException {
+    private void createTeamRoutingRule(Team team, TeamRoutingRule teamRoutingRule) throws Exception {
         CreateTeamRoutingRulePayload payload = new CreateTeamRoutingRulePayload();
         payload.setCriteria(teamRoutingRule.getCriteria());
         payload.setName(teamRoutingRule.getName());
@@ -100,30 +113,40 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
         payload.setTimeRestriction(teamRoutingRule.getTimeRestriction());
         payload.setTimezone(teamRoutingRule.getTimezone());
 
-        CreateTeamRoutingRuleRequest request = new CreateTeamRoutingRuleRequest();
+        final CreateTeamRoutingRuleRequest request = new CreateTeamRoutingRuleRequest();
         request.setIdentifier(team.getName());
         request.setTeamIdentifierType(CreateTeamRoutingRuleRequest.TeamIdentifierTypeEnum.NAME);
         request.setBody(payload);
 
-        teamRoutingRuleApi.createTeamRoutingRule(request);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return teamRoutingRuleApi.createTeamRoutingRule(request);
+            }
+        });
+
     }
 
-    private void createTeamRole(Team team, TeamRole teamRole) throws ApiException {
+    private void createTeamRole(Team team, TeamRole teamRole) throws Exception {
         CreateTeamRolePayload payload = new CreateTeamRolePayload();
         payload.setName(teamRole.getName());
         payload.setRights(teamRole.getRights());
 
-        AddTeamRoleRequest request = new AddTeamRoleRequest();
+        final AddTeamRoleRequest request = new AddTeamRoleRequest();
         request.setIdentifier(team.getName());
         request.setTeamIdentifierType(AddTeamRoleRequest.TeamIdentifierTypeEnum.NAME);
         request.setBody(payload);
-
-        teamRoleApi.createTeamRole(request);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return teamRoleApi.createTeamRole(request);
+            }
+        });
     }
 
     @Override
-    protected void updateEntity(TeamConfig entity, EntityStatus entityStatus) throws ApiException {
-        SuccessResponse teamUpdateResponse;
+    protected void updateEntity(final TeamConfig entity, EntityStatus entityStatus) throws Exception {
+        final SuccessResponse teamUpdateResponse;
 
         UpdateTeamPayload payload = new UpdateTeamPayload();
         final Team team = entity.getTeam();
@@ -134,14 +157,25 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
         }
         payload.setMembers(new ArrayList<TeamMember>());
 
-        UpdateTeamRequest request = new UpdateTeamRequest().body(payload);
+        final UpdateTeamRequest request = new UpdateTeamRequest().body(payload);
 
         if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
-            teamUpdateResponse = teamApi.updateTeam(request.identifier(team.getId()));
+            teamUpdateResponse = RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+                @Override
+                public SuccessResponse call() throws Exception {
+                    return teamApi.updateTeam(request.identifier(team.getId()));
+                }
+            });
+
         } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
-            teamUpdateResponse = teamApi.updateTeam(request.identifier(findTeamIdInCurrentTeams(entity)));
-        }
-        else {
+            teamUpdateResponse = RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+                @Override
+                public SuccessResponse call() throws Exception {
+                    return teamApi.updateTeam(request.identifier(findTeamIdInCurrentTeams(entity)));
+                }
+            });
+
+        } else {
             logger.warn("Could not find team in current configuration. Update team skipped for " + team.getName());
             return;
         }
@@ -183,8 +217,14 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
             updateTeamPayload.setDescription(team.getDescription());
         }
         updateTeamPayload.setMembers(team.getMembers());
-        UpdateTeamRequest updateTeamRequest = new UpdateTeamRequest().body(updateTeamPayload);
-        teamApi.updateTeam(updateTeamRequest.identifier(teamUpdateResponse.getData().getId()));
+        final UpdateTeamRequest updateTeamRequest = new UpdateTeamRequest().body(updateTeamPayload);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return teamApi.updateTeam(updateTeamRequest.identifier(teamUpdateResponse.getData().getId()));
+            }
+        });
+
     }
 
     private String findTeamIdInCurrentTeams(TeamConfig entity) {
@@ -222,7 +262,7 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
         return null;
     }
 
-    private void updateTeamRoutingRule(Team team, TeamRoutingRule teamRoutingRule, EntityStatus entityStatus) throws ApiException {
+    private void updateTeamRoutingRule(Team team, TeamRoutingRule teamRoutingRule, EntityStatus entityStatus) throws Exception {
         UpdateTeamRoutingRulePayload payload = new UpdateTeamRoutingRulePayload();
         payload.setCriteria(teamRoutingRule.getCriteria());
         payload.setName(teamRoutingRule.getName());
@@ -230,7 +270,7 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
         payload.setTimeRestriction(teamRoutingRule.getTimeRestriction());
         payload.setTimezone(teamRoutingRule.getTimezone());
 
-        UpdateTeamRoutingRuleRequest request = new UpdateTeamRoutingRuleRequest();
+        final UpdateTeamRoutingRuleRequest request = new UpdateTeamRoutingRuleRequest();
         request.setId(teamRoutingRule.getId());
         if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
             request.setTeamIdentifierType(UpdateTeamRoutingRuleRequest.TeamIdentifierTypeEnum.NAME);
@@ -239,15 +279,21 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
             request.setIdentifier(team.getId());
         }
         request.body(payload);
-        teamRoutingRuleApi.updateTeamRoutingRule(request);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return teamRoutingRuleApi.updateTeamRoutingRule(request);
+            }
+        });
+
     }
 
-    private void updateTeamRole(Team team, TeamRole teamRole, EntityStatus entityStatus) throws ApiException {
+    private void updateTeamRole(Team team, TeamRole teamRole, EntityStatus entityStatus) throws Exception {
         UpdateTeamRolePayload payload = new UpdateTeamRolePayload();
         payload.setName(teamRole.getName());
         payload.setRights(teamRole.getRights());
 
-        UpdateTeamRoleRequest request = new UpdateTeamRoleRequest();
+        final UpdateTeamRoleRequest request = new UpdateTeamRoleRequest();
         request.setTeamRoleIdentifier(teamRole.getId());
         request.setIdentifierType(UpdateTeamRoleRequest.IdentifierTypeEnum.ID);
         if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
@@ -257,7 +303,13 @@ public class TeamImporter extends BaseImporter<TeamConfig> {
             request.setIdentifier(team.getId());
         }
         request.body(payload);
-        teamRoleApi.updateTeamRole(request);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return teamRoleApi.updateTeamRole(request);
+            }
+        });
+
     }
 
     @Override

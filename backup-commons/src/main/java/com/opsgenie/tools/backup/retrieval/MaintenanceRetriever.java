@@ -3,6 +3,7 @@ package com.opsgenie.tools.backup.retrieval;
 import com.opsgenie.oas.sdk.api.MaintenanceApi;
 import com.opsgenie.oas.sdk.model.Maintenance;
 import com.opsgenie.oas.sdk.model.MaintenanceMeta;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ public class MaintenanceRetriever  implements EntityRetriever<Maintenance>{
     @Override
     public List<Maintenance> retrieveEntities() throws Exception {
         logger.info("Retrieving current maintenance configurations");
-        List<MaintenanceMeta> metas = ApiAdapter.invoke(new Callable<List<MaintenanceMeta>>() {
+        List<MaintenanceMeta> metas = RetryPolicyAdapter.invoke(new Callable<List<MaintenanceMeta>>() {
             @Override
             public List<MaintenanceMeta> call()  {
                 return maintenanceApi.listMaintenance("non-expired").getData();
@@ -40,7 +41,7 @@ public class MaintenanceRetriever  implements EntityRetriever<Maintenance>{
 
     private void retrieveMaintenance(List<MaintenanceMeta> maintenanceMetaList) throws Exception {
         for ( final MaintenanceMeta maintenanceMeta : maintenanceMetaList){
-            Maintenance maintenance = ApiAdapter.invoke(new Callable<Maintenance>() {
+            Maintenance maintenance = RetryPolicyAdapter.invoke(new Callable<Maintenance>() {
                 @Override
                 public Maintenance call()  {
                     return maintenanceApi.getMaintenance(maintenanceMeta.getId()).getData();

@@ -8,6 +8,7 @@ import com.opsgenie.oas.sdk.model.Schedule;
 import com.opsgenie.oas.sdk.model.ScheduleOverride;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.ScheduleConfig;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ public class ScheduleRetriever implements EntityRetriever<ScheduleConfig> {
     public List<ScheduleConfig> retrieveEntities() throws Exception {
         logger.info("Retrieving current schedule configurations");
         List<ScheduleConfig> scheduleConfigs = new ArrayList<ScheduleConfig>();
-        final List<Schedule> schedules = ApiAdapter.invoke(new Callable<List<Schedule>>() {
+        final List<Schedule> schedules = RetryPolicyAdapter.invoke(new Callable<List<Schedule>>() {
             @Override
             public List<Schedule> call()  {
                 return scheduleApi.listSchedules(Collections.singletonList("rotation")).getData();
@@ -61,7 +62,7 @@ public class ScheduleRetriever implements EntityRetriever<ScheduleConfig> {
             final ListScheduleOverridesRequest listRequest = new ListScheduleOverridesRequest();
             listRequest.setIdentifier(schedule.getName());
             listRequest.setScheduleIdentifierType(ListScheduleOverridesRequest.ScheduleIdentifierTypeEnum.NAME);
-            ListScheduleOverrideResponse response = ApiAdapter.invoke(new Callable<ListScheduleOverrideResponse>() {
+            ListScheduleOverrideResponse response = RetryPolicyAdapter.invoke(new Callable<ListScheduleOverrideResponse>() {
                 @Override
                 public ListScheduleOverrideResponse call() {
                     return overrideApi.listScheduleOverride(listRequest);
@@ -87,7 +88,7 @@ public class ScheduleRetriever implements EntityRetriever<ScheduleConfig> {
             request.setIdentifier(schedule.getName());
             request.setScheduleIdentifierType(GetScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
 
-            GetScheduleOverrideResponse overrideResponse = ApiAdapter.invoke(new Callable<GetScheduleOverrideResponse>() {
+            GetScheduleOverrideResponse overrideResponse = RetryPolicyAdapter.invoke(new Callable<GetScheduleOverrideResponse>() {
                 @Override
                 public GetScheduleOverrideResponse call() {
                     return overrideApi.getScheduleOverride(request);

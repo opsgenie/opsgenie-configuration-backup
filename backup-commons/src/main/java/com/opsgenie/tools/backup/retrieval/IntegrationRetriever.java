@@ -7,6 +7,7 @@ import com.opsgenie.oas.sdk.model.Integration;
 import com.opsgenie.oas.sdk.model.IntegrationMeta;
 import com.opsgenie.oas.sdk.model.ListIntegrationRequest;
 import com.opsgenie.tools.backup.dto.IntegrationConfig;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
     @Override
     public List<IntegrationConfig> retrieveEntities() throws Exception {
         logger.info("Retrieving current integration configurations");
-        final List<IntegrationMeta> integrationMetaList = ApiAdapter.invoke(new Callable<List<IntegrationMeta>>() {
+        final List<IntegrationMeta> integrationMetaList = RetryPolicyAdapter.invoke(new Callable<List<IntegrationMeta>>() {
             @Override
             public List<IntegrationMeta> call()  {
                 return integrationApi.listIntegrations(new ListIntegrationRequest()).getData();
@@ -55,7 +56,7 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
 
     private IntegrationConfig populateIntegrationActions(final IntegrationMeta meta) throws Exception {
         final IntegrationConfig integrationConfig = new IntegrationConfig();
-        final Integration integration = ApiAdapter.invoke(new Callable<Integration>() {
+        final Integration integration = RetryPolicyAdapter.invoke(new Callable<Integration>() {
             @Override
             public Integration call()  {
                 return integrationApi.getIntegration(meta.getId()).getData();
@@ -66,7 +67,7 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
         integration.setId(meta.getId());
         integrationConfig.setIntegration(integration);
         try {
-            integrationConfig.setIntegrationActions(ApiAdapter.invoke(new Callable<ActionCategorized>() {
+            integrationConfig.setIntegrationActions(RetryPolicyAdapter.invoke(new Callable<ActionCategorized>() {
                         @Override
                         public ActionCategorized call()  {
                             return integrationActionApi.listIntegrationActions(meta.getId()).getData();

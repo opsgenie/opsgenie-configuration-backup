@@ -3,6 +3,7 @@ package com.opsgenie.tools.backup.retrieval;
 import com.opsgenie.oas.sdk.api.DeprecatedPolicyApi;
 import com.opsgenie.oas.sdk.model.DeprecatedAlertPolicy;
 import com.opsgenie.oas.sdk.model.DeprecatedAlertPolicyMeta;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class DeprecatedPolicyRetriever implements EntityRetriever<DeprecatedAler
         logger.info("Retrieving current policy (old version) configurations");
         List<DeprecatedAlertPolicy> policies = new ArrayList<DeprecatedAlertPolicy>();
         for (final DeprecatedAlertPolicyMeta meta : retrievePolicyMetaList()) {
-            policies.add(ApiAdapter.invoke(new Callable<DeprecatedAlertPolicy>() {
+            policies.add(RetryPolicyAdapter.invoke(new Callable<DeprecatedAlertPolicy>() {
                         @Override
                         public DeprecatedAlertPolicy call()  {
                             return policyApi.getAlertPolicy(meta.getId()).getData();
@@ -34,7 +35,7 @@ public class DeprecatedPolicyRetriever implements EntityRetriever<DeprecatedAler
 
     public List<DeprecatedAlertPolicyMeta> retrievePolicyMetaList() throws Exception {
         logger.info("Retrieving policy meta list (old version)");
-        return ApiAdapter.invoke(new Callable<List<DeprecatedAlertPolicyMeta>>() {
+        return RetryPolicyAdapter.invoke(new Callable<List<DeprecatedAlertPolicyMeta>>() {
             @Override
             public List<DeprecatedAlertPolicyMeta> call()  {
                 return policyApi.listAlertPolicies().getData();

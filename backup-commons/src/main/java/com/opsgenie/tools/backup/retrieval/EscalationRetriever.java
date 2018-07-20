@@ -2,6 +2,7 @@ package com.opsgenie.tools.backup.retrieval;
 
 import com.opsgenie.oas.sdk.api.EscalationApi;
 import com.opsgenie.oas.sdk.model.Escalation;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ public class EscalationRetriever implements EntityRetriever<Escalation>{
     @Override
     public List<Escalation> retrieveEntities() throws Exception {
         logger.info("Retrieving current escalation configurations");
-        return ApiAdapter.invoke(new Callable<List<Escalation>>() {
+        return RetryPolicyAdapter.invoke(new Callable<List<Escalation>>() {
             @Override
             public List<Escalation> call()  {
                 return escalationApi.listEscalations().getData();

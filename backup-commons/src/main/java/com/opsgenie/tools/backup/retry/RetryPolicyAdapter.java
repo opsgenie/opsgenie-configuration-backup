@@ -1,14 +1,17 @@
-package com.opsgenie.tools.backup.retrieval;
+package com.opsgenie.tools.backup.retry;
 
 import com.opsgenie.oas.sdk.ApiException;
+import com.opsgenie.tools.backup.retrieval.UserRetriever;
 import org.apache.http.HttpStatus;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ApiAdapter {
+public class RetryPolicyAdapter {
     private static final int RATE_LIMITING_STATUS_CODE = 429;
     private static final int DEFAULT_MAX_RETRIES = 20;
+    private static final String DOMAIN_SEARCH = DomainNames.SEARCH.value();
+    private static final String DOMAIN_CONFIGURATION = DomainNames.CONFIGURATION.value();
     private static AtomicInteger configurationRetryCount = new AtomicInteger();
     private static AtomicInteger configurationApiCalls = new AtomicInteger();
     private static AtomicInteger searchRetryCount = new AtomicInteger();
@@ -39,13 +42,13 @@ public class ApiAdapter {
 
     private static void initConfigLimitInMin() {
         if (configurationApiCalls.get() < 1) {
-            configLimitInMin = UserRetriever.getSpecificApiLimit("configuration", 60);
+            configLimitInMin = UserRetriever.getSpecificApiLimit(DOMAIN_CONFIGURATION, 60);
             startTime = System.currentTimeMillis();
         }
     }
 
     public static <T> T invoke(Callable<T> method) throws Exception {
-        return invoke(method, "configuration");
+        return invoke(method, DOMAIN_CONFIGURATION);
     }
 
     private static boolean isInternalServerError(ApiException e) {
@@ -65,15 +68,15 @@ public class ApiAdapter {
     }
 
     private static AtomicInteger getRetryCountForDomain(String domain) {
-        return domain.equals("search") ? searchRetryCount : configurationRetryCount;
+        return domain.equals(DOMAIN_SEARCH) ? searchRetryCount : configurationRetryCount;
     }
 
     private static AtomicInteger getCounterForDomain(String domain) {
-        return domain.equals("search") ? searchApiCalls : configurationApiCalls;
+        return domain.equals(DOMAIN_SEARCH) ? searchApiCalls : configurationApiCalls;
     }
 
     private static void sleepIfConfLimitExceeds() throws InterruptedException {
-        if ((configurationApiCalls.get()) >= (configLimitInMin * 4 / 10)) {
+        if ((configurationApiCalls.get()) >= (configLimitInMin)) {
             long current = System.currentTimeMillis();
             int sleepTime = 60000 - (int) (current - startTime);
             startTime = current;
