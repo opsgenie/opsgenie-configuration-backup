@@ -3,19 +3,12 @@ package com.opsgenie.tools.backup;
 import com.beust.jcommander.JCommander;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.opsgenie.oas.sdk.ApiClient;
 import com.opsgenie.oas.sdk.Configuration;
-import com.opsgenie.oas.sdk.JSON;
 import com.opsgenie.oas.sdk.api.AccountApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.retry.DataDto;
-import com.opsgenie.tools.backup.retry.DomainLimitDto;
-import com.opsgenie.tools.backup.retry.RateLimitDto;
-import com.opsgenie.tools.backup.retry.RateLimitsDto;
 import com.opsgenie.tools.backup.util.BackupUtils;
-import jdk.nashorn.internal.parser.JSONParser;
-import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -27,12 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ExportMain {
     private final static Logger logger = LoggerFactory.getLogger(ExportMain.class);
-    public static List<DomainLimitDto> apiSearchLimits;
+
+    public static DataDto apiLimits;
+
     public static void main(String[] args) throws Exception {
         CommandLineArgs commandLineArgs = new CommandLineArgs();
         final JCommander argumentParser = new JCommander(commandLineArgs);
@@ -77,9 +70,8 @@ public class ExportMain {
         }
 
         configureDefaultApiClient(apiKey, opsGenieHost, debug);
-
+        apiLimits = getApiLimit(apiKey);
         AccountApi accountApi = new AccountApi();
-        apiSearchLimits = getApiLimits(apiKey);
         try {
             final GetAccountInfoResponse info = accountApi.getInfo();
             logger.info("Account name is " + info.getData().getName() + "\n");
@@ -112,7 +104,7 @@ public class ExportMain {
         mapper.addMixIn(Policy.class, IgnoredType.class);
     }
 
-    private static List<DomainLimitDto> getApiLimits(String apiKey) throws IOException {
+    public static DataDto getApiLimit(String apiKey) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         HttpGet httpGet = new HttpGet("http://localhost:9004/v2/request-limits/");
         httpGet.addHeader(HttpHeaders.AUTHORIZATION, "GenieKey " + apiKey);
@@ -120,31 +112,25 @@ public class ExportMain {
         ResponseHandler handler = new BasicResponseHandler();
 
         String body = (String) client.execute(httpGet, handler);
-        Header[] headers = response.getAllHeaders();
         DataDto result = new DataDto();
-        BackupUtils.fromJson(result,body);
+        BackupUtils.fromJson(result, body);
         logger.info("****" + result);
-        List<DomainLimitDto> searchLimits = new ArrayList<DomainLimitDto>();
-        List<RateLimitDto> rateLimitDtoList = result.getData().getRateLimits();
-        for (RateLimitDto rateLimitDto : rateLimitDtoList){
-            if(rateLimitDto.getDomain().equals("search")){
-                searchLimits = rateLimitDto.getLimits();
-            }
-        }
-        return searchLimits ;
+        return result;
     }
 
-    abstract class IgnoredIdAndType {
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        String id;
-
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        String type;
-    }
-
-    abstract class IgnoredType {
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        String type;
-    }
 
 }
+
+abstract class IgnoredIdAndType {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    String id;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    String type;
+}
+
+abstract class IgnoredType {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    String type;
+}
+

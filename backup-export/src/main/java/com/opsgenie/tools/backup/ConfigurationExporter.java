@@ -2,14 +2,6 @@ package com.opsgenie.tools.backup;
 
 import com.opsgenie.tools.backup.exporters.*;
 import com.opsgenie.tools.backup.util.BackupUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
@@ -21,9 +13,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This is base exporter class. It takes {@link BackupProperties} class inorder to set export
@@ -61,11 +50,11 @@ public class ConfigurationExporter extends BaseBackup {
         exporters.add(new UserForwardingExporter(rootPath));
         exporters.add(new DeprecatedPolicyExporter(rootPath));
         exporters.add(new DeprecatedPolicyOrderExporter(rootPath));
-        exporters.add(new IntegrationExporter(rootPath));
         exporters.add(new CustomUserRoleExporter(rootPath));
         exporters.add(new PolicyExporter(rootPath));
         exporters.add(new PolicyOrderExporter(rootPath));
         exporters.add(new MaintenanceExporter(rootPath));
+        exporters.add(new IntegrationExporter(rootPath));
     }
 
     /**
@@ -79,18 +68,8 @@ public class ConfigurationExporter extends BaseBackup {
         }
         init();
         logger.info("Export operation started!");
-        ExecutorService pool = Executors.newFixedThreadPool(10);
         for (final Exporter exporter : exporters) {
-            pool.submit(new Runnable() {
-                @Override
-                public void run() {
-                    exporter.export();
-                }
-            });
-        }
-        pool.shutdown();
-        while (!pool.awaitTermination(15, TimeUnit.SECONDS)) {
-            logger.info("Waiting for export operations to finish");
+            exporter.export();
         }
 
         if (getBackupProperties().isGitEnabled()) {

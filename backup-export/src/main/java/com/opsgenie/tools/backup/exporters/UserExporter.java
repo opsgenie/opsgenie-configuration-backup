@@ -16,7 +16,7 @@ public class UserExporter extends BaseExporter<UserConfig> {
 
     @Override
     protected EntityRetriever<UserConfig> initializeEntityRetriever() {
-        return new UserRetriever();
+        return new UserRetriever(getApiLimits());
     }
 
 

@@ -4,6 +4,9 @@ import com.opsgenie.oas.sdk.api.NotificationRuleApi;
 import com.opsgenie.oas.sdk.api.UserApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.UserConfig;
+import com.opsgenie.tools.backup.retry.DataDto;
+import com.opsgenie.tools.backup.retry.DomainLimitDto;
+import com.opsgenie.tools.backup.retry.RateLimitDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,13 +15,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
-
 public class UserRetriever implements EntityRetriever<UserConfig> {
+
 
     private static final Logger logger = LoggerFactory.getLogger(UserRetriever.class);
 
     private static final UserApi userApi = new UserApi();
     private static final NotificationRuleApi notificationRuleApi = new NotificationRuleApi();
+    public static DataDto apiLimits = new DataDto();
+
+
+    public UserRetriever() {
+    }
+
+    public UserRetriever(DataDto apiLimits) {
+        this.apiLimits = apiLimits;
+    }
 
     @Override
     public List<UserConfig> retrieveEntities() throws Exception {
@@ -42,11 +54,11 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
         for (int i = 1; i < (pageCount * 1.0) / 100; i++) {
             final int offset = 100 * i;
             userList.addAll(ApiAdapter.invoke(new Callable<Collection<? extends User>>() {
-                        @Override
-                        public Collection<? extends User> call()  {
-                            return userApi.listUsers(new ListUsersRequest().offset(offset)).getData();
-                        }
-                    }));
+                @Override
+                public Collection<? extends User> call() {
+                    return userApi.listUsers(new ListUsersRequest().offset(offset)).getData();
+                }
+            }, "search"));
             logger.info("Retrieved " + userList.size() + "/" + listUsersResponse.getTotalCount());
         }
         return userList;
@@ -55,18 +67,18 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
     private static ConcurrentLinkedQueue<User> populateUserContacts(List<User> userList) throws InterruptedException {
         logger.info("Populating user contacts rules");
         final ConcurrentLinkedQueue<User> usersWithContact = new ConcurrentLinkedQueue<User>();
-        ExecutorService pool = Executors.newFixedThreadPool(10);
+        ExecutorService pool = Executors.newFixedThreadPool(getUserSearchThreadCount());
         for (final User user : userList) {
             pool.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         usersWithContact.add(ApiAdapter.invoke(new Callable<User>() {
-                                    @Override
-                                    public User call()  {
-                                        return userApi.getUser(new GetUserRequest().identifier(user.getId()).expand(Collections.singletonList("contact"))).getData();
-                                    }
-                                }));
+                            @Override
+                            public User call() {
+                                return userApi.getUser(new GetUserRequest().identifier(user.getId()).expand(Collections.singletonList("contact"))).getData();
+                            }
+                        }));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -94,7 +106,7 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
                     try {
                         data = ApiAdapter.invoke(new Callable<List<NotificationRuleMeta>>() {
                             @Override
-                            public List<NotificationRuleMeta> call()  {
+                            public List<NotificationRuleMeta> call() {
                                 return notificationRuleApi.listNotificationRules(user.getId()).getData();
                             }
                         });
@@ -107,7 +119,7 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
                         try {
                             final NotificationRule notificationRule = ApiAdapter.invoke(new Callable<NotificationRule>() {
                                 @Override
-                                public NotificationRule call()  {
+                                public NotificationRule call() {
                                     return notificationRuleApi.getNotificationRule(new GetNotificationRuleRequest().identifier(user.getId()).ruleId(meta.getId())).getData();
                                 }
                             });
@@ -129,4 +141,30 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
         }
         return new ArrayList<UserConfig>(usersWithNotificationRules);
     }
+
+    public static int getSpecificApiLimit(String domain, int periodInSeconds) {
+        List<DomainLimitDto> domainDtoList = new ArrayList<DomainLimitDto>();
+        List<RateLimitDto> rateLimitDtoList = apiLimits.getData().getRateLimits();
+        for (RateLimitDto rateLimitDto : rateLimitDtoList) {
+            if (rateLimitDto.getDomain().equals(domain)) {
+                domainDtoList = rateLimitDto.getLimits();
+            }
+        }
+        int resultLimit = 1;
+        for (DomainLimitDto domainLimitDto : domainDtoList) {
+            if (domainLimitDto.getPeriodInSeconds() == periodInSeconds) {
+                resultLimit = domainLimitDto.getLimit();
+            }
+        }
+        return resultLimit;
+    }
+
+    public static int getUserSearchThreadCount() {
+        int result = 1;
+        if (apiLimits.getData() != null) {
+            result = getSpecificApiLimit("search", 1);
+        }
+        return result;
+    }
+
 }
