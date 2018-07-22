@@ -13,7 +13,6 @@ import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.Callable;
 

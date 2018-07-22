@@ -2,12 +2,11 @@ package com.opsgenie.tools.backup.importers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
-import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.DeprecatedPolicyApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.PolicyConfig;
-import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.DeprecatedPolicyRetriever;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
@@ -125,35 +124,35 @@ public class DeprecatedPolicyImporter extends BaseImporter<DeprecatedAlertPolicy
             logger.error("Could not read policy orders from file: " + e.getMessage());
             return;
         }
-        try{
-        List<DeprecatedAlertPolicyMeta> list = new DeprecatedPolicyRetriever().retrievePolicyMetaList();
+        try {
+            List<DeprecatedAlertPolicyMeta> list = new DeprecatedPolicyRetriever().retrievePolicyMetaList();
 
-        List<PolicyConfig> configs = new ArrayList<PolicyConfig>();
-        for (DeprecatedAlertPolicyMeta meta : list) {
-            configs.add(new PolicyConfig().setId(meta.getId()).setName(meta.getName()).setOrder(meta.getOrder()));
-        }
-        if (equalsIgnoreOrder(configs, this.policyOrderConfig)) {
-            return;
-        }
-        int size = this.currentConfigs.size();
-        for (PolicyConfig config : policyOrderConfig) {
-            final ChangeAlertPolicyOrderRequest params = new ChangeAlertPolicyOrderRequest();
-            params.setPolicyId(getCurrentPolicyId(config.getId(), config.getName()));
-            if (params.getPolicyId() == null) {
-                continue;
+            List<PolicyConfig> configs = new ArrayList<PolicyConfig>();
+            for (DeprecatedAlertPolicyMeta meta : list) {
+                configs.add(new PolicyConfig().setId(meta.getId()).setName(meta.getName()).setOrder(meta.getOrder()));
             }
-            DeprecatedChangeAlertPolicyOrderPayload body = new DeprecatedChangeAlertPolicyOrderPayload();
-            body.setTargetIndex(size + config.getOrder());
-            params.setBody(body);
-            RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
-                @Override
-                public SuccessResponse call() throws Exception {
-                    return api.changeAlertPolicyOrder(params);
+            if (equalsIgnoreOrder(configs, this.policyOrderConfig)) {
+                return;
+            }
+            int size = this.currentConfigs.size();
+            for (PolicyConfig config : policyOrderConfig) {
+                final ChangeAlertPolicyOrderRequest params = new ChangeAlertPolicyOrderRequest();
+                params.setPolicyId(getCurrentPolicyId(config.getId(), config.getName()));
+                if (params.getPolicyId() == null) {
+                    continue;
                 }
-            });
+                DeprecatedChangeAlertPolicyOrderPayload body = new DeprecatedChangeAlertPolicyOrderPayload();
+                body.setTargetIndex(size + config.getOrder());
+                params.setBody(body);
+                RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+                    @Override
+                    public SuccessResponse call() throws Exception {
+                        return api.changeAlertPolicyOrder(params);
+                    }
+                });
 
-        }
-        }catch (Exception e){
+            }
+        } catch (Exception e) {
             logger.error("Could not read policy orders " + e.getMessage());
         }
     }

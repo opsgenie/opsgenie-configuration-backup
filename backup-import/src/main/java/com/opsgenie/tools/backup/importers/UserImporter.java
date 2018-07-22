@@ -74,7 +74,7 @@ public class UserImporter extends BaseImporter<UserConfig> {
         payload.setTimeZone(user.getTimeZone());
         try {
             RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
-    //todo
+                //todo
                 @Override
                 public SuccessResponse call() throws Exception {
                     return userApi.createUser(payload);
@@ -125,9 +125,9 @@ public class UserImporter extends BaseImporter<UserConfig> {
                     .contact(notificationRuleStep.getContact())
                     .enabled(notificationRuleStep.isEnabled())
                     .sendAfter(notificationRuleStep.getSendAfter());
-            if(notificationRuleStepPayload.getContact().getMethod().equals(ContactMeta.MethodEnum.MOBILE)) {
+            if (notificationRuleStepPayload.getContact().getMethod().equals(ContactMeta.MethodEnum.MOBILE)) {
                 logger.warn("Skipping mobile contact method");
-            }else{
+            } else {
                 createNotificationRuleStepPayloadList.add(
                         notificationRuleStepPayload);
             }

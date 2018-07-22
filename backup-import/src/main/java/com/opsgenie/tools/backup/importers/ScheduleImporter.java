@@ -3,7 +3,6 @@ package com.opsgenie.tools.backup.importers;
 import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.ScheduleApi;
 import com.opsgenie.oas.sdk.api.ScheduleOverrideApi;
-import com.opsgenie.oas.sdk.api.ScheduleRotationApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.ScheduleConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
@@ -90,21 +89,21 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
 
 
         List<ScheduleOverride> overridesFromConfig = scheduleConfig.getScheduleOverrideList();
-        if (overridesFromConfig != null && !overridesFromConfig.isEmpty()){
+        if (overridesFromConfig != null && !overridesFromConfig.isEmpty()) {
             logger.info("Importing schedule overrides for " + scheduleConfig.getSchedule().getName());
             ArrayList<ScheduleOverride> overridesReversed = new ArrayList<ScheduleOverride>(overridesFromConfig);
             Collections.reverse(overridesReversed);
 
-            for (ScheduleOverride override : overridesReversed){
-                    if (findOverrideByAlias(scheduleConfig.getSchedule().getName(), override) != null){
-                        updateScheduleOverride(scheduleConfig.getSchedule().getName(), override);
-                    }
-                    else {
-                        createScheduleOverride(scheduleConfig.getSchedule().getName(), override);
-                    }
+            for (ScheduleOverride override : overridesReversed) {
+                if (findOverrideByAlias(scheduleConfig.getSchedule().getName(), override) != null) {
+                    updateScheduleOverride(scheduleConfig.getSchedule().getName(), override);
+                } else {
+                    createScheduleOverride(scheduleConfig.getSchedule().getName(), override);
+                }
             }
         }
     }
+
     private ScheduleOverride findOverrideByAlias(String scheduleName, ScheduleOverride override) {
 
         for (ScheduleConfig scheduleConfig : currentConfigs) {
@@ -140,6 +139,7 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
         });
 
     }
+
     private void updateScheduleOverride(String scheduleName, ScheduleOverride override) throws Exception {
         deleteRotationIds(override.getRotations());
         UpdateScheduleOverridePayload updatePayload = new UpdateScheduleOverridePayload();
@@ -162,9 +162,9 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
 
     }
 
-    private void deleteRotationIds(List<ScheduleOverrideRotation> rotations){
-        for (ScheduleOverrideRotation rotation : rotations){
-         rotation.setId("");
+    private void deleteRotationIds(List<ScheduleOverrideRotation> rotations) {
+        for (ScheduleOverrideRotation rotation : rotations) {
+            rotation.setId("");
         }
     }
 

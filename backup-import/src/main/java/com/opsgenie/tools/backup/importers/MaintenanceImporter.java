@@ -7,8 +7,6 @@ import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.MaintenanceRetriever;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.concurrent.Callable;
 
 /**

@@ -1,6 +1,5 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.TeamApi;
 import com.opsgenie.oas.sdk.api.TeamRoleApi;
 import com.opsgenie.oas.sdk.api.TeamRoutingRuleApi;

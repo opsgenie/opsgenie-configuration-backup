@@ -87,7 +87,7 @@ public class EscalationImporter extends BaseImporter<Escalation> {
             escalationRule.getRecipient().setId(null);
         }
 
-        if(entity.getRepeat() == null){
+        if (entity.getRepeat() == null) {
             EscalationRepeat repeat = new EscalationRepeat();
             repeat.setWaitInterval(0);
             entity.setRepeat(repeat);

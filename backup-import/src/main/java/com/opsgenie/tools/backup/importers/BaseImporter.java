@@ -1,7 +1,6 @@
 package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.oas.sdk.ApiException;
-import com.opsgenie.tools.backup.dto.PolicyConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.util.BackupUtils;
 import org.slf4j.Logger;
@@ -122,5 +121,6 @@ abstract class BaseImporter<T> implements Importer {
 
     protected abstract String getImportDirectoryName();
 
-    protected void updateEntityOrders() { }
+    protected void updateEntityOrders() {
+    }
 }

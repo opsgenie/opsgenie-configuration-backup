@@ -61,7 +61,7 @@ public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
         try {
             RetryPolicyAdapter.invoke(new Callable<CreateForwardingRuleResponse>() {
                 @Override
-                public CreateForwardingRuleResponse call(){
+                public CreateForwardingRuleResponse call() {
                     return forwardingRuleApi.createForwardingRule(payload);
                 }
             });

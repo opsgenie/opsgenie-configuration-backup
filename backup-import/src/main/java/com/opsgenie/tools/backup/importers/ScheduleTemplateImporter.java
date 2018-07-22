@@ -1,6 +1,5 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.ScheduleApi;
 import com.opsgenie.oas.sdk.model.CreateSchedulePayload;
 import com.opsgenie.oas.sdk.model.CreateScheduleResponse;

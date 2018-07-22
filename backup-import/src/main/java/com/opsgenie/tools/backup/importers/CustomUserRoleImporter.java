@@ -2,13 +2,10 @@ package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.CustomUserRoleApi;
-import com.opsgenie.oas.sdk.api.EscalationApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.retrieval.CustomUserRoleRetriever;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
-import com.opsgenie.tools.backup.retrieval.EscalationRetriever;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
-import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.util.concurrent.Callable;
 
