@@ -8,6 +8,7 @@ import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.PolicyConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.DeprecatedPolicyRetriever;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public class DeprecatedPolicyImporter extends BaseImporter<DeprecatedAlertPolicy> {
 
@@ -69,14 +71,20 @@ public class DeprecatedPolicyImporter extends BaseImporter<DeprecatedAlertPolicy
     }
 
     @Override
-    protected void createEntity(DeprecatedAlertPolicy entity) throws ApiException {
+    protected void createEntity(final DeprecatedAlertPolicy entity) throws Exception {
         entity.setId(null);
-        api.createAlertPolicy(entity);
+        RetryPolicyAdapter.invoke(new Callable<DeprecatedCreateAlertPolicyResponse>() {
+            @Override
+            public DeprecatedCreateAlertPolicyResponse call() throws Exception {
+                return api.createAlertPolicy(entity);
+            }
+        });
+
     }
 
     @Override
-    protected void updateEntity(DeprecatedAlertPolicy alertPolicy, EntityStatus entityStatus) throws ApiException {
-        UpdateAlertPolicyRequest request = new UpdateAlertPolicyRequest();
+    protected void updateEntity(DeprecatedAlertPolicy alertPolicy, EntityStatus entityStatus) throws Exception {
+        final UpdateAlertPolicyRequest request = new UpdateAlertPolicyRequest();
         request.setBody(alertPolicy);
         final String id = alertPolicy.getId();
         alertPolicy.setId(null);
@@ -85,7 +93,13 @@ public class DeprecatedPolicyImporter extends BaseImporter<DeprecatedAlertPolicy
         } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
             request.setPolicyId(findPolicyIdInCurrentConf(alertPolicy.getName()));
         }
-        api.updateAlertPolicy(request);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return api.updateAlertPolicy(request);
+            }
+        });
+
     }
 
     private String findPolicyIdInCurrentConf(String alertPolicyName) {
@@ -123,7 +137,7 @@ public class DeprecatedPolicyImporter extends BaseImporter<DeprecatedAlertPolicy
         }
         int size = this.currentConfigs.size();
         for (PolicyConfig config : policyOrderConfig) {
-            ChangeAlertPolicyOrderRequest params = new ChangeAlertPolicyOrderRequest();
+            final ChangeAlertPolicyOrderRequest params = new ChangeAlertPolicyOrderRequest();
             params.setPolicyId(getCurrentPolicyId(config.getId(), config.getName()));
             if (params.getPolicyId() == null) {
                 continue;
@@ -131,7 +145,13 @@ public class DeprecatedPolicyImporter extends BaseImporter<DeprecatedAlertPolicy
             DeprecatedChangeAlertPolicyOrderPayload body = new DeprecatedChangeAlertPolicyOrderPayload();
             body.setTargetIndex(size + config.getOrder());
             params.setBody(body);
-            api.changeAlertPolicyOrder(params);
+            RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+                @Override
+                public SuccessResponse call() throws Exception {
+                    return api.changeAlertPolicyOrder(params);
+                }
+            });
+
         }
         }catch (Exception e){
             logger.error("Could not read policy orders " + e.getMessage());

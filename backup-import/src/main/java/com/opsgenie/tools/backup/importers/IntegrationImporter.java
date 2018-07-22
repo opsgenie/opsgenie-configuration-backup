@@ -5,18 +5,17 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.IntegrationActionApi;
 import com.opsgenie.oas.sdk.api.IntegrationApi;
-import com.opsgenie.oas.sdk.model.CreateIntegrationResponse;
-import com.opsgenie.oas.sdk.model.Integration;
-import com.opsgenie.oas.sdk.model.UpdateIntegrationActionRequest;
-import com.opsgenie.oas.sdk.model.UpdateIntegrationRequest;
+import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.IntegrationConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.IntegrationRetriever;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.concurrent.Callable;
 
 public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
 
@@ -70,18 +69,30 @@ public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
     }
 
     @Override
-    protected void createEntity(IntegrationConfig integrationConfig) throws ParseException, IOException, ApiException {
+    protected void createEntity(IntegrationConfig integrationConfig) throws Exception {
         final Integration integration = integrationConfig.getIntegration();
-        final CreateIntegrationResponse createIntegrationResponse = integrationApi.createIntegration(integration);
+        final CreateIntegrationResponse createIntegrationResponse = RetryPolicyAdapter.invoke(new Callable<CreateIntegrationResponse>() {
+            @Override
+            public CreateIntegrationResponse call() throws Exception {
+                return integrationApi.createIntegration(integration);
+            }
+        });
+
         System.out.println(createIntegrationResponse);
         final UpdateIntegrationActionRequest updateIntegrationActionRequest = new UpdateIntegrationActionRequest()
                 .body(integrationConfig.getIntegrationActions())
                 .id(createIntegrationResponse.getData().getId());
-        integrationActionApi.updateIntegrationActions(updateIntegrationActionRequest);
+        RetryPolicyAdapter.invoke(new Callable<UpdateIntegrationActionsResponse>() {
+            @Override
+            public UpdateIntegrationActionsResponse call() throws Exception {
+                return integrationActionApi.updateIntegrationActions(updateIntegrationActionRequest);
+            }
+        });
+
     }
 
     @Override
-    protected void updateEntity(IntegrationConfig integration, EntityStatus entityStatus) throws ParseException, IOException, ApiException {
+    protected void updateEntity(IntegrationConfig integration, EntityStatus entityStatus) throws Exception {
         final String integrationId = integration.getIntegration().getId();
         final UpdateIntegrationRequest updateIntegrationRequest = new UpdateIntegrationRequest().body(integration.getIntegration());
         if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
@@ -89,11 +100,23 @@ public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
         } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
             updateIntegrationRequest.setId(findIntegrationIdWithName(integration));
         }
-        integrationApi.updateIntegration(updateIntegrationRequest);
+        RetryPolicyAdapter.invoke(new Callable<UpdateIntegrationResponse>() {
+            @Override
+            public UpdateIntegrationResponse call() throws Exception {
+                return integrationApi.updateIntegration(updateIntegrationRequest);
+            }
+        });
+
         final UpdateIntegrationActionRequest updateIntegrationActionRequest = new UpdateIntegrationActionRequest()
                 .body(integration.getIntegrationActions())
                 .id(findIntegrationIdWithName(integration));
-        integrationActionApi.updateIntegrationActions(updateIntegrationActionRequest);
+        RetryPolicyAdapter.invoke(new Callable<UpdateIntegrationActionsResponse>() {
+            @Override
+            public UpdateIntegrationActionsResponse call() throws Exception {
+                return integrationActionApi.updateIntegrationActions(updateIntegrationActionRequest);
+            }
+        });
+
     }
 
     private String findIntegrationIdWithName(IntegrationConfig integrationToImport) {
