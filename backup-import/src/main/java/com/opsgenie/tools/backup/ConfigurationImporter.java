@@ -1,6 +1,7 @@
 package com.opsgenie.tools.backup;
 
 import com.opsgenie.tools.backup.importers.*;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +16,8 @@ public class ConfigurationImporter extends BaseBackup {
     private static List<Importer> importers;
     private final Logger logger = LoggerFactory.getLogger(ConfigurationImporter.class);
     private ImportConfig config;
-
-    ConfigurationImporter(BackupProperties backupProperties, ImportConfig config) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
+    private final RateLimitManager rateLimitManager;
+    ConfigurationImporter(BackupProperties backupProperties, ImportConfig config, RateLimitManager rateLimitManager) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
         super(backupProperties);
         if (config == null) {
             logger.warn("Config object is null. Default Import configs will be used.");
@@ -24,6 +25,7 @@ public class ConfigurationImporter extends BaseBackup {
         } else {
             this.config = config;
         }
+        this.rateLimitManager= rateLimitManager;
     }
 
     /**
@@ -62,15 +64,15 @@ public class ConfigurationImporter extends BaseBackup {
 
     private void initializeImporters(String rootPath) {
         importers = new ArrayList<Importer>();
-        importers.add(new CustomUserRoleImporter(rootPath, config.isAddNewCustomUserRoles(), config.isUpdateExistingCustomUserRoles()));
-        importers.add(new UserImporter(rootPath, config.isAddNewUsers(), config.isUpdateExistingUsers()));
-        importers.add(new TeamImporter(rootPath, config.isAddNewTeams(), config.isUpdateExistingTeams()));
+        importers.add(new CustomUserRoleImporter(rootPath,config.isAddNewCustomUserRoles(), config.isUpdateExistingCustomUserRoles()));
+        importers.add(new UserImporter(rootPath, rateLimitManager,config.isAddNewUsers(), config.isUpdateExistingUsers()));
+        importers.add(new TeamImporter(rootPath,rateLimitManager ,config.isAddNewTeams(), config.isUpdateExistingTeams()));
         importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
         importers.add(new EscalationImporter(rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
         importers.add(new ScheduleImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
         importers.add(new UserForwardingImporter(rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
         importers.add(new DeprecatedPolicyImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
-        importers.add(new IntegrationImporter(rootPath, config.isAddNewIntegrations(), config.isUpdateExistingIntegrations()));
+        importers.add(new IntegrationImporter(rootPath,rateLimitManager ,config.isAddNewIntegrations(), config.isUpdateExistingIntegrations()));
         importers.add(new PolicyImporter(rootPath, config.isAddNewPoliciesV2(), config.isUpdateExistingPoliciesV2()));
         importers.add(new MaintenanceImporter(rootPath, config.isAddNewMaintenance(), config.isUpdateExistingMaintenance()));
 

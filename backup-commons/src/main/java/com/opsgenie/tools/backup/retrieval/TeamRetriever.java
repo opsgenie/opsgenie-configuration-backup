@@ -5,6 +5,8 @@ import com.opsgenie.oas.sdk.api.TeamRoleApi;
 import com.opsgenie.oas.sdk.api.TeamRoutingRuleApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.TeamConfig;
+import com.opsgenie.tools.backup.retry.DomainNames;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,13 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
     private static final TeamRoutingRuleApi teamRoutingRuleApi = new TeamRoutingRuleApi();
     private static final TeamRoleApi teamRoleApi = new TeamRoleApi();
 
+    private final RateLimitManager rateLimitManager;
+
+    public TeamRetriever(RateLimitManager rateLimitManager) {
+        this.rateLimitManager = rateLimitManager;
+    }
+
+
     @Override
     public List<TeamConfig> retrieveEntities() throws Exception {
         logger.info("Retrieving current team configurations");
@@ -32,7 +41,8 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
         });
 
         final ConcurrentLinkedQueue<TeamConfig> teamsWithDetails = new ConcurrentLinkedQueue<TeamConfig>();
-        ExecutorService pool = Executors.newFixedThreadPool(10);
+        int threadCount = rateLimitManager.getRateLimit(DomainNames.SEARCH, 1);
+        ExecutorService pool = Executors.newFixedThreadPool(threadCount);
         for (final Team teamMeta : teams) {
             pool.submit(new Runnable() {
                 @Override

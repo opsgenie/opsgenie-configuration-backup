@@ -3,7 +3,6 @@ package com.opsgenie.tools.backup.retrieval;
 import com.opsgenie.oas.sdk.api.CustomUserRoleApi;
 import com.opsgenie.oas.sdk.model.CustomUserRole;
 import com.opsgenie.oas.sdk.model.GetCustomUserRoleRequest;
-//import com.sun.tools.javac.comp.Todo;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+
+//import com.sun.tools.javac.comp.Todo;
 
 public class CustomUserRoleRetriever implements EntityRetriever<CustomUserRole>{
 

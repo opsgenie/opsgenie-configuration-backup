@@ -7,6 +7,7 @@ import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.TeamConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.TeamRetriever;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
@@ -14,19 +15,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public class TeamImporter extends BaseImporter<TeamConfig> {
+public class TeamImporter extends BaseImporterWithRateLimiting<TeamConfig> {
 
     private static TeamApi teamApi = new TeamApi();
     private static TeamRoutingRuleApi teamRoutingRuleApi = new TeamRoutingRuleApi();
     private static TeamRoleApi teamRoleApi = new TeamRoleApi();
 
-    public TeamImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
-        super(backupRootDirectory, addEntity, updateEntitiy);
+    public TeamImporter(String backupRootDirectory, RateLimitManager rateLimitManager, boolean addEntity, boolean updateEntitiy) {
+        super(backupRootDirectory, rateLimitManager, addEntity, updateEntitiy);
     }
 
     @Override
     protected EntityRetriever<TeamConfig> initializeEntityRetriever() {
-        return new TeamRetriever();
+        return new TeamRetriever(rateLimitManager);
     }
 
     @Override

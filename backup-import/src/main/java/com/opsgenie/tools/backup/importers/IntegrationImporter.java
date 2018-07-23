@@ -9,6 +9,7 @@ import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.IntegrationConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.IntegrationRetriever;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
@@ -16,13 +17,13 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.Callable;
 
-public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
+public class IntegrationImporter extends BaseImporterWithRateLimiting<IntegrationConfig> {
 
     private static IntegrationApi integrationApi = new IntegrationApi();
     private static IntegrationActionApi integrationActionApi = new IntegrationActionApi();
 
-    public IntegrationImporter(String backupRootDirectory, boolean addEntityEnabled, boolean updateEntityEnabled) {
-        super(backupRootDirectory, addEntityEnabled, updateEntityEnabled);
+    public IntegrationImporter(String backupRootDirectory, RateLimitManager rateLimitManager, boolean addEntityEnabled, boolean updateEntityEnabled) {
+        super(backupRootDirectory, rateLimitManager, addEntityEnabled, updateEntityEnabled);
     }
 
     @Override
@@ -38,7 +39,7 @@ public class IntegrationImporter extends BaseImporter<IntegrationConfig> {
 
     @Override
     protected EntityRetriever<IntegrationConfig> initializeEntityRetriever() {
-        return new IntegrationRetriever();
+        return new IntegrationRetriever(rateLimitManager);
     }
 
     @Override

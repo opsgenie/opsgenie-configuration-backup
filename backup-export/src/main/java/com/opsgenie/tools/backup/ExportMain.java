@@ -7,24 +7,14 @@ import com.opsgenie.oas.sdk.ApiClient;
 import com.opsgenie.oas.sdk.Configuration;
 import com.opsgenie.oas.sdk.api.AccountApi;
 import com.opsgenie.oas.sdk.model.*;
-import com.opsgenie.tools.backup.retry.DataDto;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 public class ExportMain {
     private final static Logger logger = LoggerFactory.getLogger(ExportMain.class);
-
-    public static DataDto apiLimits;
 
     public static void main(String[] args) throws Exception {
         CommandLineArgs commandLineArgs = new CommandLineArgs();
@@ -70,13 +60,14 @@ public class ExportMain {
         }
 
         configureDefaultApiClient(apiKey, opsGenieHost, debug);
-        apiLimits = getApiLimit(apiKey);
+        RateLimitManager rateLimitManager = new RateLimitManager(BackupUtils.getApiLimit(apiKey,opsGenieHost));
+        RetryPolicyAdapter.init(rateLimitManager);
         AccountApi accountApi = new AccountApi();
         try {
             final GetAccountInfoResponse info = accountApi.getInfo();
             logger.info("Account name is " + info.getData().getName() + "\n");
 
-            ConfigurationExporter exporter = new ConfigurationExporter(properties);
+            ConfigurationExporter exporter = new ConfigurationExporter(properties, rateLimitManager);
             exporter.export();
 
             logger.info("Finished");
@@ -103,21 +94,6 @@ public class ExportMain {
         mapper.addMixIn(Responder.class, IgnoredType.class);
         mapper.addMixIn(Policy.class, IgnoredType.class);
     }
-
-    public static DataDto getApiLimit(String apiKey) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpGet httpGet = new HttpGet("http://localhost:9004/v2/request-limits/");
-        httpGet.addHeader(HttpHeaders.AUTHORIZATION, "GenieKey " + apiKey);
-        HttpResponse response = client.execute(httpGet);
-        ResponseHandler handler = new BasicResponseHandler();
-
-        String body = (String) client.execute(httpGet, handler);
-        DataDto result = new DataDto();
-        BackupUtils.fromJson(result, body);
-        logger.info("****" + result);
-        return result;
-    }
-
 
 }
 

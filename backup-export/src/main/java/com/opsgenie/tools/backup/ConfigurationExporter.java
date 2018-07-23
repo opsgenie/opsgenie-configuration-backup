@@ -1,6 +1,7 @@
 package com.opsgenie.tools.backup;
 
 import com.opsgenie.tools.backup.exporters.*;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
 import com.opsgenie.tools.backup.util.BackupUtils;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -23,9 +24,11 @@ import java.util.List;
 public class ConfigurationExporter extends BaseBackup {
     private static List<Exporter> exporters;
     private final Logger logger = LoggerFactory.getLogger(ConfigurationExporter.class);
+    private final RateLimitManager rateLimitManager;
 
-    ConfigurationExporter(BackupProperties backupProperties) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
+    ConfigurationExporter(BackupProperties backupProperties, RateLimitManager rateLimitManager) throws FileNotFoundException, UnsupportedEncodingException, GitAPIException {
         super(backupProperties);
+        this.rateLimitManager = rateLimitManager;
     }
 
     protected void init() {
@@ -43,8 +46,8 @@ public class ConfigurationExporter extends BaseBackup {
 
     private void initializeExporters(String rootPath) {
         exporters = new ArrayList<com.opsgenie.tools.backup.exporters.Exporter>();
-        exporters.add(new UserExporter(rootPath));
-        exporters.add(new TeamExporter(rootPath));
+        exporters.add(new UserExporter(rootPath, rateLimitManager));
+        exporters.add(new TeamExporter(rootPath,rateLimitManager));
         exporters.add(new ScheduleExporter(rootPath));
         exporters.add(new EscalationExporter(rootPath));
         exporters.add(new UserForwardingExporter(rootPath));
@@ -54,7 +57,7 @@ public class ConfigurationExporter extends BaseBackup {
         exporters.add(new PolicyExporter(rootPath));
         exporters.add(new PolicyOrderExporter(rootPath));
         exporters.add(new MaintenanceExporter(rootPath));
-        exporters.add(new IntegrationExporter(rootPath));
+        exporters.add(new IntegrationExporter(rootPath,rateLimitManager));
     }
 
     /**

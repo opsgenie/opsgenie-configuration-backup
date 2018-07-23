@@ -1,7 +1,8 @@
 package com.opsgenie.tools.backup.exporters;
 
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
-import com.opsgenie.tools.backup.retry.DataDto;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
+import com.opsgenie.tools.backup.retry.RateLimitsDto;
 import com.opsgenie.tools.backup.util.BackupUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,11 +11,10 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.List;
 
-import static com.opsgenie.tools.backup.ExportMain.apiLimits;
-
 abstract class BaseExporter<T> implements Exporter {
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
-    protected File exportDirectory;
+
+    final Logger logger = LoggerFactory.getLogger(getClass());
+    private File exportDirectory;
 
     BaseExporter(String backupRootDirectory, String exportDirectoryName) {
         this.exportDirectory = new File(backupRootDirectory + "/" + exportDirectoryName + "/");
@@ -46,11 +46,6 @@ abstract class BaseExporter<T> implements Exporter {
             exportFile(getExportDirectory().getAbsolutePath() + "/" + getEntityFileName(bean) + ".json", bean);
         }
     }
-
-    public DataDto getApiLimits() {
-        return apiLimits;
-    }
-
 
     protected abstract EntityRetriever<T> initializeEntityRetriever();
 

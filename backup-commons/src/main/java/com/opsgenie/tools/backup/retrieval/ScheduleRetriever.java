@@ -2,10 +2,6 @@ package com.opsgenie.tools.backup.retrieval;
 
 import com.opsgenie.oas.sdk.api.ScheduleApi;
 import com.opsgenie.oas.sdk.api.ScheduleOverrideApi;
-import com.opsgenie.oas.sdk.model.ListScheduleOverrideResponse;
-import com.opsgenie.oas.sdk.model.ListScheduleOverridesRequest;
-import com.opsgenie.oas.sdk.model.Schedule;
-import com.opsgenie.oas.sdk.model.ScheduleOverride;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.ScheduleConfig;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;

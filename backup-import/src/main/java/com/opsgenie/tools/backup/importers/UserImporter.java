@@ -8,6 +8,7 @@ import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.UserConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.UserRetriever;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
@@ -15,19 +16,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public class UserImporter extends BaseImporter<UserConfig> {
-
+public class UserImporter extends BaseImporterWithRateLimiting<UserConfig> {
+    private static final int ALREADY_EXISTS_STATUS_CODE = 409;
     private static UserApi userApi = new UserApi();
     private static ContactApi contactApi = new ContactApi();
     private static NotificationRuleApi notificationRuleApi = new NotificationRuleApi();
 
-    public UserImporter(String backupRootDirectory, boolean addEntity, boolean updateEntity) {
-        super(backupRootDirectory, addEntity, updateEntity);
+    public UserImporter(String backupRootDirectory, RateLimitManager rateLimitManager, boolean addEntity, boolean updateEntity) {
+        super(backupRootDirectory, rateLimitManager, addEntity, updateEntity);
     }
 
     @Override
     protected EntityRetriever<UserConfig> initializeEntityRetriever() {
-        return new UserRetriever();
+        return new UserRetriever(rateLimitManager);
     }
 
     @Override
@@ -54,7 +55,7 @@ public class UserImporter extends BaseImporter<UserConfig> {
     }
 
     @Override
-    protected void createEntity(UserConfig userConfig) throws ApiException {
+    protected void createEntity(UserConfig userConfig) throws Exception {
         final CreateUserPayload payload = new CreateUserPayload();
         final User user = userConfig.getUser();
         payload.setUsername(user.getUsername());
@@ -67,27 +68,26 @@ public class UserImporter extends BaseImporter<UserConfig> {
         payload.setTags(user.getTags());
         payload.setTimeZone(user.getTimeZone());
         payload.setInvitationDisabled(true);
-
         if (BackupUtils.checkValidString(user.getSkypeUsername()))
             payload.setSkypeUsername(user.getSkypeUsername());
 
         payload.setTimeZone(user.getTimeZone());
-        try {
-            RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
-                //todo
-                @Override
-                public SuccessResponse call() throws Exception {
-                    return userApi.createUser(payload);
+
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                SuccessResponse sr = new SuccessResponse();
+                try {
+                    sr = userApi.createUser(payload);
+                } catch (ApiException e) {
+                    if (e.getCode() == ALREADY_EXISTS_STATUS_CODE) {
+                        throw new Exception("The user being created is registered in another OpsGenie account. ");
+                    }
                 }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            addContacts(user);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                return sr;
+            }
+        });
+        addContacts(user);
         final List<NotificationRule> notificationRuleList = userConfig.getNotificationRuleList();
         compareNotificationRules(user, notificationRuleList);
     }

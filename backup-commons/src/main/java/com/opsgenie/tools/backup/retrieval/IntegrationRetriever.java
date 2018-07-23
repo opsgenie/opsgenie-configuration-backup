@@ -7,6 +7,8 @@ import com.opsgenie.oas.sdk.model.Integration;
 import com.opsgenie.oas.sdk.model.IntegrationMeta;
 import com.opsgenie.oas.sdk.model.ListIntegrationRequest;
 import com.opsgenie.tools.backup.dto.IntegrationConfig;
+import com.opsgenie.tools.backup.retry.DomainNames;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,13 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
     private static IntegrationApi integrationApi = new IntegrationApi();
     private static IntegrationActionApi integrationActionApi = new IntegrationActionApi();
 
+    private final RateLimitManager rateLimitManager;
+
+    public IntegrationRetriever(RateLimitManager rateLimitManager) {
+        this.rateLimitManager = rateLimitManager;
+    }
+
+
     @Override
     public List<IntegrationConfig> retrieveEntities() throws Exception {
         logger.info("Retrieving current integration configurations");
@@ -33,7 +42,8 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
         });
         //Todo
         final ConcurrentLinkedQueue<IntegrationConfig> integrations = new ConcurrentLinkedQueue<IntegrationConfig>();
-        ExecutorService pool = Executors.newFixedThreadPool(10);
+        int threadCount = rateLimitManager.getRateLimit(DomainNames.SEARCH, 1);
+        ExecutorService pool = Executors.newFixedThreadPool(threadCount);
         for (final IntegrationMeta meta : integrationMetaList) {
             pool.submit(new Runnable() {
                 @Override

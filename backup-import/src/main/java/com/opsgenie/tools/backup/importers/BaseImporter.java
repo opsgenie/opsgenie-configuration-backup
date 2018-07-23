@@ -2,6 +2,7 @@ package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retry.DataDto;
 import com.opsgenie.tools.backup.util.BackupUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.opsgenie.tools.backup.ImportMain.apiLimits;
 
 abstract class BaseImporter<T> implements Importer {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
@@ -103,6 +106,9 @@ abstract class BaseImporter<T> implements Importer {
                 logger.error("Error at adding " + getEntityIdentifierName(backupEntity) + ". " + e.getMessage());
             }
         }
+    }
+    public DataDto getApiLimits() {
+        return apiLimits;
     }
 
     protected abstract EntityRetriever<T> initializeEntityRetriever();

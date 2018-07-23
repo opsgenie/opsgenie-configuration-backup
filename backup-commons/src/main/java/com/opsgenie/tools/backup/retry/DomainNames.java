@@ -1,6 +1,6 @@
 package com.opsgenie.tools.backup.retry;
 
-enum DomainNames {
+public enum DomainNames {
     SEARCH("search"),
     CONFIGURATION("configuration");
 
