@@ -6,6 +6,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.opsgenie.tools.backup.dto.PolicyConfig;
+import com.opsgenie.tools.backup.retry.DataDto;
+import com.opsgenie.tools.backup.retry.RateLimitsDto;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +48,17 @@ public class BackupUtils {
 
         return sb.toString();
     }
+    public static RateLimitsDto getApiLimit(String apiKey,String opsGenieHost) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
 
+        HttpGet httpGet = new HttpGet( opsGenieHost+ "/v2/request-limits/");
+        httpGet.addHeader(HttpHeaders.AUTHORIZATION, "GenieKey " + apiKey);
+
+        String body = client.execute(httpGet, new BasicResponseHandler());
+        DataDto result = new DataDto();
+        BackupUtils.fromJson(result, body);
+        return result.getData();
+    }
     public static String[] getFileListOf(File directory) {
         if (directory != null && directory.exists() && directory.isDirectory()) {
             return directory.list(new FilenameFilter() {

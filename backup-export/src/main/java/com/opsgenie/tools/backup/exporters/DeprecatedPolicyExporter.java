@@ -1,8 +1,8 @@
 package com.opsgenie.tools.backup.exporters;
 
 import com.opsgenie.oas.sdk.model.DeprecatedAlertPolicy;
-import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.DeprecatedPolicyRetriever;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 
 public class DeprecatedPolicyExporter extends BaseExporter<DeprecatedAlertPolicy> {
 

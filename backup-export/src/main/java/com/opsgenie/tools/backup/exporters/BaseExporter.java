@@ -1,6 +1,8 @@
 package com.opsgenie.tools.backup.exporters;
 
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
+import com.opsgenie.tools.backup.retry.RateLimitsDto;
 import com.opsgenie.tools.backup.util.BackupUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +12,9 @@ import java.io.PrintWriter;
 import java.util.List;
 
 abstract class BaseExporter<T> implements Exporter {
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
-    protected File exportDirectory;
+
+    final Logger logger = LoggerFactory.getLogger(getClass());
+    private File exportDirectory;
 
     BaseExporter(String backupRootDirectory, String exportDirectoryName) {
         this.exportDirectory = new File(backupRootDirectory + "/" + exportDirectoryName + "/");
@@ -31,15 +34,15 @@ abstract class BaseExporter<T> implements Exporter {
 
     @Override
     public void export() {
-        List<T> currentBeanList;
+        List<T> currentEntityList;
         try {
-            currentBeanList = initializeEntityRetriever().retrieveEntities();
+            currentEntityList = initializeEntityRetriever().retrieveEntities();
         } catch (Exception e) {
             logger.error("Could not list " + exportDirectory.getName(), e);
             return;
         }
 
-        for (T bean : currentBeanList) {
+        for (T bean : currentEntityList) {
             exportFile(getExportDirectory().getAbsolutePath() + "/" + getEntityFileName(bean) + ".json", bean);
         }
     }

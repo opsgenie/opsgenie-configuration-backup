@@ -8,24 +8,27 @@ import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.UserConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.UserRetriever;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
-public class UserImporter extends BaseImporter<UserConfig> {
-
+public class UserImporter extends BaseImporterWithRateLimiting<UserConfig> {
+    private static final int ALREADY_EXISTS_STATUS_CODE = 409;
     private static UserApi userApi = new UserApi();
     private static ContactApi contactApi = new ContactApi();
     private static NotificationRuleApi notificationRuleApi = new NotificationRuleApi();
 
-    public UserImporter(String backupRootDirectory, boolean addEntity, boolean updateEntity) {
-        super(backupRootDirectory, addEntity, updateEntity);
+    public UserImporter(String backupRootDirectory, RateLimitManager rateLimitManager, boolean addEntity, boolean updateEntity) {
+        super(backupRootDirectory, rateLimitManager, addEntity, updateEntity);
     }
 
     @Override
     protected EntityRetriever<UserConfig> initializeEntityRetriever() {
-        return new UserRetriever();
+        return new UserRetriever(rateLimitManager);
     }
 
     @Override
@@ -52,8 +55,8 @@ public class UserImporter extends BaseImporter<UserConfig> {
     }
 
     @Override
-    protected void createEntity(UserConfig userConfig) throws ApiException {
-        CreateUserPayload payload = new CreateUserPayload();
+    protected void createEntity(UserConfig userConfig) throws Exception {
+        final CreateUserPayload payload = new CreateUserPayload();
         final User user = userConfig.getUser();
         payload.setUsername(user.getUsername());
         payload.setFullName(user.getFullName());
@@ -65,19 +68,31 @@ public class UserImporter extends BaseImporter<UserConfig> {
         payload.setTags(user.getTags());
         payload.setTimeZone(user.getTimeZone());
         payload.setInvitationDisabled(true);
-
         if (BackupUtils.checkValidString(user.getSkypeUsername()))
             payload.setSkypeUsername(user.getSkypeUsername());
 
         payload.setTimeZone(user.getTimeZone());
 
-        userApi.createUser(payload);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                SuccessResponse sr = new SuccessResponse();
+                try {
+                    sr = userApi.createUser(payload);
+                } catch (ApiException e) {
+                    if (e.getCode() == ALREADY_EXISTS_STATUS_CODE) {
+                        throw new Exception("The user being created is registered in another OpsGenie account. ");
+                    }
+                }
+                return sr;
+            }
+        });
         addContacts(user);
         final List<NotificationRule> notificationRuleList = userConfig.getNotificationRuleList();
         compareNotificationRules(user, notificationRuleList);
     }
 
-    private void createNotificationRule(User user, NotificationRule notificationRule) throws ApiException {
+    private void createNotificationRule(User user, NotificationRule notificationRule) throws Exception {
         CreateNotificationRulePayload payload = new CreateNotificationRulePayload();
         payload.setActionType(notificationRule.getActionType());
         payload.setCriteria(notificationRule.getCriteria());
@@ -90,11 +105,16 @@ public class UserImporter extends BaseImporter<UserConfig> {
         payload.setTimeRestriction(notificationRule.getTimeRestriction());
         payload.setSteps(constructCreateNotificationRuleStepPayloadList(notificationRule));
 
-        CreateNotificationRuleRequest request = new CreateNotificationRuleRequest();
+        final CreateNotificationRuleRequest request = new CreateNotificationRuleRequest();
         request.setBody(payload);
         request.setIdentifier(user.getUsername());
+        RetryPolicyAdapter.invoke(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                return notificationRuleApi.createNotificationRule(request).getData().getId();
+            }
+        });
 
-        notificationRuleApi.createNotificationRule(request).getData().getId();
     }
 
     private List<CreateNotificationRuleStepPayload> constructCreateNotificationRuleStepPayloadList(NotificationRule notificationRule) {
@@ -105,9 +125,9 @@ public class UserImporter extends BaseImporter<UserConfig> {
                     .contact(notificationRuleStep.getContact())
                     .enabled(notificationRuleStep.isEnabled())
                     .sendAfter(notificationRuleStep.getSendAfter());
-            if(notificationRuleStepPayload.getContact().getMethod().equals(ContactMeta.MethodEnum.MOBILE)) {
+            if (notificationRuleStepPayload.getContact().getMethod().equals(ContactMeta.MethodEnum.MOBILE)) {
                 logger.warn("Skipping mobile contact method");
-            }else{
+            } else {
                 createNotificationRuleStepPayloadList.add(
                         notificationRuleStepPayload);
             }
@@ -117,7 +137,7 @@ public class UserImporter extends BaseImporter<UserConfig> {
     }
 
     @Override
-    protected void updateEntity(UserConfig userConfig, EntityStatus entityStatus) throws ApiException {
+    protected void updateEntity(UserConfig userConfig, EntityStatus entityStatus) throws Exception {
         UpdateUserPayload payload = new UpdateUserPayload();
         final User user = userConfig.getUser();
         payload.setUsername(user.getUsername());
@@ -135,14 +155,21 @@ public class UserImporter extends BaseImporter<UserConfig> {
 
         payload.setTimeZone(user.getTimeZone());
 
-        UpdateUserRequest request = new UpdateUserRequest();
+        final UpdateUserRequest request = new UpdateUserRequest();
         if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
             request.setIdentifier(user.getId());
         } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
             request.setIdentifier(user.getUsername());
         }
         request.setBody(payload);
-        userApi.updateUser(request);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+
+            @Override
+            public SuccessResponse call() throws Exception {
+                return userApi.updateUser(request);
+            }
+        });
+
         addContacts(user);
         final List<NotificationRule> notificationRuleList = userConfig.getNotificationRuleList();
         compareNotificationRules(user, notificationRuleList);
@@ -166,7 +193,7 @@ public class UserImporter extends BaseImporter<UserConfig> {
         }
     }
 
-    private void updateNotificationRule(User user, NotificationRule notificationRule) throws ApiException {
+    private void updateNotificationRule(User user, NotificationRule notificationRule) throws Exception {
         UpdateNotificationRulePayload payload = new UpdateNotificationRulePayload();
         payload.setCriteria(notificationRule.getCriteria());
         payload.setEnabled(notificationRule.isEnabled());
@@ -178,12 +205,17 @@ public class UserImporter extends BaseImporter<UserConfig> {
         payload.setTimeRestriction(notificationRule.getTimeRestriction());
         payload.setSteps(constructCreateNotificationRuleStepPayloadList(notificationRule));
 
-        UpdateNotificationRuleRequest request = new UpdateNotificationRuleRequest();
+        final UpdateNotificationRuleRequest request = new UpdateNotificationRuleRequest();
         request.setRuleId(findRuleIdByName(user, notificationRule));
         request.setIdentifier(user.getUsername());
         request.setBody(payload);
+        RetryPolicyAdapter.invoke(new Callable<UpdateNotificationRuleResponse>() {
+            @Override
+            public UpdateNotificationRuleResponse call() throws Exception {
+                return notificationRuleApi.updateNotificationRule(request);
+            }
+        });
 
-        notificationRuleApi.updateNotificationRule(request);
     }
 
     private String findRuleIdByName(User user, NotificationRule notificationRule) {
@@ -199,11 +231,17 @@ public class UserImporter extends BaseImporter<UserConfig> {
         return null;
     }
 
-    private void addContacts(User user) throws ApiException {
-        CreateContactRequest createContactRequest = new CreateContactRequest();
+    private void addContacts(final User user) throws Exception {
+        final CreateContactRequest createContactRequest = new CreateContactRequest();
         createContactRequest.setIdentifier(user.getUsername());
 
-        List<ContactWithApplyOrder> currentContactList = contactApi.listContacts(user.getUsername()).getData();
+        List<ContactWithApplyOrder> currentContactList = RetryPolicyAdapter.invoke(new Callable<List<ContactWithApplyOrder>>() {
+            @Override
+            public List<ContactWithApplyOrder> call() throws Exception {
+                return contactApi.listContacts(user.getUsername()).getData();
+            }
+        });
+
         List<UserContact> backupContactList = user.getUserContacts();
 
         if (backupContactList != null) {
@@ -223,7 +261,13 @@ public class UserImporter extends BaseImporter<UserConfig> {
                             payload.setMethod(CreateContactPayload.MethodEnum.fromValue(userContact.getContactMethod().getValue()));
                             payload.setTo(userContact.getTo());
                             createContactRequest.body(payload);
-                            contactApi.createContact(createContactRequest);
+                            RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+                                @Override
+                                public SuccessResponse call() throws Exception {
+                                    return contactApi.createContact(createContactRequest);
+                                }
+                            });
+
                         }
 
                     }

@@ -1,6 +1,5 @@
 package com.opsgenie.tools.backup.exporters;
 
-import com.opsgenie.oas.sdk.model.Policy;
 import com.opsgenie.tools.backup.dto.PolicyWithTeamInfo;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.PolicyRetriever;

@@ -10,14 +10,15 @@ import com.opsgenie.tools.backup.dto.PolicyWithTeamInfo;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.PolicyOrderRetriever;
 import com.opsgenie.tools.backup.retrieval.PolicyRetriever;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * @author Zeynep Sengil
@@ -33,6 +34,7 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
         super(backupRootDirectory, addEntity, updateEntity);
         this.rootPath = backupRootDirectory;
     }
+
     @Override
     protected EntityRetriever<PolicyWithTeamInfo> initializeEntityRetriever() {
         return new PolicyRetriever();
@@ -51,16 +53,22 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
     }
 
     @Override
-    protected void createEntity(PolicyWithTeamInfo entity) throws ParseException, IOException, ApiException {
-        Policy policy = entity.getPolicy();
+    protected void createEntity(final PolicyWithTeamInfo entity) throws Exception {
+        final Policy policy = entity.getPolicy();
         policy.setId(null);
-        api.createPolicy(policy, entity.getTeamId());
+        RetryPolicyAdapter.invoke(new Callable<CreatePolicyResponse>() {
+            @Override
+            public CreatePolicyResponse call() throws Exception {
+                return api.createPolicy(policy, entity.getTeamId());
+            }
+        });
+
     }
 
     @Override
-    protected void updateEntity(PolicyWithTeamInfo entity, EntityStatus entityStatus) throws ParseException, IOException, ApiException {
+    protected void updateEntity(PolicyWithTeamInfo entity, EntityStatus entityStatus) throws Exception {
         Policy policy = entity.getPolicy();
-        UpdatePolicyRequest request = new UpdatePolicyRequest();
+        final UpdatePolicyRequest request = new UpdatePolicyRequest();
         request.setBody(policy);
         request.setTeamId(entity.getTeamId());
 
@@ -69,7 +77,13 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
         } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
             request.setPolicyId(findPolicyIdInCurrentConf(policy.getName()));
         }
-        api.updatePolicy(request);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return api.updatePolicy(request);
+            }
+        });
+
     }
 
     private String findPolicyIdInCurrentConf(String alertPolicyName) {
@@ -91,24 +105,32 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
             return;
         }
         List<PolicyConfig> currentOrderConfigs;
-        currentOrderConfigs = new PolicyOrderRetriever().retrieveEntities();
-
-
-        if (equalsIgnoreOrder(currentOrderConfigs, this.policyOrderConfigFromFile)) {
-            return;
-        }
-        int size = currentOrderConfigs.size();
-        for (PolicyConfig config : policyOrderConfigFromFile) {
-            ChangePolicyOrderRequest params = new ChangePolicyOrderRequest();
-            params.setPolicyId(getCurrentPolicyId(config.getId(), config.getName(), currentOrderConfigs));
-            if (params.getPolicyId() == null) {
-                continue;
+        try {
+            currentOrderConfigs = new PolicyOrderRetriever().retrieveEntities();
+            if (equalsIgnoreOrder(currentOrderConfigs, this.policyOrderConfigFromFile)) {
+                return;
             }
-            ChangePolicyOrderPayload body = new ChangePolicyOrderPayload();
-            body.setTargetIndex(size + config.getOrder());
-            params.setBody(body);
-            params.setTeamId(config.getTeam());
-            api.changePolicyOrder(params);
+            int size = currentOrderConfigs.size();
+            for (PolicyConfig config : policyOrderConfigFromFile) {
+                final ChangePolicyOrderRequest params = new ChangePolicyOrderRequest();
+                params.setPolicyId(getCurrentPolicyId(config.getId(), config.getName(), currentOrderConfigs));
+                if (params.getPolicyId() == null) {
+                    continue;
+                }
+                ChangePolicyOrderPayload body = new ChangePolicyOrderPayload();
+                body.setTargetIndex(size + config.getOrder());
+                params.setBody(body);
+                params.setTeamId(config.getTeam());
+                RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+                    @Override
+                    public SuccessResponse call() throws Exception {
+                        return api.changePolicyOrder(params);
+                    }
+                });
+
+            }
+        } catch (Exception e) {
+            logger.error("Could not read policy V2 orders" + e.getMessage());
         }
     }
 

@@ -1,8 +1,8 @@
 package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.oas.sdk.ApiException;
-import com.opsgenie.tools.backup.dto.PolicyConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
+import com.opsgenie.tools.backup.retry.DataDto;
 import com.opsgenie.tools.backup.util.BackupUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.opsgenie.tools.backup.ImportMain.apiLimits;
 
 abstract class BaseImporter<T> implements Importer {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
@@ -105,14 +107,17 @@ abstract class BaseImporter<T> implements Importer {
             }
         }
     }
+    public DataDto getApiLimits() {
+        return apiLimits;
+    }
 
     protected abstract EntityRetriever<T> initializeEntityRetriever();
 
     protected abstract EntityStatus checkEntity(T entity) throws ApiException;
 
-    protected abstract void createEntity(T entity) throws ParseException, IOException, ApiException;
+    protected abstract void createEntity(T entity) throws ParseException, IOException, ApiException, Exception;
 
-    protected abstract void updateEntity(T entity, EntityStatus entityStatus) throws ParseException, IOException, ApiException;
+    protected abstract void updateEntity(T entity, EntityStatus entityStatus) throws ParseException, IOException, ApiException, Exception;
 
     protected T getNewInstance() {
         throw new UnsupportedOperationException();
@@ -122,5 +127,6 @@ abstract class BaseImporter<T> implements Importer {
 
     protected abstract String getImportDirectoryName();
 
-    protected void updateEntityOrders() { }
+    protected void updateEntityOrders() {
+    }
 }
