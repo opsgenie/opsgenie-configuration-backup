@@ -5,7 +5,10 @@ import com.opsgenie.oas.sdk.api.EscalationApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.EscalationRetriever;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
+
+import java.util.concurrent.Callable;
 
 public class EscalationImporter extends BaseImporter<Escalation> {
 
@@ -43,8 +46,8 @@ public class EscalationImporter extends BaseImporter<Escalation> {
     }
 
     @Override
-    protected void createEntity(Escalation entity) throws ApiException {
-        CreateEscalationPayload payload = new CreateEscalationPayload();
+    protected void createEntity(Escalation entity) throws Exception {
+        final CreateEscalationPayload payload = new CreateEscalationPayload();
         payload.setName(entity.getName());
 
         if (BackupUtils.checkValidString(entity.getDescription())) {
@@ -59,11 +62,17 @@ public class EscalationImporter extends BaseImporter<Escalation> {
         payload.setOwnerTeam(entity.getOwnerTeam());
         payload.setRules(entity.getRules());
 
-        api.createEscalation(payload);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return api.createEscalation(payload);
+            }
+        });
+
     }
 
     @Override
-    protected void updateEntity(Escalation entity, EntityStatus entityStatus) throws ApiException {
+    protected void updateEntity(Escalation entity, EntityStatus entityStatus) throws Exception {
 
         UpdateEscalationPayload payload = new UpdateEscalationPayload();
         payload.setName(entity.getName());
@@ -78,7 +87,7 @@ public class EscalationImporter extends BaseImporter<Escalation> {
             escalationRule.getRecipient().setId(null);
         }
 
-        if(entity.getRepeat() == null){
+        if (entity.getRepeat() == null) {
             EscalationRepeat repeat = new EscalationRepeat();
             repeat.setWaitInterval(0);
             entity.setRepeat(repeat);
@@ -86,7 +95,7 @@ public class EscalationImporter extends BaseImporter<Escalation> {
         payload.setRepeat(entity.getRepeat());
         payload.setRules(entity.getRules());
 
-        UpdateEscalationRequest request = new UpdateEscalationRequest();
+        final UpdateEscalationRequest request = new UpdateEscalationRequest();
         if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
             request.setIdentifier(entity.getId());
             request.setIdentifierType(UpdateEscalationRequest.IdentifierTypeEnum.ID);
@@ -95,8 +104,13 @@ public class EscalationImporter extends BaseImporter<Escalation> {
             request.setIdentifierType(UpdateEscalationRequest.IdentifierTypeEnum.NAME);
         }
         request.setBody(payload);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return api.updateEscalation(request);
+            }
+        });
 
-        api.updateEscalation(request);
     }
 
     @Override

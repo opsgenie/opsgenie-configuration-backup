@@ -6,6 +6,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.opsgenie.tools.backup.dto.PolicyConfig;
+import com.opsgenie.tools.backup.retry.DataDto;
+import com.opsgenie.tools.backup.retry.RateLimitsDto;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +45,25 @@ public class BackupUtils {
         }
 
         return sb.toString();
+    }
+
+    public static RateLimitsDto generateRateLimits(String apiKey, String opsGenieHost) throws IOException {
+        try {
+            HttpClient client = HttpClientBuilder.create().build();
+
+            HttpGet httpGet = new HttpGet(opsGenieHost + "/v2/request-limits/");
+            httpGet.addHeader(HttpHeaders.AUTHORIZATION, "GenieKey " + apiKey);
+
+            String body = client.execute(httpGet, new BasicResponseHandler());
+            DataDto result = new DataDto();
+            BackupUtils.fromJson(result, body);
+
+            return result.getData();
+        } catch (Exception e) {
+            logger.error("Could not initiate rate limits. " + e.getMessage());
+            System.exit(1);
+            return null;
+        }
     }
 
     public static String[] getFileListOf(File directory) {
@@ -87,6 +113,7 @@ public class BackupUtils {
     }
 
     public static List<PolicyConfig> readWithTypeReference(String json) throws IOException {
-        return mapper.readValue(json, new TypeReference<List<PolicyConfig>>(){});
+        return mapper.readValue(json, new TypeReference<List<PolicyConfig>>() {
+        });
     }
 }

@@ -1,7 +1,6 @@
 package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.oas.sdk.ApiException;
-import com.opsgenie.tools.backup.dto.PolicyConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.util.BackupUtils;
 import org.slf4j.Logger;
@@ -110,9 +109,9 @@ abstract class BaseImporter<T> implements Importer {
 
     protected abstract EntityStatus checkEntity(T entity) throws ApiException;
 
-    protected abstract void createEntity(T entity) throws ParseException, IOException, ApiException;
+    protected abstract void createEntity(T entity) throws ParseException, IOException, ApiException, Exception;
 
-    protected abstract void updateEntity(T entity, EntityStatus entityStatus) throws ParseException, IOException, ApiException;
+    protected abstract void updateEntity(T entity, EntityStatus entityStatus) throws ParseException, IOException, ApiException, Exception;
 
     protected T getNewInstance() {
         throw new UnsupportedOperationException();
@@ -122,5 +121,6 @@ abstract class BaseImporter<T> implements Importer {
 
     protected abstract String getImportDirectoryName();
 
-    protected void updateEntityOrders() { }
+    protected void updateEntityOrders() {
+    }
 }

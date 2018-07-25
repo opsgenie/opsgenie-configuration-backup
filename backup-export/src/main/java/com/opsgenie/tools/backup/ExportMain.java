@@ -7,6 +7,9 @@ import com.opsgenie.oas.sdk.ApiClient;
 import com.opsgenie.oas.sdk.Configuration;
 import com.opsgenie.oas.sdk.api.AccountApi;
 import com.opsgenie.oas.sdk.model.*;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
+import com.opsgenie.tools.backup.util.BackupUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,19 +60,18 @@ public class ExportMain {
         }
 
         configureDefaultApiClient(apiKey, opsGenieHost, debug);
-
+        RateLimitManager rateLimitManager = new RateLimitManager(BackupUtils.generateRateLimits(apiKey,opsGenieHost));
+        RetryPolicyAdapter.init(rateLimitManager);
         AccountApi accountApi = new AccountApi();
         try {
             final GetAccountInfoResponse info = accountApi.getInfo();
             logger.info("Account name is " + info.getData().getName() + "\n");
 
-            ConfigurationExporter exporter = new ConfigurationExporter(properties);
+            ConfigurationExporter exporter = new ConfigurationExporter(properties, rateLimitManager);
             exporter.export();
 
             logger.info("Finished");
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             logger.error("Could not connect to host: " + opsGenieHost);
             System.exit(1);
         }
@@ -93,17 +95,18 @@ public class ExportMain {
         mapper.addMixIn(Policy.class, IgnoredType.class);
     }
 
-    abstract class IgnoredIdAndType {
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        String id;
-
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        String type;
-    }
-
-    abstract class IgnoredType {
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        String type;
-    }
-
 }
+
+abstract class IgnoredIdAndType {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    String id;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    String type;
+}
+
+abstract class IgnoredType {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    String type;
+}
+

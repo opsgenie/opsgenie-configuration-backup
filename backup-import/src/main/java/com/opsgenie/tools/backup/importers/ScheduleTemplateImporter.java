@@ -1,12 +1,15 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.ScheduleApi;
 import com.opsgenie.oas.sdk.model.CreateSchedulePayload;
+import com.opsgenie.oas.sdk.model.CreateScheduleResponse;
 import com.opsgenie.oas.sdk.model.Schedule;
 import com.opsgenie.tools.backup.dto.ScheduleConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.ScheduleRetriever;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
+
+import java.util.concurrent.Callable;
 
 public class ScheduleTemplateImporter extends BaseImporter<ScheduleConfig> {
 
@@ -45,10 +48,16 @@ public class ScheduleTemplateImporter extends BaseImporter<ScheduleConfig> {
     }
 
     @Override
-    protected void createEntity(ScheduleConfig entity) throws ApiException {
-        CreateSchedulePayload payload = new CreateSchedulePayload();
+    protected void createEntity(ScheduleConfig entity) throws Exception {
+        final CreateSchedulePayload payload = new CreateSchedulePayload();
         payload.setName(entity.getSchedule().getName());
-        api.createSchedule(payload);
+        RetryPolicyAdapter.invoke(new Callable<CreateScheduleResponse>() {
+            @Override
+            public CreateScheduleResponse call() throws Exception {
+                return api.createSchedule(payload);
+            }
+        });
+
     }
 
     @Override
