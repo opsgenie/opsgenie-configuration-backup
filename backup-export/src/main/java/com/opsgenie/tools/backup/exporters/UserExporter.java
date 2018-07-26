@@ -3,10 +3,11 @@ package com.opsgenie.tools.backup.exporters;
 import com.opsgenie.tools.backup.dto.UserConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.UserRetriever;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
 
-public class UserExporter extends BaseExporter<UserConfig> {
-    public UserExporter(String backupRootDirectory) {
-        super(backupRootDirectory, "users");
+public class UserExporter extends BaseExporterWithRateLimiting<UserConfig> {
+    public UserExporter(String backupRootDirectory, RateLimitManager rateLimitManager) {
+        super(backupRootDirectory, "users",rateLimitManager);
     }
 
     @Override
@@ -16,7 +17,7 @@ public class UserExporter extends BaseExporter<UserConfig> {
 
     @Override
     protected EntityRetriever<UserConfig> initializeEntityRetriever() {
-        return new UserRetriever();
+        return new UserRetriever(rateLimitManager);
     }
 
 

@@ -2,12 +2,12 @@ package com.opsgenie.tools.backup.importers;
 
 import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.CustomUserRoleApi;
-import com.opsgenie.oas.sdk.api.EscalationApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.retrieval.CustomUserRoleRetriever;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
-import com.opsgenie.tools.backup.retrieval.EscalationRetriever;
-import com.opsgenie.tools.backup.util.BackupUtils;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
+
+import java.util.concurrent.Callable;
 
 public class CustomUserRoleImporter extends BaseImporter<CustomUserRole> {
 
@@ -45,7 +45,7 @@ public class CustomUserRoleImporter extends BaseImporter<CustomUserRole> {
     }
 
     @Override
-    protected void createEntity(CustomUserRole entity) throws ApiException {
+    protected void createEntity(CustomUserRole entity) throws Exception {
         CreateCustomUserRolePayload payload = new CreateCustomUserRolePayload();
         payload.setName(entity.getName());
 
@@ -53,13 +53,19 @@ public class CustomUserRoleImporter extends BaseImporter<CustomUserRole> {
         payload.setGrantedRights(entity.getGrantedRights());
         payload.setDisallowedRights(entity.getDisallowedRights());
 
-        AddCustomUserRoleRequest request = new AddCustomUserRoleRequest();
+        final AddCustomUserRoleRequest request = new AddCustomUserRoleRequest();
         request.setBody(payload);
-        api.createCustomUserRole(request);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return api.createCustomUserRole(request);
+            }
+        });
+
     }
 
     @Override
-    protected void updateEntity(CustomUserRole entity, EntityStatus entityStatus) throws ApiException {
+    protected void updateEntity(CustomUserRole entity, EntityStatus entityStatus) throws Exception {
 
         UpdateCustomUserRolePayload payload = new UpdateCustomUserRolePayload();
         payload.setName(entity.getName());
@@ -68,7 +74,7 @@ public class CustomUserRoleImporter extends BaseImporter<CustomUserRole> {
         payload.setDisallowedRights(entity.getDisallowedRights());
         payload.setGrantedRights(entity.getGrantedRights());
 
-        UpdateCustomUserRoleRequest request = new UpdateCustomUserRoleRequest();
+        final UpdateCustomUserRoleRequest request = new UpdateCustomUserRoleRequest();
         if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
             request.setIdentifier(entity.getId());
             request.setIdentifierType(UpdateCustomUserRoleRequest.IdentifierTypeEnum.ID);
@@ -77,8 +83,13 @@ public class CustomUserRoleImporter extends BaseImporter<CustomUserRole> {
             request.setIdentifierType(UpdateCustomUserRoleRequest.IdentifierTypeEnum.NAME);
         }
         request.setBody(payload);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return api.updateCustomUserRole(request);
+            }
+        });
 
-        api.updateCustomUserRole(request);
     }
 
     @Override

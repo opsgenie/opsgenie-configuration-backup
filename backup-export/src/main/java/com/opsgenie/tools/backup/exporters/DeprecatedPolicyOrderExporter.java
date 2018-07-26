@@ -1,8 +1,8 @@
 package com.opsgenie.tools.backup.exporters;
 
 import com.opsgenie.tools.backup.dto.PolicyConfig;
-import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.DeprecatedPolicyOrderRetriever;
+import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.io.PrintWriter;

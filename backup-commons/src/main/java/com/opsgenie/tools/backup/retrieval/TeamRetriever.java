@@ -5,15 +5,15 @@ import com.opsgenie.oas.sdk.api.TeamRoleApi;
 import com.opsgenie.oas.sdk.api.TeamRoutingRuleApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.TeamConfig;
+import com.opsgenie.tools.backup.retry.DomainNames;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class TeamRetriever implements EntityRetriever<TeamConfig> {
 
@@ -23,12 +23,26 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
     private static final TeamRoutingRuleApi teamRoutingRuleApi = new TeamRoutingRuleApi();
     private static final TeamRoleApi teamRoleApi = new TeamRoleApi();
 
+    private final RateLimitManager rateLimitManager;
+
+    public TeamRetriever(RateLimitManager rateLimitManager) {
+        this.rateLimitManager = rateLimitManager;
+    }
+
+
     @Override
-    public List<TeamConfig> retrieveEntities() throws InterruptedException {
+    public List<TeamConfig> retrieveEntities() throws Exception {
         logger.info("Retrieving current team configurations");
-        final List<Team> teams = teamApi.listTeams(new ArrayList<String>()).getData();
+        final List<Team> teams = RetryPolicyAdapter.invoke(new Callable<List<Team>>() {
+            @Override
+            public List<Team> call()  {
+                return teamApi.listTeams(new ArrayList<String>()).getData();
+            }
+        });
+
         final ConcurrentLinkedQueue<TeamConfig> teamsWithDetails = new ConcurrentLinkedQueue<TeamConfig>();
-        ExecutorService pool = Executors.newFixedThreadPool(10);
+        int threadCount = rateLimitManager.getRateLimit(DomainNames.SEARCH, 1);
+        ExecutorService pool = Executors.newFixedThreadPool(threadCount);
         for (final Team teamMeta : teams) {
             pool.submit(new Runnable() {
                 @Override
@@ -36,7 +50,13 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
                     TeamConfig teamConfig = new TeamConfig();
                     boolean failed = false;
                     try {
-                        final List<TeamRoutingRule> routingRules = teamRoutingRuleApi.listTeamRoutingRules(new ListTeamRoutingRulesRequest().identifier(teamMeta.getId())).getData();
+                        final List<TeamRoutingRule> routingRules = RetryPolicyAdapter.invoke(new Callable<List<TeamRoutingRule>>() {
+                            @Override
+                            public List<TeamRoutingRule> call()  {
+                                return teamRoutingRuleApi.listTeamRoutingRules(new ListTeamRoutingRulesRequest().identifier(teamMeta.getId())).getData();
+                            }
+                        });
+
                         teamConfig.setTeamRoutingRules(routingRules);
                     } catch (Exception e) {
                         failed = true;
@@ -52,7 +72,13 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
                     }
 
                     try {
-                        final List<TeamRole> teamRoles = teamRoleApi.listTeamRoles(new ListTeamRolesRequest().identifier(teamMeta.getId())).getData();
+                        final List<TeamRole> teamRoles = RetryPolicyAdapter.invoke(new Callable<List<TeamRole>>() {
+                            @Override
+                            public List<TeamRole> call()  {
+                                return teamRoleApi.listTeamRoles(new ListTeamRolesRequest().identifier(teamMeta.getId())).getData();
+                            }
+                        });
+
                         teamConfig.setTeamRoles(teamRoles);
                     } catch (Exception e) {
                         failed = true;

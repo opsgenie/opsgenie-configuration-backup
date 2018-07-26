@@ -3,16 +3,17 @@ package com.opsgenie.tools.backup.importers;
 import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.ScheduleApi;
 import com.opsgenie.oas.sdk.api.ScheduleOverrideApi;
-import com.opsgenie.oas.sdk.api.ScheduleRotationApi;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.ScheduleConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.ScheduleRetriever;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
 
@@ -57,7 +58,7 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
     }
 
     @Override
-    protected void updateEntity(ScheduleConfig scheduleConfig, EntityStatus entityStatus) throws ApiException {
+    protected void updateEntity(ScheduleConfig scheduleConfig, EntityStatus entityStatus) throws Exception {
         UpdateSchedulePayload payload = new UpdateSchedulePayload();
         final Schedule schedule = scheduleConfig.getSchedule();
         payload.setName(schedule.getName());
@@ -71,7 +72,7 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
         payload.setOwnerTeam(schedule.getOwnerTeam());
         payload.setRotations(constructCreateScheduleRotationPayloads(schedule));
 
-        UpdateScheduleRequest request = new UpdateScheduleRequest();
+        final UpdateScheduleRequest request = new UpdateScheduleRequest();
         if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
             request.setIdentifier(schedule.getId());
         } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
@@ -79,25 +80,30 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
             request.setIdentifier(schedule.getName());
         }
         request.setBody(payload);
+        RetryPolicyAdapter.invoke(new Callable<UpdateScheduleResponse>() {
+            @Override
+            public UpdateScheduleResponse call() throws Exception {
+                return scheduleApi.updateSchedule(request);
+            }
+        });
 
-        scheduleApi.updateSchedule(request);
 
         List<ScheduleOverride> overridesFromConfig = scheduleConfig.getScheduleOverrideList();
-        if (overridesFromConfig != null && !overridesFromConfig.isEmpty()){
+        if (overridesFromConfig != null && !overridesFromConfig.isEmpty()) {
             logger.info("Importing schedule overrides for " + scheduleConfig.getSchedule().getName());
             ArrayList<ScheduleOverride> overridesReversed = new ArrayList<ScheduleOverride>(overridesFromConfig);
             Collections.reverse(overridesReversed);
 
-            for (ScheduleOverride override : overridesReversed){
-                    if (findOverrideByAlias(scheduleConfig.getSchedule().getName(), override) != null){
-                        updateScheduleOverride(scheduleConfig.getSchedule().getName(), override);
-                    }
-                    else {
-                        createScheduleOverride(scheduleConfig.getSchedule().getName(), override);
-                    }
+            for (ScheduleOverride override : overridesReversed) {
+                if (findOverrideByAlias(scheduleConfig.getSchedule().getName(), override) != null) {
+                    updateScheduleOverride(scheduleConfig.getSchedule().getName(), override);
+                } else {
+                    createScheduleOverride(scheduleConfig.getSchedule().getName(), override);
+                }
             }
         }
     }
+
     private ScheduleOverride findOverrideByAlias(String scheduleName, ScheduleOverride override) {
 
         for (ScheduleConfig scheduleConfig : currentConfigs) {
@@ -112,7 +118,7 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
         return null;
     }
 
-    private void createScheduleOverride(String scheduleName, ScheduleOverride override){
+    private void createScheduleOverride(String scheduleName, ScheduleOverride override) throws Exception {
         deleteRotationIds(override.getRotations());
         CreateScheduleOverridePayload createPayload = new CreateScheduleOverridePayload();
         createPayload.setRotations(override.getRotations());
@@ -121,13 +127,20 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
         createPayload.setStartDate(override.getStartDate());
         createPayload.setUser(override.getUser());
 
-        CreateScheduleOverrideRequest createRequest = new CreateScheduleOverrideRequest();
+        final CreateScheduleOverrideRequest createRequest = new CreateScheduleOverrideRequest();
         createRequest.setIdentifier(scheduleName);
         createRequest.setScheduleIdentifierType(CreateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
         createRequest.setBody(createPayload);
-        overrideApi.createScheduleOverride(createRequest);
+        RetryPolicyAdapter.invoke(new Callable<CreateScheduleOverrideResponse>() {
+            @Override
+            public CreateScheduleOverrideResponse call() throws Exception {
+                return overrideApi.createScheduleOverride(createRequest);
+            }
+        });
+
     }
-    private void updateScheduleOverride(String scheduleName, ScheduleOverride override) {
+
+    private void updateScheduleOverride(String scheduleName, ScheduleOverride override) throws Exception {
         deleteRotationIds(override.getRotations());
         UpdateScheduleOverridePayload updatePayload = new UpdateScheduleOverridePayload();
         updatePayload.setEndDate(override.getEndDate());
@@ -135,17 +148,23 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
         updatePayload.setRotations(override.getRotations());
         updatePayload.setUser(override.getUser());
 
-        UpdateScheduleOverrideRequest updateRequest = new UpdateScheduleOverrideRequest();
+        final UpdateScheduleOverrideRequest updateRequest = new UpdateScheduleOverrideRequest();
         updateRequest.setAlias(override.getAlias());
         updateRequest.setIdentifier(scheduleName);
         updateRequest.setScheduleIdentifierType(UpdateScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
         updateRequest.setBody(updatePayload);
-        overrideApi.updateScheduleOverride(updateRequest);
+        RetryPolicyAdapter.invoke(new Callable<UpdateScheduleOverrideResponse>() {
+            @Override
+            public UpdateScheduleOverrideResponse call() throws Exception {
+                return overrideApi.updateScheduleOverride(updateRequest);
+            }
+        });
+
     }
 
-    private void deleteRotationIds(List<ScheduleOverrideRotation> rotations){
-        for (ScheduleOverrideRotation rotation : rotations){
-         rotation.setId("");
+    private void deleteRotationIds(List<ScheduleOverrideRotation> rotations) {
+        for (ScheduleOverrideRotation rotation : rotations) {
+            rotation.setId("");
         }
     }
 

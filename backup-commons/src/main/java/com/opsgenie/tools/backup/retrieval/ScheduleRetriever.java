@@ -2,18 +2,16 @@ package com.opsgenie.tools.backup.retrieval;
 
 import com.opsgenie.oas.sdk.api.ScheduleApi;
 import com.opsgenie.oas.sdk.api.ScheduleOverrideApi;
-import com.opsgenie.oas.sdk.model.ListScheduleOverrideResponse;
-import com.opsgenie.oas.sdk.model.ListScheduleOverridesRequest;
-import com.opsgenie.oas.sdk.model.Schedule;
-import com.opsgenie.oas.sdk.model.ScheduleOverride;
 import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.dto.ScheduleConfig;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public class ScheduleRetriever implements EntityRetriever<ScheduleConfig> {
 
@@ -33,10 +31,16 @@ public class ScheduleRetriever implements EntityRetriever<ScheduleConfig> {
     private static final ScheduleOverrideApi overrideApi = new ScheduleOverrideApi();
 
     @Override
-    public List<ScheduleConfig> retrieveEntities() {
+    public List<ScheduleConfig> retrieveEntities() throws Exception {
         logger.info("Retrieving current schedule configurations");
         List<ScheduleConfig> scheduleConfigs = new ArrayList<ScheduleConfig>();
-        final List<Schedule> schedules = scheduleApi.listSchedules(Collections.singletonList("rotation")).getData();
+        final List<Schedule> schedules = RetryPolicyAdapter.invoke(new Callable<List<Schedule>>() {
+            @Override
+            public List<Schedule> call()  {
+                return scheduleApi.listSchedules(Collections.singletonList("rotation")).getData();
+            }
+        });
+
         for (Schedule schedule : schedules) {
             ScheduleConfig scheduleConfig = new ScheduleConfig();
             scheduleConfig.setSchedule(schedule);
@@ -51,10 +55,16 @@ public class ScheduleRetriever implements EntityRetriever<ScheduleConfig> {
 
     private List<ScheduleOverride> listScheduleOverrides(Schedule schedule) {
         try {
-            ListScheduleOverridesRequest listRequest = new ListScheduleOverridesRequest();
+            final ListScheduleOverridesRequest listRequest = new ListScheduleOverridesRequest();
             listRequest.setIdentifier(schedule.getName());
             listRequest.setScheduleIdentifierType(ListScheduleOverridesRequest.ScheduleIdentifierTypeEnum.NAME);
-            ListScheduleOverrideResponse response = overrideApi.listScheduleOverride(listRequest);
+            ListScheduleOverrideResponse response = RetryPolicyAdapter.invoke(new Callable<ListScheduleOverrideResponse>() {
+                @Override
+                public ListScheduleOverrideResponse call() {
+                    return overrideApi.listScheduleOverride(listRequest);
+                }
+            });
+
             if (response != null) {
                 return getOverridesWithRotationNames(schedule, response.getData());
             }
@@ -64,17 +74,23 @@ public class ScheduleRetriever implements EntityRetriever<ScheduleConfig> {
         return Collections.emptyList();
     }
 
-    private List<ScheduleOverride> getOverridesWithRotationNames(Schedule schedule, List<ScheduleOverride> overrideList) {
+    private List<ScheduleOverride> getOverridesWithRotationNames(Schedule schedule, List<ScheduleOverride> overrideList) throws Exception {
 
         List<ScheduleOverride> overrideListWithRotationNames = new ArrayList<ScheduleOverride>();
         for (ScheduleOverride override : overrideList){
 
-            GetScheduleOverrideRequest request = new GetScheduleOverrideRequest();
+            final GetScheduleOverrideRequest request = new GetScheduleOverrideRequest();
             request.setAlias(override.getAlias());
             request.setIdentifier(schedule.getName());
             request.setScheduleIdentifierType(GetScheduleOverrideRequest.ScheduleIdentifierTypeEnum.NAME);
 
-            GetScheduleOverrideResponse overrideResponse = overrideApi.getScheduleOverride(request);
+            GetScheduleOverrideResponse overrideResponse = RetryPolicyAdapter.invoke(new Callable<GetScheduleOverrideResponse>() {
+                @Override
+                public GetScheduleOverrideResponse call() {
+                    return overrideApi.getScheduleOverride(request);
+                }
+            });
+
             if (overrideResponse != null){
                 overrideListWithRotationNames.add(overrideResponse.getData());
             }

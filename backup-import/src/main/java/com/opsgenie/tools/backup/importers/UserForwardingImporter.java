@@ -1,13 +1,12 @@
 package com.opsgenie.tools.backup.importers;
 
-import com.opsgenie.oas.sdk.ApiException;
 import com.opsgenie.oas.sdk.api.ForwardingRuleApi;
-import com.opsgenie.oas.sdk.model.CreateForwardingRulePayload;
-import com.opsgenie.oas.sdk.model.ForwardingRule;
-import com.opsgenie.oas.sdk.model.UpdateForwardingRulePayload;
-import com.opsgenie.oas.sdk.model.UpdateForwardingRuleRequest;
+import com.opsgenie.oas.sdk.model.*;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.ForwardingRetriever;
+import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
+
+import java.util.concurrent.Callable;
 
 
 public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
@@ -46,24 +45,29 @@ public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
     }
 
     @Override
-    protected void createEntity(ForwardingRule entity) throws ApiException {
+    protected void createEntity(ForwardingRule entity) throws Exception {
         if (entity.getEndDate() != null && entity.getEndDate().getMillis() < System.currentTimeMillis()) {
             logger.warn(getEntityIdentifierName(entity) + " end date is in the past.");
             return;
         }
 
-        CreateForwardingRulePayload payload = new CreateForwardingRulePayload();
+        final CreateForwardingRulePayload payload = new CreateForwardingRulePayload();
         payload.setFromUser(entity.getFromUser());
         payload.setToUser(entity.getToUser());
         payload.setStartDate(entity.getStartDate());
         payload.setEndDate(entity.getEndDate());
         payload.setAlias(entity.getAlias());
+        RetryPolicyAdapter.invoke(new Callable<CreateForwardingRuleResponse>() {
+            @Override
+            public CreateForwardingRuleResponse call() {
+                return forwardingRuleApi.createForwardingRule(payload);
+            }
+        });
 
-        forwardingRuleApi.createForwardingRule(payload);
     }
 
     @Override
-    protected void updateEntity(ForwardingRule entity, EntityStatus entityStatus) throws ApiException {
+    protected void updateEntity(ForwardingRule entity, EntityStatus entityStatus) throws Exception {
         if (entity.getEndDate() != null && entity.getEndDate().getMillis() < System.currentTimeMillis()) {
             logger.warn(getEntityIdentifierName(entity) + " end date is in the past.");
             return;
@@ -75,15 +79,20 @@ public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
         payload.setStartDate(entity.getStartDate());
         payload.setEndDate(entity.getEndDate());
 
-        UpdateForwardingRuleRequest request = new UpdateForwardingRuleRequest();
+        final UpdateForwardingRuleRequest request = new UpdateForwardingRuleRequest();
         if (EntityStatus.EXISTS_WITH_ID.equals(entityStatus)) {
             request.setIdentifier(entity.getId());
         } else if (EntityStatus.EXISTS_WITH_NAME.equals(entityStatus)) {
             request.setIdentifier(findForwardingRuleId(entity));
         }
         request.setBody(payload);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return forwardingRuleApi.updateForwardingRule(request);
+            }
+        });
 
-        forwardingRuleApi.updateForwardingRule(request);
     }
 
     private String findForwardingRuleId(ForwardingRule forwardingRuleToImport) {
