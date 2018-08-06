@@ -34,7 +34,7 @@ public class ConfigurationImporter extends BaseBackup {
      * folder or remote git. If git is enabled from BackupProperties parameters it will import those
      * configurations from remote git.
      */
-    void restore() throws GitAPIException, InterruptedException {
+    void restore() throws Exception {
         if (getBackupProperties().isGitEnabled()) {
             cloneGit(getBackupProperties());
         }
@@ -67,6 +67,7 @@ public class ConfigurationImporter extends BaseBackup {
         importers = new ArrayList<Importer>();
         importers.add(new CustomUserRoleImporter(rootPath, config.isAddNewCustomUserRoles(), config.isUpdateExistingCustomUserRoles()));
         importers.add(new UserImporter(rootPath, rateLimitManager, config.isAddNewUsers(), config.isUpdateExistingUsers()));
+        importers.add(new UserNotificationRuleImporter(rootPath, rateLimitManager, config.isAddNewUsers(), config.isUpdateExistingUsers()));
         importers.add(new TeamImporter(rootPath, rateLimitManager, config.isAddNewTeams(), config.isUpdateExistingTeams()));
         importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
         importers.add(new EscalationImporter(rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));

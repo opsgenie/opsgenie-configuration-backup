@@ -25,7 +25,7 @@ abstract class BaseImporter<T> implements Importer {
         this.importDirectory = new File(backupRootDirectory + "/" + getImportDirectoryName() + "/");
     }
 
-    public void restore() {
+    public void restore() throws Exception {
         if (!addEntityEnabled && !updateEntityEnabled) {
             logger.info("Skipping importing " + getImportDirectoryName() + " because both add and update is disabled");
             return;

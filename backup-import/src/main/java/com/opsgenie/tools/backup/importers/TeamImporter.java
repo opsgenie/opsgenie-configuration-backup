@@ -292,7 +292,7 @@ public class TeamImporter extends BaseImporterWithRateLimiting<TeamConfig> {
         UpdateTeamRolePayload payload = new UpdateTeamRolePayload();
         payload.setName(teamRole.getName());
         payload.setRights(teamRole.getRights());
-
+ 
         final UpdateTeamRoleRequest request = new UpdateTeamRoleRequest();
         request.setTeamRoleIdentifier(teamRole.getId());
         request.setIdentifierType(UpdateTeamRoleRequest.IdentifierTypeEnum.ID);
