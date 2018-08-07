@@ -68,10 +68,11 @@ public class ConfigurationImporter extends BaseBackup {
         importers.add(new CustomUserRoleImporter(rootPath, config.isAddNewCustomUserRoles(), config.isUpdateExistingCustomUserRoles()));
         importers.add(new UserImporter(rootPath, rateLimitManager, config.isAddNewUsers(), config.isUpdateExistingUsers()));
         importers.add(new UserNotificationRuleImporter(rootPath, rateLimitManager, config.isAddNewUsers(), config.isUpdateExistingUsers()));
-        importers.add(new TeamImporter(rootPath, rateLimitManager, config.isAddNewTeams(), config.isUpdateExistingTeams()));
+        importers.add(new TeamTemplateImporter(rootPath, rateLimitManager, config.isAddNewTeams(), config.isUpdateExistingTeams()));
         importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
         importers.add(new EscalationImporter(rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
         importers.add(new ScheduleImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
+        importers.add(new TeamImporter(rootPath, rateLimitManager, config.isAddNewTeams(), config.isUpdateExistingTeams()));
         importers.add(new UserForwardingImporter(rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
         importers.add(new DeprecatedPolicyImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));
         importers.add(new IntegrationImporter(rootPath, rateLimitManager, config.isAddNewIntegrations(), config.isUpdateExistingIntegrations()));

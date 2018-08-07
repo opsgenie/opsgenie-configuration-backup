@@ -15,6 +15,7 @@ import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class IntegrationImporter extends BaseImporterWithRateLimiting<IntegrationConfig> {
@@ -133,5 +134,6 @@ public class IntegrationImporter extends BaseImporterWithRateLimiting<Integratio
     }
 
     @Override
-    protected void updateTeamIds(IntegrationConfig entity) {}
+    protected void updateTeamIds(IntegrationConfig entity) throws Exception {}
+
 }
