@@ -171,4 +171,7 @@ public class DeprecatedPolicyImporter extends BaseImporter<DeprecatedAlertPolicy
         }
         return null;
     }
+
+    @Override
+    protected void updateTeamIds(DeprecatedAlertPolicy entity) {}
 }

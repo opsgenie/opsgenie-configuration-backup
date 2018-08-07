@@ -10,14 +10,13 @@ import com.opsgenie.tools.backup.dto.PolicyWithTeamInfo;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.PolicyOrderRetriever;
 import com.opsgenie.tools.backup.retrieval.PolicyRetriever;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 /**
@@ -28,11 +27,13 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
 
     private static PolicyApi api = new PolicyApi();
     private String rootPath;
+    private RateLimitManager rateLimitManager;
     private List<PolicyConfig> policyOrderConfigFromFile = new ArrayList<PolicyConfig>();
 
-    public PolicyImporter(String backupRootDirectory, boolean addEntity, boolean updateEntity) {
+    public PolicyImporter(String backupRootDirectory, RateLimitManager rateLimitManager, boolean addEntity, boolean updateEntity) {
         super(backupRootDirectory, addEntity, updateEntity);
         this.rootPath = backupRootDirectory;
+        this.rateLimitManager = rateLimitManager;
     }
 
     @Override
@@ -131,6 +132,39 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
             }
         } catch (Exception e) {
             logger.error("Could not read policy V2 orders" + e.getMessage());
+        }
+    }
+
+    @Override
+    protected void updateTeamIds(PolicyWithTeamInfo entity) throws Exception {
+        Map<String, String> teamIdMap = new TeamIdMapper(rateLimitManager).getTeamIdMap();
+
+        if(entity.getTeamId() != null) {
+            String teamName = entity.getTeamName();
+
+            if(entity.getPolicy().getClass() == AlertPolicy.class) {
+                AlertPolicy alertPolicy = (AlertPolicy) entity.getPolicy();
+                for(Responder responder : alertPolicy.getResponders()) {
+                    if(responder.getId().equals(entity.getTeamId())) {
+                        responder.setId(teamIdMap.get(teamName));
+                    }
+                }
+            }
+
+            entity.setTeamId(teamIdMap.get(teamName));
+            entity.getPolicy().setTeamId(teamIdMap.get(teamName));
+        }
+
+        else {
+            AlertPolicy alertPolicy = (AlertPolicy) entity.getPolicy();
+
+            for(Responder responder : alertPolicy.getResponders()) {
+                String responderId = responder.getId();
+                String teamName;
+                if((teamName = oldTeamIdMap.get(responderId)) != null) {
+                    responder.setId(teamIdMap.get(teamName));
+                }
+            }
         }
     }
 

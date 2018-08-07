@@ -8,10 +8,12 @@ import com.opsgenie.oas.sdk.model.Policy;
  */
 public class PolicyWithTeamInfo {
     String teamId;
+    String teamName;
     Policy policy;
 
-    public PolicyWithTeamInfo(String teamId, Policy policy){
+    public PolicyWithTeamInfo(String teamId, String teamName, Policy policy){
         this.teamId = teamId;
+        this.teamName = teamName;
         this.policy = policy;
     }
     public PolicyWithTeamInfo(){
@@ -24,6 +26,15 @@ public class PolicyWithTeamInfo {
 
     public PolicyWithTeamInfo setTeamId(String teamId) {
         this.teamId = teamId;
+        return this;
+    }
+
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public PolicyWithTeamInfo setTeamName(String teamName) {
+        this.teamName = teamName;
         return this;
     }
 

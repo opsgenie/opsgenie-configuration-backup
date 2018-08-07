@@ -131,4 +131,7 @@ public class IntegrationImporter extends BaseImporterWithRateLimiting<Integratio
     protected String getEntityIdentifierName(IntegrationConfig entity) {
         return "Integration " + entity.getIntegration().getName();
     }
+
+    @Override
+    protected void updateTeamIds(IntegrationConfig entity) {}
 }

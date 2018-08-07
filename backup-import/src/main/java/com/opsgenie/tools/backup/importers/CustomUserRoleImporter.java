@@ -97,4 +97,7 @@ public class CustomUserRoleImporter extends BaseImporter<CustomUserRole> {
         return "CustomUserRole " + entity.getName();
     }
 
+    @Override
+    protected void updateTeamIds(CustomUserRole entity) {}
+
 }

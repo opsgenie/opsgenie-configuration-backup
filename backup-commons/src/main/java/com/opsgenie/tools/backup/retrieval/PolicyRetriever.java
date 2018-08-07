@@ -42,7 +42,7 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
             }
         });
 
-        getPolicies(globalPolicies, null);
+        getPolicies(globalPolicies, null, null);
     }
 
     public void retrieveTeamPolicies() throws Exception {
@@ -55,12 +55,12 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
         });
 
         for (Team teamMeta : teams){
-            getAlertPolicies(teamMeta.getId());
-            getNotificationPolicies(teamMeta.getId());
+            getAlertPolicies(teamMeta.getId(), teamMeta.getName());
+            getNotificationPolicies(teamMeta.getId(), teamMeta.getName());
         }
     }
 
-    public void getAlertPolicies(final String teamId) throws Exception {
+    public void getAlertPolicies(final String teamId, final String teamName) throws Exception {
         logger.info("Retrieving alert policy list for team with id: " + teamId);
         ListPoliciesResponse listAlertPoliciesResponse = RetryPolicyAdapter.invoke(new Callable<ListPoliciesResponse>() {
             @Override
@@ -70,10 +70,10 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
         });
 
         List<PolicyMeta> policyMetaList = listAlertPoliciesResponse.getData();
-        getPolicies(policyMetaList, teamId);
+        getPolicies(policyMetaList, teamId, teamName);
     }
 
-    public void getNotificationPolicies(final String teamId) throws Exception {
+    public void getNotificationPolicies(final String teamId, String teamName) throws Exception {
         logger.info("Retrieving notification policy list for team with id: " + teamId);
         ListPoliciesResponse listNotfPoliciesResponse = RetryPolicyAdapter.invoke(new Callable<ListPoliciesResponse>() {
             @Override
@@ -84,10 +84,10 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
 
         List<PolicyMeta> notfPolicyMetaList = listNotfPoliciesResponse.getData();
 
-        getPolicies(notfPolicyMetaList, teamId);
+        getPolicies(notfPolicyMetaList, teamId, teamName);
     }
 
-    public void getPolicies(List<PolicyMeta> policyMetaList, final String teamId) throws Exception {
+    public void getPolicies(List<PolicyMeta> policyMetaList, final String teamId, final String teamName) throws Exception {
         if (policyMetaList != null){
             for (final PolicyMeta policyMeta : policyMetaList){
                 GetPolicyResponse policyResponse = RetryPolicyAdapter.invoke(new Callable<GetPolicyResponse>() {
@@ -99,7 +99,7 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
 
                 Policy policy = policyResponse.getData();
                 if (policy != null){
-                    policies.add(new PolicyWithTeamInfo(teamId, policy));
+                    policies.add(new PolicyWithTeamInfo(teamId, teamName, policy));
                 }
             }
         }

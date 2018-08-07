@@ -316,4 +316,9 @@ public class TeamImporter extends BaseImporterWithRateLimiting<TeamConfig> {
     protected String getEntityIdentifierName(TeamConfig entity) {
         return "Team " + entity.getTeam().getName();
     }
+
+    @Override
+    protected void updateTeamIds(TeamConfig entity) {
+        oldTeamIdMap.put(entity.getTeam().getId(), entity.getTeam().getName());
+    }
 }

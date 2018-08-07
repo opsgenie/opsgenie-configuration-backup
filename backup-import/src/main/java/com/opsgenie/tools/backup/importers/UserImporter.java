@@ -176,4 +176,7 @@ public class UserImporter extends BaseImporterWithRateLimiting<UserConfig> {
     protected String getEntityIdentifierName(UserConfig entity) {
         return "User " + entity.getUser().getUsername();
     }
+
+    @Override
+    protected void updateTeamIds(UserConfig entity) {}
 }

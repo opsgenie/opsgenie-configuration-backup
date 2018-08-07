@@ -87,4 +87,7 @@ public class MaintenanceImporter extends BaseImporter<Maintenance> {
     protected Maintenance getNewInstance() {
         return new Maintenance();
     }
+
+    @Override
+    protected void updateTeamIds(Maintenance entity) {}
 }
