@@ -134,6 +134,15 @@ public class IntegrationImporter extends BaseImporterWithRateLimiting<Integratio
     }
 
     @Override
-    protected void updateTeamIds(IntegrationConfig entity) throws Exception {}
+    protected void updateTeamIds(IntegrationConfig entity) throws Exception {
+        Map<String, String> teamIdMap = new TeamIdMapper(rateLimitManager).getTeamIdMap();
+        TeamMeta ownerTeam;
+        if((ownerTeam = entity.getIntegration().getOwnerTeam()) != null) {
+            String newTeamId;
+            if((newTeamId = teamIdMap.get(ownerTeam.getName())) != null) {
+                ownerTeam.setId(newTeamId);
+            }
+        }
+    }
 
 }
