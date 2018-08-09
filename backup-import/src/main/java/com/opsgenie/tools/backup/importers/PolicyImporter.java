@@ -97,7 +97,7 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
     }
 
     @Override
-    protected void updateEntityOrders() {
+    protected void updateEntityOrders() throws Exception {
         try {
             String entityJson = BackupUtils.readFile(rootPath + "/ordersV2/PolicyOrders.json");
             this.policyOrderConfigFromFile = BackupUtils.readWithTypeReference(entityJson);
@@ -106,8 +106,10 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
             return;
         }
         List<PolicyConfig> currentOrderConfigs;
+        Map<String, String> teamIdMap;
         try {
             currentOrderConfigs = new PolicyOrderRetriever().retrieveEntities();
+            teamIdMap = new TeamIdMapper(rateLimitManager).getTeamIdMap();
             if (equalsIgnoreOrder(currentOrderConfigs, this.policyOrderConfigFromFile)) {
                 return;
             }
@@ -121,7 +123,8 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
                 ChangePolicyOrderPayload body = new ChangePolicyOrderPayload();
                 body.setTargetIndex(size + config.getOrder());
                 params.setBody(body);
-                params.setTeamId(config.getTeam());
+                String teamName = oldTeamIdMap.get(config.getTeam());
+                params.setTeamId(teamIdMap.get(teamName));
                 RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
                     @Override
                     public SuccessResponse call() throws Exception {

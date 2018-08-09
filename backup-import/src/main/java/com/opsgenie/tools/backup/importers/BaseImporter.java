@@ -127,6 +127,6 @@ abstract class BaseImporter<T> implements Importer {
 
     protected abstract String getImportDirectoryName();
 
-    protected void updateEntityOrders() {
+    protected void updateEntityOrders() throws Exception {
     }
 }
