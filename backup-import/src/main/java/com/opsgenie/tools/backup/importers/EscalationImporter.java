@@ -118,4 +118,7 @@ public class EscalationImporter extends BaseImporter<Escalation> {
         return "Escalation " + entity.getName();
     }
 
+    @Override
+    protected void updateTeamIds(Escalation entity) {}
+
 }

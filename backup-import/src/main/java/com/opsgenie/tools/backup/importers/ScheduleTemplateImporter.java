@@ -69,4 +69,7 @@ public class ScheduleTemplateImporter extends BaseImporter<ScheduleConfig> {
     protected String getEntityIdentifierName(ScheduleConfig entity) {
         return "Schedule " + entity.getSchedule().getName();
     }
+
+    @Override
+    protected void updateTeamIds(ScheduleConfig entity) {}
 }

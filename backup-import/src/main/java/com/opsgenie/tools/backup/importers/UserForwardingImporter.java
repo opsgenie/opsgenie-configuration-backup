@@ -108,4 +108,7 @@ public class UserForwardingImporter extends BaseImporter<ForwardingRule> {
     protected String getEntityIdentifierName(ForwardingRule forwardingRule) {
         return "Forwarding from user " + forwardingRule.getFromUser().getUsername();
     }
+
+    @Override
+    protected void updateTeamIds(ForwardingRule entity) {}
 }

@@ -15,6 +15,7 @@ import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class IntegrationImporter extends BaseImporterWithRateLimiting<IntegrationConfig> {
@@ -131,4 +132,17 @@ public class IntegrationImporter extends BaseImporterWithRateLimiting<Integratio
     protected String getEntityIdentifierName(IntegrationConfig entity) {
         return "Integration " + entity.getIntegration().getName();
     }
+
+    @Override
+    protected void updateTeamIds(IntegrationConfig entity) throws Exception {
+        Map<String, String> teamIdMap = new TeamIdMapper(rateLimitManager).getTeamIdMap();
+        TeamMeta ownerTeam;
+        if((ownerTeam = entity.getIntegration().getOwnerTeam()) != null) {
+            String newTeamId;
+            if((newTeamId = teamIdMap.get(ownerTeam.getName())) != null) {
+                ownerTeam.setId(newTeamId);
+            }
+        }
+    }
+
 }

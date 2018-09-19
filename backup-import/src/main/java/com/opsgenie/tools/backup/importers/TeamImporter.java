@@ -21,8 +21,8 @@ public class TeamImporter extends BaseImporterWithRateLimiting<TeamConfig> {
     private static TeamRoutingRuleApi teamRoutingRuleApi = new TeamRoutingRuleApi();
     private static TeamRoleApi teamRoleApi = new TeamRoleApi();
 
-    public TeamImporter(String backupRootDirectory, RateLimitManager rateLimitManager, boolean addEntity, boolean updateEntitiy) {
-        super(backupRootDirectory, rateLimitManager, addEntity, updateEntitiy);
+    public TeamImporter(String backupRootDirectory, RateLimitManager rateLimitManager, boolean addEntity, boolean updateEntity) {
+        super(backupRootDirectory, rateLimitManager, addEntity, updateEntity);
     }
 
     @Override
@@ -55,93 +55,8 @@ public class TeamImporter extends BaseImporterWithRateLimiting<TeamConfig> {
 
     @Override
     protected void createEntity(TeamConfig entity) throws Exception {
-        final CreateTeamPayload payload = new CreateTeamPayload();
-        final Team team = entity.getTeam();
-        payload.setName(team.getName());
+        throw new IllegalStateException("This should not happen because the team template importer should create all of the teams");
 
-        if (BackupUtils.checkValidString(team.getDescription()))
-            payload.setDescription(team.getDescription());
-
-        payload.setMembers(new ArrayList<TeamMember>());
-        final SuccessResponse teamCreateResult = RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
-            @Override
-            public SuccessResponse call() throws Exception {
-                return teamApi.createTeam(payload);
-            }
-        });
-
-        final List<TeamRoutingRule> teamRoutingRules = entity.getTeamRoutingRules();
-        if (teamRoutingRules != null) {
-            for (TeamRoutingRule teamRoutingRule : teamRoutingRules) {
-                if (teamRoutingRule.isIsDefault()) {
-                    logger.info("Skipping default routing rule");
-                } else {
-                    createTeamRoutingRule(team, teamRoutingRule);
-                }
-            }
-        }
-        final List<TeamRole> teamRoles = entity.getTeamRoles();
-        if (teamRoles != null) {
-            for (TeamRole teamRole : teamRoles) {
-                createTeamRole(team, teamRole);
-            }
-        }
-
-        // Set members after adding custom team roles
-        UpdateTeamPayload updateTeamPayload = new UpdateTeamPayload();
-        updateTeamPayload.setName(teamCreateResult.getData().getName());
-        if (BackupUtils.checkValidString(team.getDescription())) {
-            updateTeamPayload.setDescription(team.getDescription());
-        }
-        updateTeamPayload.setMembers(team.getMembers());
-        final UpdateTeamRequest request = new UpdateTeamRequest().body(updateTeamPayload);
-        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
-            @Override
-            public SuccessResponse call() throws Exception {
-                return teamApi.updateTeam(request.identifier(teamCreateResult.getData().getId()));
-            }
-        });
-
-    }
-
-    private void createTeamRoutingRule(Team team, TeamRoutingRule teamRoutingRule) throws Exception {
-        CreateTeamRoutingRulePayload payload = new CreateTeamRoutingRulePayload();
-        payload.setCriteria(teamRoutingRule.getCriteria());
-        payload.setName(teamRoutingRule.getName());
-        payload.setNotify(teamRoutingRule.getNotify().id(null));
-        payload.setOrder(teamRoutingRule.getOrder());
-        payload.setTimeRestriction(teamRoutingRule.getTimeRestriction());
-        payload.setTimezone(teamRoutingRule.getTimezone());
-
-        final CreateTeamRoutingRuleRequest request = new CreateTeamRoutingRuleRequest();
-        request.setIdentifier(team.getName());
-        request.setTeamIdentifierType(CreateTeamRoutingRuleRequest.TeamIdentifierTypeEnum.NAME);
-        request.setBody(payload);
-
-        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
-            @Override
-            public SuccessResponse call() throws Exception {
-                return teamRoutingRuleApi.createTeamRoutingRule(request);
-            }
-        });
-
-    }
-
-    private void createTeamRole(Team team, TeamRole teamRole) throws Exception {
-        CreateTeamRolePayload payload = new CreateTeamRolePayload();
-        payload.setName(teamRole.getName());
-        payload.setRights(teamRole.getRights());
-
-        final AddTeamRoleRequest request = new AddTeamRoleRequest();
-        request.setIdentifier(team.getName());
-        request.setTeamIdentifierType(AddTeamRoleRequest.TeamIdentifierTypeEnum.NAME);
-        request.setBody(payload);
-        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
-            @Override
-            public SuccessResponse call() throws Exception {
-                return teamRoleApi.createTeamRole(request);
-            }
-        });
     }
 
     @Override
@@ -227,6 +142,47 @@ public class TeamImporter extends BaseImporterWithRateLimiting<TeamConfig> {
 
     }
 
+    private void createTeamRoutingRule(Team team, TeamRoutingRule teamRoutingRule) throws Exception {
+        CreateTeamRoutingRulePayload payload = new CreateTeamRoutingRulePayload();
+        payload.setCriteria(teamRoutingRule.getCriteria());
+        payload.setName(teamRoutingRule.getName());
+        payload.setNotify(teamRoutingRule.getNotify().id(null));
+        payload.setOrder(teamRoutingRule.getOrder());
+        payload.setTimeRestriction(teamRoutingRule.getTimeRestriction());
+        payload.setTimezone(teamRoutingRule.getTimezone());
+
+        final CreateTeamRoutingRuleRequest request = new CreateTeamRoutingRuleRequest();
+        request.setIdentifier(team.getName());
+        request.setTeamIdentifierType(CreateTeamRoutingRuleRequest.TeamIdentifierTypeEnum.NAME);
+        request.setBody(payload);
+
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return teamRoutingRuleApi.createTeamRoutingRule(request);
+            }
+        });
+
+    }
+
+    private void createTeamRole(Team team, TeamRole teamRole) throws Exception {
+        CreateTeamRolePayload payload = new CreateTeamRolePayload();
+        payload.setName(teamRole.getName());
+        payload.setRights(teamRole.getRights());
+
+        final AddTeamRoleRequest request = new AddTeamRoleRequest();
+        request.setIdentifier(team.getName());
+        request.setTeamIdentifierType(AddTeamRoleRequest.TeamIdentifierTypeEnum.NAME);
+        request.setBody(payload);
+        RetryPolicyAdapter.invoke(new Callable<SuccessResponse>() {
+            @Override
+            public SuccessResponse call() throws Exception {
+                return teamRoleApi.createTeamRole(request);
+            }
+        });
+    }
+
+
     private String findTeamIdInCurrentTeams(TeamConfig entity) {
         for (TeamConfig teamConfig : currentConfigs) {
             if (entity.getTeam().getName().equals(teamConfig.getTeam().getName())) {
@@ -292,7 +248,7 @@ public class TeamImporter extends BaseImporterWithRateLimiting<TeamConfig> {
         UpdateTeamRolePayload payload = new UpdateTeamRolePayload();
         payload.setName(teamRole.getName());
         payload.setRights(teamRole.getRights());
-
+ 
         final UpdateTeamRoleRequest request = new UpdateTeamRoleRequest();
         request.setTeamRoleIdentifier(teamRole.getId());
         request.setIdentifierType(UpdateTeamRoleRequest.IdentifierTypeEnum.ID);
@@ -315,5 +271,10 @@ public class TeamImporter extends BaseImporterWithRateLimiting<TeamConfig> {
     @Override
     protected String getEntityIdentifierName(TeamConfig entity) {
         return "Team " + entity.getTeam().getName();
+    }
+
+    @Override
+    protected void updateTeamIds(TeamConfig entity) {
+        oldTeamIdMap.put(entity.getTeam().getId(), entity.getTeam().getName());
     }
 }

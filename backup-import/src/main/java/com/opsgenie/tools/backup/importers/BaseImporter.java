@@ -10,13 +10,16 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 abstract class BaseImporter<T> implements Importer {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected File importDirectory;
     private boolean addEntityEnabled;
     private boolean updateEntityEnabled;
+    protected static Map<String, String> oldTeamIdMap = new HashMap<String, String>();
     List<T> currentConfigs = new ArrayList<T>();
 
     BaseImporter(String backupRootDirectory, boolean addEntityEnabled, boolean updateEntityEnabled) {
@@ -25,7 +28,7 @@ abstract class BaseImporter<T> implements Importer {
         this.importDirectory = new File(backupRootDirectory + "/" + getImportDirectoryName() + "/");
     }
 
-    public void restore() {
+    public void restore() throws Exception {
         if (!addEntityEnabled && !updateEntityEnabled) {
             logger.info("Skipping importing " + getImportDirectoryName() + " because both add and update is disabled");
             return;
@@ -47,6 +50,7 @@ abstract class BaseImporter<T> implements Importer {
         for (String fileName : files) {
             T entity = readEntity(fileName);
             if (entity != null) {
+                updateTeamIds(entity);
                 importEntity(entity);
             }
         }
@@ -105,6 +109,8 @@ abstract class BaseImporter<T> implements Importer {
         }
     }
 
+    protected abstract void updateTeamIds(T entity) throws Exception;
+
     protected abstract EntityRetriever<T> initializeEntityRetriever();
 
     protected abstract EntityStatus checkEntity(T entity) throws ApiException;
@@ -121,6 +127,6 @@ abstract class BaseImporter<T> implements Importer {
 
     protected abstract String getImportDirectoryName();
 
-    protected void updateEntityOrders() {
+    protected void updateEntityOrders() throws Exception {
     }
 }
