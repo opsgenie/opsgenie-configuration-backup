@@ -20,6 +20,7 @@ public class ExportMain {
         CommandLineArgs commandLineArgs = new CommandLineArgs();
         final JCommander argumentParser = new JCommander(commandLineArgs);
         argumentParser.setProgramName("OpsGenieConfigExporter");
+        argumentParser.setCaseSensitiveOptions(false);
         try {
             argumentParser.parse(args);
         } catch (Exception e) {
