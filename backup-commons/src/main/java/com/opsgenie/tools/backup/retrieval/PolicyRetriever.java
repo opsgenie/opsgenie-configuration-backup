@@ -50,7 +50,7 @@ public class PolicyRetriever  implements EntityRetriever<PolicyWithTeamInfo> {
         final List<Team> teams = RetryPolicyAdapter.invoke(new Callable<List<Team>>() {
             @Override
             public List<Team> call()  {
-                return teamApi.listTeams(new ArrayList<String>()).getData();
+                return teamApi.listTeams().getData();
             }
         });
 
