@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class RetryPolicyAdapter {
     private static final Logger logger = LoggerFactory.getLogger(RetryPolicyAdapter.class);
+    private static final int MAX_SLEEP_TIME = 72000;
     private static final int RATE_LIMITING_STATUS_CODE = 429;
     private static final int DEFAULT_MAX_RETRIES = 20;
     private static AtomicInteger configurationRetryCount = new AtomicInteger();
@@ -20,6 +21,7 @@ public class RetryPolicyAdapter {
     private static int configLimitInMin = 0;
     private static int searchLimitInMin = 0;
     private static boolean initialized = false;
+    private static Long lastRetryCountChange = System.currentTimeMillis();
 
     public static void init(RateLimitManager rateLimitManager) {
         configLimitInMin = rateLimitManager.getRateLimit(DomainNames.CONFIGURATION, 60);
@@ -32,7 +34,6 @@ public class RetryPolicyAdapter {
         if (!initialized) {
             throw new IllegalStateException("RetryPolicyAdapter should be initialized before invoking api calls");
         }
-        AtomicInteger apiRequestCounter = getCounterForDomain(domain);
         AtomicInteger retryCountForDomain = getRetryCountForDomain(domain);
         while (retryCountForDomain.get() < DEFAULT_MAX_RETRIES) {
             try {
@@ -57,7 +58,7 @@ public class RetryPolicyAdapter {
     }
 
     private static boolean isInternalServerError(ApiException e) {
-        return e.getCode() >= HttpStatus.SC_INTERNAL_SERVER_ERROR ;
+        return e.getCode() >= HttpStatus.SC_INTERNAL_SERVER_ERROR;
     }
 
     private static boolean isRateLimited(ApiException e) {
@@ -67,10 +68,25 @@ public class RetryPolicyAdapter {
 
     private static void sleepAndIncrementCounter(DomainNames domain) throws InterruptedException {
         AtomicInteger retryCount = getRetryCountForDomain(domain);
-        long sleepDuration = 200 * (long) Math.pow(2, retryCount.get());
+        long sleepDuration = calculateSleepTime(retryCount);
+        increaseRetryCount(sleepDuration, retryCount);
         logger.info("sleeping for " + sleepDuration + " milliseconds.");
         Thread.sleep(sleepDuration);
-        retryCount.incrementAndGet();
+    }
+
+    private static long calculateSleepTime(AtomicInteger retryCount){
+        long sleepTime = 200 * (long) Math.pow(2, retryCount.get());
+        if(sleepTime > MAX_SLEEP_TIME)
+            return MAX_SLEEP_TIME;
+        else
+            return sleepTime;
+    }
+
+    private static synchronized void increaseRetryCount(long sleepDuration, AtomicInteger retryCount) {
+        if (sleepDuration + lastRetryCountChange  < System.currentTimeMillis()) {
+            lastRetryCountChange = System.currentTimeMillis();
+            retryCount.getAndIncrement();
+        }
     }
 
     private static AtomicInteger getRetryCountForDomain(DomainNames domain) {
@@ -80,7 +96,8 @@ public class RetryPolicyAdapter {
     private static AtomicInteger getCounterForDomain(DomainNames domain) {
         return domain == DomainNames.SEARCH ? searchApiCalls : configurationApiCalls;
     }
-    private static int getLimitForDomain(DomainNames domain){
+
+    private static int getLimitForDomain(DomainNames domain) {
         return domain == DomainNames.SEARCH ? searchLimitInMin : configLimitInMin;
     }
 
