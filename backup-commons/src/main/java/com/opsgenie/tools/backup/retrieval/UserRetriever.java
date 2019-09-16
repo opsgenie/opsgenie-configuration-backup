@@ -10,10 +10,7 @@ import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class UserRetriever implements EntityRetriever<UserConfig> {
@@ -132,6 +129,7 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
                         }
                     }
                     userConfigWrapper.setUser(user);
+                    sortNotificationRules(rules);
                     userConfigWrapper.setNotificationRuleList(rules);
                     usersWithNotificationRules.add(userConfigWrapper);
                 }
@@ -142,6 +140,15 @@ public class UserRetriever implements EntityRetriever<UserConfig> {
             logger.info("Populating user notification rules:" + usersWithNotificationRules.size() + "/" + users.size());
         }
         return new ArrayList<UserConfig>(usersWithNotificationRules);
+    }
+
+    private void sortNotificationRules(List<NotificationRule> rules) {
+        Collections.sort(rules, new Comparator<NotificationRule>() {
+            @Override
+            public int compare(NotificationRule o1, NotificationRule o2) {
+                return o1.getId().compareToIgnoreCase(o2.getId());
+            }
+        });
     }
 
 }

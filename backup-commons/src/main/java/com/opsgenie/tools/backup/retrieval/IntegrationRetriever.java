@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -36,7 +38,7 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
         logger.info("Retrieving current integration configurations");
         final List<IntegrationMeta> integrationMetaList = RetryPolicyAdapter.invoke(new Callable<List<IntegrationMeta>>() {
             @Override
-            public List<IntegrationMeta> call()  {
+            public List<IntegrationMeta> call() {
                 return integrationApi.listIntegrations(new ListIntegrationRequest()).getData();
             }
         });
@@ -49,6 +51,7 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
                 public void run() {
                     try {
                         final IntegrationConfig integrationConfig = populateIntegrationActions(meta);
+                        sortIntegrationReadOnly(integrationConfig);
                         integrations.add(integrationConfig);
                     } catch (Exception e) {
                         logger.error("Could not retrieve integration with id: " + meta.getId() + " name:" + meta.getName() + "." + e.getMessage());
@@ -63,11 +66,20 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
         return new ArrayList<IntegrationConfig>(integrations);
     }
 
+    private void sortIntegrationReadOnly(IntegrationConfig integrationConfig) {
+        Collections.sort(integrationConfig.getIntegration().getReadOnly(), new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.compareToIgnoreCase(o2);
+            }
+        });
+    }
+
     private IntegrationConfig populateIntegrationActions(final IntegrationMeta meta) throws Exception {
         final IntegrationConfig integrationConfig = new IntegrationConfig();
         final Integration integration = RetryPolicyAdapter.invoke(new Callable<Integration>() {
             @Override
-            public Integration call()  {
+            public Integration call() {
                 return integrationApi.getIntegration(meta.getId()).getData();
             }
         });
@@ -77,11 +89,11 @@ public class IntegrationRetriever implements EntityRetriever<IntegrationConfig> 
         integrationConfig.setIntegration(integration);
         try {
             integrationConfig.setIntegrationActions(RetryPolicyAdapter.invoke(new Callable<ActionCategorized>() {
-                        @Override
-                        public ActionCategorized call()  {
-                            return integrationActionApi.listIntegrationActions(meta.getId()).getData();
-                        }
-                    }));
+                @Override
+                public ActionCategorized call() {
+                    return integrationActionApi.listIntegrationActions(meta.getId()).getData();
+                }
+            }));
 
         } catch (Exception e) {
             logger.info(integration.getName() + " is not an advanced integration, so not exporting actions");

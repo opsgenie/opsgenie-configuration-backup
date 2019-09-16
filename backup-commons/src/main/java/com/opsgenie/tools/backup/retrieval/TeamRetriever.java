@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -56,7 +58,7 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
                                 return teamRoutingRuleApi.listTeamRoutingRules(new ListTeamRoutingRulesRequest().identifier(teamMeta.getId())).getData();
                             }
                         });
-
+                        sortRoutingRules(routingRules);
                         teamConfig.setTeamRoutingRules(routingRules);
                     } catch (Exception e) {
                         failed = true;
@@ -78,7 +80,7 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
                                 return teamRoleApi.listTeamRoles(new ListTeamRolesRequest().identifier(teamMeta.getId())).getData();
                             }
                         });
-
+                        sortTeamRules(teamRoles);
                         teamConfig.setTeamRoles(teamRoles);
                     } catch (Exception e) {
                         failed = true;
@@ -96,5 +98,23 @@ public class TeamRetriever implements EntityRetriever<TeamConfig> {
             logger.info("Populating team routing rules:" + teamsWithDetails.size() + "/" + teams.size());
         }
         return new ArrayList<TeamConfig>(teamsWithDetails);
+    }
+
+    private void sortTeamRules(List<TeamRole> teamRoles) {
+        Collections.sort(teamRoles, new Comparator<TeamRole>() {
+            @Override
+            public int compare(TeamRole o1, TeamRole o2) {
+                return o1.getId().compareToIgnoreCase(o2.getId());
+            }
+        });
+    }
+
+    private void sortRoutingRules(List<TeamRoutingRule> routingRules) {
+        Collections.sort(routingRules, new Comparator<TeamRoutingRule>() {
+            @Override
+            public int compare(TeamRoutingRule o1, TeamRoutingRule o2) {
+                return o1.getId().compareToIgnoreCase(o2.getId());
+            }
+        });
     }
 }
