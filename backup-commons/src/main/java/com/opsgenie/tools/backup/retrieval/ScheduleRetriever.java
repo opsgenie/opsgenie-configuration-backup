@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -46,11 +47,25 @@ public class ScheduleRetriever implements EntityRetriever<ScheduleConfig> {
             scheduleConfig.setSchedule(schedule);
             scheduleConfigs.add(scheduleConfig);
             if (includeOverrides) {
-                scheduleConfig.setScheduleOverrideList(listScheduleOverrides(schedule));
+                List<ScheduleOverride> scheduleOverrides = listScheduleOverrides(schedule);
+                sortScheduleOverrides(scheduleOverrides);
+                scheduleConfig.setScheduleOverrideList(scheduleOverrides);
             }
         }
         return scheduleConfigs;
 
+    }
+
+    private void sortScheduleOverrides(List<ScheduleOverride> scheduleOverrides) {
+        Collections.sort(scheduleOverrides, new Comparator<ScheduleOverride>() {
+            @Override
+            public int compare(ScheduleOverride o1, ScheduleOverride o2) {
+                if(o1.getParent() != null && o2.getParent() != null){
+                    return o1.getParent().getId().compareToIgnoreCase(o2.getParent().getId());
+                }
+                return 0;
+            }
+        });
     }
 
     private List<ScheduleOverride> listScheduleOverrides(Schedule schedule) {

@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -34,11 +36,28 @@ public class CustomUserRoleRetriever implements EntityRetriever<CustomUserRole>{
             customUserRoleList.add(RetryPolicyAdapter.invoke(new Callable<CustomUserRole>() {
                         @Override
                         public CustomUserRole call() {
-                            return customUserRoleApi.getCustomUserRole(request).getData();
+                            CustomUserRole data = customUserRoleApi.getCustomUserRole(request).getData();
+                            sortCustomUserRoleRights(data);
+                            return data;
                         }
                     }));
 
         }
         return customUserRoleList;
+    }
+
+    private void sortCustomUserRoleRights(CustomUserRole customUserRole) {
+        Collections.sort(customUserRole.getDisallowedRights(), new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.compareToIgnoreCase(o2);
+            }
+        });
+        Collections.sort(customUserRole.getGrantedRights(), new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.compareToIgnoreCase(o2);
+            }
+        });
     }
 }
