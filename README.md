@@ -7,13 +7,14 @@ You can download the executable jars from [releases]( https://github.com/opsgeni
 ## Parameters
   Options:
   * --apiKey
-       Opsgenie Integration API Key. (API Key is mandatory)
+       Opsgenie Integration API Key. (API Key is mandatory)  
+       + Access Rights: [Read and Configuration Access](https://docs.opsgenie.com/docs/api-key-management#section-access-rights-)
   *  --backupPath
        Backup directory
-       Default: /Users/baris/git/client-configuration-backup
+       + Default: /Users/baris/git/client-configuration-backup
   *  --opsgenieHost
        OpsGenie host to use
-       Default: https://api.opsgenie.com
+       + Default: https://api.opsgenie.com
   *  --sshKeyPath
        Ssh key path
   *  --sshPassPhrase
