@@ -42,6 +42,8 @@ public class ScheduleRetriever implements EntityRetriever<ScheduleConfig> {
             }
         });
 
+        sortScheduleTimeRestrictions(schedules);
+
         for (Schedule schedule : schedules) {
             ScheduleConfig scheduleConfig = new ScheduleConfig();
             scheduleConfig.setSchedule(schedule);
@@ -54,6 +56,43 @@ public class ScheduleRetriever implements EntityRetriever<ScheduleConfig> {
         }
         return scheduleConfigs;
 
+    }
+
+    private void sortScheduleTimeRestrictions(List<Schedule> schedules) {
+        for(Schedule schedule: schedules) {
+            for(ScheduleRotation scheduleRotation: schedule.getRotations()) {
+                if(scheduleRotation.getTimeRestriction() instanceof WeekdayTimeRestrictionInterval) {
+                    WeekdayTimeRestrictionInterval weekdayTimeRestrictionInterval = (WeekdayTimeRestrictionInterval) scheduleRotation.getTimeRestriction();
+                    List<WeekdayTimeRestriction> restrictions = weekdayTimeRestrictionInterval.getRestrictions();
+                    Collections.sort(restrictions, new Comparator<WeekdayTimeRestriction>() {
+                        @Override
+                        public int compare(WeekdayTimeRestriction o1, WeekdayTimeRestriction o2) {
+                            return compareWeekdayTimeRestriction(o1, o2);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    private int compareWeekdayTimeRestriction(WeekdayTimeRestriction o1, WeekdayTimeRestriction o2) {
+        int r = o1.getStartDay().compareTo(o2.getStartDay());
+        if(r != 0) return r;
+
+        r = o1.getStartHour().compareTo(o2.getStartHour());
+        if(r != 0) return r;
+
+        r = o1.getStartMin().compareTo(o2.getStartMin());
+        if(r != 0) return r;
+
+        r = o1.getEndDay().compareTo(o2.getEndDay());
+        if(r != 0) return r;
+
+        r = o1.getEndHour().compareTo(o2.getEndHour());
+        if(r != 0) return r;
+
+        r = o1.getEndMin().compareTo(o2.getEndMin());
+        return r;
     }
 
     private void sortScheduleOverrides(List<ScheduleOverride> scheduleOverrides) {
