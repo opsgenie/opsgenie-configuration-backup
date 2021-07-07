@@ -67,13 +67,14 @@ public class ExportMain {
         try {
             final GetAccountInfoResponse info = accountApi.getInfo();
             logger.info("Account name is " + info.getData().getName() + "\n");
+            logger.info("OpsGenie host is " + opsGenieHost  + "\n");
 
             ConfigurationExporter exporter = new ConfigurationExporter(properties, rateLimitManager);
             exporter.export();
 
             logger.info("Finished");
         } catch (Exception e) {
-            logger.error("Could not connect to host: " + opsGenieHost);
+            logger.error("Could not finish task: " + e.getMessage());
             System.exit(1);
         }
     }
