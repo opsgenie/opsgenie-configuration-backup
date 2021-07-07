@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 group 'com.opsgenie.tools'
-version '0.23.4'
+version '0.23.6'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
