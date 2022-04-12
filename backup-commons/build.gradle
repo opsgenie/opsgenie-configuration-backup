@@ -17,9 +17,9 @@ apply plugin: 'java'
 apply plugin: 'project-report'
 
 dependencies {
-    compile 'org.apache.logging.log4j:log4j-api:2.16.0'
-    compile 'org.apache.logging.log4j:log4j-core:2.16.0'
-    compile "org.apache.logging.log4j:log4j-slf4j-impl:2.16.0"
+    compile 'org.apache.logging.log4j:log4j-api:2.17.2'
+    compile 'org.apache.logging.log4j:log4j-core:2.17.2'
+    compile "org.apache.logging.log4j:log4j-slf4j-impl:2.17.2"
     compile "com.beust:jcommander:1.48"
     compile 'org.eclipse.jgit:org.eclipse.jgit:4.5.0.201609210915-r'
     compile "com.opsgenie.oas:opsgenie-sdk-swagger:1.0.10"
