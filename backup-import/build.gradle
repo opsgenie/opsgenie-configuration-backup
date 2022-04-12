@@ -3,7 +3,7 @@ version '0.23.7'
 
 apply plugin: 'java'
 
-sourceCompatibility = 1.6
+sourceCompatibility = 1.8
 
 dependencies {
     compile project(':backup-commons')
