@@ -26,7 +26,7 @@ public class RateLimitManager {
                 resultLimit = domainLimitDto.getLimit();
             }
         }
-        return resultLimit;
+        return Math.max(resultLimit, 1);
     }
 
     public int getRateLimit(DomainNames domain, int period) {
