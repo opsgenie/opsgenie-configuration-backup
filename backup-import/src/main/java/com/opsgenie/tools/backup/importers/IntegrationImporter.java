@@ -143,6 +143,13 @@ public class IntegrationImporter extends BaseImporterWithRateLimiting<Integratio
                 ownerTeam.setId(newTeamId);
             }
         }
+        TeamMeta assignedTeam;
+        if((assignedTeam = entity.getIntegration().getAssignedTeam()) != null) {
+            String newTeamId;
+            if((newTeamId = teamIdMap.get(assignedTeam.getName())) != null) {
+                assignedTeam.setId(newTeamId);
+            }
+        }
     }
 
 }
