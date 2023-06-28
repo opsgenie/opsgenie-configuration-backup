@@ -71,7 +71,7 @@ public class ConfigurationImporter extends BaseBackup {
         importers.add(new TeamTemplateImporter(rootPath, rateLimitManager, config.isAddNewTeams(), config.isUpdateExistingTeams()));
         importers.add(new ScheduleTemplateImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
         importers.add(new EscalationImporter(rootPath, config.isAddNewEscalations(), config.isUpdateExistingEscalations()));
-        importers.add(new ScheduleImporter(rootPath, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
+        importers.add(new ScheduleImporter(rootPath, rateLimitManager, config.isAddNewSchedules(), config.isUpdateExistingSchedules()));
         importers.add(new TeamImporter(rootPath, rateLimitManager, config.isAddNewTeams(), config.isUpdateExistingTeams()));
         importers.add(new UserForwardingImporter(rootPath, config.isAddNewUserForwarding(), config.isUpdateExistingUserForwarding()));
         importers.add(new DeprecatedPolicyImporter(rootPath, config.isAddNewPolicies(), config.isUpdateExistingPolicies()));

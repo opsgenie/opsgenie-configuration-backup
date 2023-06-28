@@ -17,6 +17,7 @@ import java.util.Map;
 abstract class BaseImporter<T> implements Importer {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     protected File importDirectory;
+    protected File backupRootDirectory;
     private boolean addEntityEnabled;
     private boolean updateEntityEnabled;
     protected static Map<String, String> oldTeamIdMap = new HashMap<String, String>();
@@ -25,6 +26,7 @@ abstract class BaseImporter<T> implements Importer {
     BaseImporter(String backupRootDirectory, boolean addEntityEnabled, boolean updateEntityEnabled) {
         this.addEntityEnabled = addEntityEnabled;
         this.updateEntityEnabled = updateEntityEnabled;
+        this.backupRootDirectory = new File(backupRootDirectory + "/");
         this.importDirectory = new File(backupRootDirectory + "/" + getImportDirectoryName() + "/");
     }
 

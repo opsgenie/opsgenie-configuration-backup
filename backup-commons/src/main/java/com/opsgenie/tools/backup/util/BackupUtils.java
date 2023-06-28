@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.List;
 
 public class BackupUtils {
@@ -46,6 +47,20 @@ public class BackupUtils {
 
         return sb.toString();
     }
+    public static String getTeamNameFromId(File teamsDirectory, String teamId) {
+        String[] files = getFileListOf(teamsDirectory);
+        if (files == null || files.length == 0) {
+            logger.warn("Warning: {} is empty", teamsDirectory);
+            return null;
+        }
+        for (String fileName : files) {
+            if(fileName.contains(teamId)){
+                return Arrays.stream(fileName.split("-")).findFirst().orElseGet(null);
+            }
+        }
+        return null;
+    }
+
 
     public static RateLimitsDto generateRateLimits(String apiKey, String opsGenieHost) throws IOException {
         try {

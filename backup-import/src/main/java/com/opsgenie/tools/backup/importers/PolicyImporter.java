@@ -14,6 +14,7 @@ import com.opsgenie.tools.backup.retry.RateLimitManager;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -148,8 +149,15 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
             if(entity.getPolicy().getClass() == AlertPolicy.class) {
                 AlertPolicy alertPolicy = (AlertPolicy) entity.getPolicy();
                 for(Responder responder : alertPolicy.getResponders()) {
-                    if(responder.getId().equals(entity.getTeamId())) {
-                        responder.setId(teamIdMap.get(teamName));
+                    if(responder.getType() == Responder.TypeEnum.TEAM) {
+                        File teamsDirectory = new File(backupRootDirectory + "/teams/");
+                        String responderTeamName = BackupUtils.getTeamNameFromId(teamsDirectory, responder.getId());
+                        if (responderTeamName != null){
+                            responder.setId(teamIdMap.get(responderTeamName));
+                        }
+                        else {
+                            logger.info("Could not find team name for team Id {} in the backup folder", responder.getId());
+                        }
                     }
                 }
             }
