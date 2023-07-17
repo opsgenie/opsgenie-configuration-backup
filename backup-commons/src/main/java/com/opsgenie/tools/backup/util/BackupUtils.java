@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.List;
 
 public class BackupUtils {
@@ -49,16 +48,21 @@ public class BackupUtils {
     }
     public static String getTeamNameFromId(File teamsDirectory, String teamId) {
         String[] files = getFileListOf(teamsDirectory);
-        if (files == null || files.length == 0) {
+        if (files.length == 0) {
             logger.warn("Warning: {} is empty", teamsDirectory);
             return null;
         }
+        String teamName = null;
         for (String fileName : files) {
             if(fileName.contains(teamId)){
-                return Arrays.stream(fileName.split("-")).findFirst().orElseGet(null);
+                String[] fileNameSplitArr = fileName.split("-");
+                if(fileNameSplitArr.length > 0){
+                    teamName = fileNameSplitArr[0];
+                }
+                break;
             }
         }
-        return null;
+        return teamName;
     }
 
 
@@ -89,7 +93,7 @@ public class BackupUtils {
                 }
             });
         }
-        return null;
+        return new String[]{};
     }
 
     public static boolean checkValidString(String s) {

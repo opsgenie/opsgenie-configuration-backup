@@ -13,6 +13,7 @@ import com.opsgenie.tools.backup.retrieval.PolicyRetriever;
 import com.opsgenie.tools.backup.retry.RateLimitManager;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
 import com.opsgenie.tools.backup.util.BackupUtils;
+import org.eclipse.jgit.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -152,7 +153,7 @@ public class PolicyImporter extends BaseImporter<PolicyWithTeamInfo> {
                     if(responder.getType() == Responder.TypeEnum.TEAM) {
                         File teamsDirectory = new File(backupRootDirectory + "/teams/");
                         String responderTeamName = BackupUtils.getTeamNameFromId(teamsDirectory, responder.getId());
-                        if (responderTeamName != null){
+                        if (!StringUtils.isEmptyOrNull(responderTeamName)){
                             responder.setId(teamIdMap.get(responderTeamName));
                         }
                         else {

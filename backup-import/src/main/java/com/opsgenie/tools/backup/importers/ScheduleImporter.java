@@ -209,11 +209,13 @@ public class ScheduleImporter extends BaseImporterWithRateLimiting<ScheduleConfi
     @Override
     protected void updateTeamIds(ScheduleConfig entity) throws Exception {
         Map<String, String> teamIdMap = new TeamIdMapper(rateLimitManager).getTeamIdMap();
-        TeamMeta ownerTeam = entity.getSchedule().getOwnerTeam();
-        if(ownerTeam != null){
-            String newTeamId = teamIdMap.get(ownerTeam.getName());
-            if(newTeamId != null) {
-                ownerTeam.setId(newTeamId);
+        if(entity.getSchedule() != null){
+            TeamMeta ownerTeam = entity.getSchedule().getOwnerTeam();
+            if(ownerTeam != null){
+                String newTeamId = teamIdMap.get(ownerTeam.getName());
+                if(newTeamId != null) {
+                    ownerTeam.setId(newTeamId);
+                }
             }
         }
     }
