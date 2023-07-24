@@ -46,6 +46,26 @@ public class BackupUtils {
 
         return sb.toString();
     }
+    public static OptionalUtil<String> getTeamNameFromId(File teamsDirectory, String teamId) {
+        String[] files = getFileListOf(teamsDirectory);
+        OptionalUtil<String> teamName = OptionalUtil.empty();
+        if (files.length == 0) {
+            logger.warn("Warning: {} is empty", teamsDirectory);
+        }
+        else {
+            for (String fileName : files) {
+                if(fileName.contains(teamId)){
+                    String[] fileNameSplitArr = fileName.split("-");
+                    if(fileNameSplitArr.length > 0){
+                        teamName = OptionalUtil.of(fileNameSplitArr[0]);
+                    }
+                    break;
+                }
+            }
+        }
+        return teamName;
+    }
+
 
     public static RateLimitsDto generateRateLimits(String apiKey, String opsGenieHost) throws IOException {
         try {
@@ -74,7 +94,7 @@ public class BackupUtils {
                 }
             });
         }
-        return null;
+        return new String[]{};
     }
 
     public static boolean checkValidString(String s) {

@@ -8,20 +8,22 @@ import com.opsgenie.tools.backup.dto.ScheduleConfig;
 import com.opsgenie.tools.backup.retrieval.EntityRetriever;
 import com.opsgenie.tools.backup.retrieval.ScheduleRetriever;
 import com.opsgenie.tools.backup.retry.RetryPolicyAdapter;
+import com.opsgenie.tools.backup.retry.RateLimitManager;
 import com.opsgenie.tools.backup.util.BackupUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
-public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
+public class ScheduleImporter extends BaseImporterWithRateLimiting<ScheduleConfig> {
 
     private static ScheduleApi scheduleApi = new ScheduleApi();
     private static ScheduleOverrideApi overrideApi = new ScheduleOverrideApi();
 
-    public ScheduleImporter(String backupRootDirectory, boolean addEntity, boolean updateEntitiy) {
-        super(backupRootDirectory, addEntity, updateEntitiy);
+    public ScheduleImporter(String backupRootDirectory, RateLimitManager rateLimitManager, boolean addEntity, boolean updateEntitiy) {
+        super(backupRootDirectory, rateLimitManager, addEntity, updateEntitiy);
     }
 
     @Override
@@ -205,5 +207,16 @@ public class ScheduleImporter extends BaseImporter<ScheduleConfig> {
     }
 
     @Override
-    protected void updateTeamIds(ScheduleConfig entity) {}
+    protected void updateTeamIds(ScheduleConfig entity) throws Exception {
+        Map<String, String> teamIdMap = new TeamIdMapper(rateLimitManager).getTeamIdMap();
+        if(entity.getSchedule() != null){
+            TeamMeta ownerTeam = entity.getSchedule().getOwnerTeam();
+            if(ownerTeam != null){
+                String newTeamId = teamIdMap.get(ownerTeam.getName());
+                if(newTeamId != null) {
+                    ownerTeam.setId(newTeamId);
+                }
+            }
+        }
+    }
 }
