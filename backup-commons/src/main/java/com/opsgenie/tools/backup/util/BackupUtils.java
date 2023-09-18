@@ -69,7 +69,7 @@ public class BackupUtils {
 
     public static RateLimitsDto generateRateLimits(String apiKey, String opsGenieHost) throws IOException {
         try {
-            HttpClient client = HttpClientBuilder.create().build();
+            HttpClient client = HttpClientBuilder.create().useSystemProperties().build();
 
             HttpGet httpGet = new HttpGet(opsGenieHost + "/v2/request-limits/");
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, "GenieKey " + apiKey);
