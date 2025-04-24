@@ -1,3 +1,5 @@
+# This tool is deprecated and no longer supported.
+
 # OpsGenie Configuration Backup
 
 OpsGenie customers can back up their account configuration and restore it later using this script.
